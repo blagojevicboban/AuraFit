@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Korisnički profil (klijent ili trener)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["client", "coach"] },
+        "coachId": { "type": "string", "description": "UID trenera (ako je klijent)" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Meal": {
+      "title": "Meal",
+      "description": "Zabeleženi obrok klijenta",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID klijenta" },
+        "description": { "type": "string" },
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fat": { "type": "number" },
+        "aiAdvice": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["userId", "description", "createdAt"]
+    },
+    "Workout": {
+      "title": "Workout",
+      "description": "Zabeleženi trening klijenta",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID klijenta" },
+        "title": { "type": "string" },
+        "exercises": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "duration": { "type": "number", "description": "Trajanje u minutima" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["userId", "title", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Kolekcija korisnika"
+    },
+    "/meals/{mealId}": {
+      "schema": { "$ref": "#/entities/Meal" },
+      "description": "Kolekcija obroka"
+    },
+    "/workouts/{workoutId}": {
+      "schema": { "$ref": "#/entities/Workout" },
+      "description": "Kolekcija treninga"
+    }
+  }
+}

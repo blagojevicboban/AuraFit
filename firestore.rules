@@ -1,0 +1,163 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - displayName: string (optional)
+    //   - role: string (required, 'client' or 'coach')
+    //   - coachId: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: meals
+    // Document ID: {mealId}
+    // Fields:
+    //   - userId: string (required)
+    //   - description: string (required)
+    //   - calories: number (optional)
+    //   - protein: number (optional)
+    //   - carbs: number (optional)
+    //   - fat: number (optional)
+    //   - aiAdvice: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: workouts
+    // Document ID: {workoutId}
+    // Fields:
+    //   - userId: string (required)
+    //   - title: string (required)
+    //   - exercises: list (optional)
+    //   - duration: number (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
+    function isReqOwner() {
+      return isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
+    }
+    
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isCoach() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['uid', 'email', 'role', 'createdAt']) &&
+             data.uid is string && data.uid.size() > 0 && data.uid.size() < 100 &&
+             data.email is string && isValidEmail(data.email) && data.email.size() < 100 &&
+             data.role in ['client', 'coach'] &&
+             data.createdAt is timestamp &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
+             (!('coachId' in data) || (data.coachId is string && data.coachId.size() < 100));
+    }
+
+    function isValidMeal(data) {
+      return hasRequiredFields(['userId', 'description', 'createdAt']) &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 1000 &&
+             data.createdAt is timestamp &&
+             (!('calories' in data) || data.calories is number) &&
+             (!('protein' in data) || data.protein is number) &&
+             (!('carbs' in data) || data.carbs is number) &&
+             (!('fat' in data) || data.fat is number) &&
+             (!('aiAdvice' in data) || (data.aiAdvice is string && data.aiAdvice.size() < 2000));
+    }
+
+    function isValidWorkout(data) {
+      return hasRequiredFields(['userId', 'title', 'createdAt']) &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.createdAt is timestamp &&
+             (!('duration' in data) || data.duration is number) &&
+             (!('exercises' in data) || (data.exercises is list && data.exercises.size() < 50));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      // Allow read if owner, or if the reader is a coach (to see clients)
+      allow read: if isOwner(userId) || isCoach();
+      
+      // Allow create if authenticated, uid matches, and data is valid
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && uidUnchanged();
+      
+      // Allow update if owner and data is valid. Role cannot be escalated.
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && uidNotModified() &&
+                    request.resource.data.role == resource.data.role &&
+                    request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    match /meals/{mealId} {
+      // Allow read if owner or coach
+      allow read: if isDocOwner() || isCoach();
+      
+      // Allow create if owner and valid
+      allow create: if isReqOwner() && isValidMeal(request.resource.data);
+      
+      // Allow update if owner and valid
+      allow update: if isDocOwner() && isReqOwner() && isValidMeal(request.resource.data) &&
+                    request.resource.data.createdAt == resource.data.createdAt;
+                    
+      allow delete: if isDocOwner();
+    }
+
+    match /workouts/{workoutId} {
+      // Allow read if owner or coach
+      allow read: if isDocOwner() || isCoach();
+      
+      // Allow create if owner and valid
+      allow create: if isReqOwner() && isValidWorkout(request.resource.data);
+      
+      // Allow update if owner and valid
+      allow update: if isDocOwner() && isReqOwner() && isValidWorkout(request.resource.data) &&
+                    request.resource.data.createdAt == resource.data.createdAt;
+                    
+      allow delete: if isDocOwner();
+    }
+  }
+}
