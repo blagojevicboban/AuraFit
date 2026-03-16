@@ -1,11 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowRight, Activity, Brain, Users } from "lucide-react";
+import { ArrowRight, Activity, Brain, Users, Sparkles, Sun, Moon } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { useEffect } from "react";
 
 export default function Landing() {
   const { signIn, userData } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,23 +31,30 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-50 selection:bg-indigo-500/30 overflow-hidden relative transition-colors duration-200">
+      {/* Background Effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none transition-colors duration-200" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-500/10 dark:bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none transition-colors duration-200" />
+
       {/* Navigation */}
-      <nav className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <nav className="border-b border-slate-200 dark:border-white/5 relative z-10 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-md transition-colors duration-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
               A
             </div>
             <span className="text-xl font-bold tracking-tight">Aura Fit</span>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={() => handleSignIn('client')} className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button onClick={toggleTheme} className="p-2 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-zinc-900">
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button onClick={() => handleSignIn('client')} className="hidden sm:block text-sm font-medium text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
               Prijava za klijente
             </button>
             <button
               onClick={() => handleSignIn('coach')}
-              className="text-sm font-medium bg-white text-zinc-950 px-4 py-2 rounded-full hover:bg-zinc-200 transition-colors cursor-pointer"
+              className="text-xs sm:text-sm font-medium bg-slate-900 dark:bg-white/10 text-white px-4 py-2 rounded-full hover:bg-slate-800 dark:hover:bg-white/20 transition-colors border border-transparent dark:border-white/10 cursor-pointer"
             >
               Portal za trenere
             </button>
@@ -54,46 +63,43 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-32 pb-24 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-3xl"
+          className="max-w-3xl mx-auto text-center md:text-left md:mx-0"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-medium mb-8 border border-indigo-500/20">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-            </span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-medium mb-8 border border-indigo-200 dark:border-indigo-500/20 backdrop-blur-sm transition-colors duration-200">
+            <Sparkles className="w-4 h-4" />
             Faza 1: MVP Dostupan
           </div>
           
-          <h1 className="text-6xl sm:text-7xl font-bold tracking-tight mb-8 leading-[1.1]">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight mb-6 sm:mb-8 leading-[1.1]">
             Tvoj trening, <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-cyan-500 to-emerald-500 dark:from-indigo-400 dark:via-cyan-400 dark:to-emerald-400">
               tvoja aura,
             </span>{" "}
             <br />
             tvoj mentor.
           </h1>
           
-          <p className="text-xl text-zinc-400 mb-12 max-w-2xl leading-relaxed">
+          <p className="text-lg sm:text-xl text-slate-600 dark:text-zinc-400 mb-10 sm:mb-12 max-w-2xl mx-auto md:mx-0 leading-relaxed transition-colors duration-200">
             Hibridna fitnes platforma koja spaja snagu veštačke inteligencije sa stručnošću pravih trenera. 
             Prati ishranu, beleži treninge i ostvari rezultate brže nego ikada.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
             <button
               onClick={() => handleSignIn('client')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-500 text-white px-8 py-4 rounded-full font-medium hover:bg-indigo-600 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-zinc-950 px-8 py-4 rounded-full font-bold hover:bg-slate-800 dark:hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg dark:shadow-[0_0_40px_rgba(255,255,255,0.1)]"
             >
-              Započni besplatno (Lite)
+              Započni besplatno
               <ArrowRight className="w-5 h-5" />
             </button>
             <button
               onClick={() => handleSignIn('coach')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-zinc-900 text-zinc-300 px-8 py-4 rounded-full font-medium hover:bg-zinc-800 transition-all border border-zinc-800 cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/50 dark:bg-zinc-900/50 text-slate-700 dark:text-zinc-300 px-8 py-4 rounded-full font-medium hover:bg-white dark:hover:bg-zinc-800 transition-all border border-slate-200 dark:border-zinc-800 backdrop-blur-sm cursor-pointer"
             >
               Ja sam trener
             </button>
@@ -101,18 +107,18 @@ export default function Landing() {
         </motion.div>
 
         {/* Features */}
-        <div className="grid md:grid-cols-3 gap-8 mt-32">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mt-24 sm:mt-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800/50"
+            className="p-6 sm:p-8 rounded-3xl bg-white/60 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/50 backdrop-blur-sm hover:bg-white dark:hover:bg-zinc-900/60 transition-colors shadow-sm dark:shadow-none"
           >
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-6">
-              <Brain className="w-6 h-6 text-indigo-400" />
+            <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mb-6 border border-indigo-200 dark:border-indigo-500/20 transition-colors duration-200">
+              <Brain className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">AI Analiza Ishrane</h3>
-            <p className="text-zinc-400 leading-relaxed">
+            <h3 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white transition-colors duration-200">AI Analiza Ishrane</h3>
+            <p className="text-slate-600 dark:text-zinc-400 leading-relaxed text-sm sm:text-base transition-colors duration-200">
               Samo opiši šta si pojeo, a Aura Fit AI će automatski izračunati kalorije i makronutrijente.
             </p>
           </motion.div>
@@ -121,13 +127,13 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800/50"
+            className="p-6 sm:p-8 rounded-3xl bg-white/60 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/50 backdrop-blur-sm hover:bg-white dark:hover:bg-zinc-900/60 transition-colors shadow-sm dark:shadow-none"
           >
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6">
-              <Activity className="w-6 h-6 text-cyan-400" />
+            <div className="w-12 h-12 rounded-2xl bg-cyan-100 dark:bg-cyan-500/20 flex items-center justify-center mb-6 border border-cyan-200 dark:border-cyan-500/20 transition-colors duration-200">
+              <Activity className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Pametni Treninzi</h3>
-            <p className="text-zinc-400 leading-relaxed">
+            <h3 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white transition-colors duration-200">Pametni Treninzi</h3>
+            <p className="text-slate-600 dark:text-zinc-400 leading-relaxed text-sm sm:text-base transition-colors duration-200">
               Prati svoj progres i "Progressive Overload". AI prepoznaje kada stagniraš i predlaže promene.
             </p>
           </motion.div>
@@ -136,13 +142,13 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800/50"
+            className="p-6 sm:p-8 rounded-3xl bg-white/60 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/50 backdrop-blur-sm hover:bg-white dark:hover:bg-zinc-900/60 transition-colors sm:col-span-2 md:col-span-1 shadow-sm dark:shadow-none"
           >
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center mb-6">
-              <Users className="w-6 h-6 text-emerald-400" />
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center mb-6 border border-emerald-200 dark:border-emerald-500/20 transition-colors duration-200">
+              <Users className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Coach Connect</h3>
-            <p className="text-zinc-400 leading-relaxed">
+            <h3 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white transition-colors duration-200">Coach Connect</h3>
+            <p className="text-slate-600 dark:text-zinc-400 leading-relaxed text-sm sm:text-base transition-colors duration-200">
               Poveži se sa pravim trenerom koji će pratiti tvoje rezultate i prilagođavati plan tvojim potrebama.
             </p>
           </motion.div>
