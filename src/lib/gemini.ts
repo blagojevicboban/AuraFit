@@ -1,6 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiClient: GoogleGenAI | null = null;
+
+function getAIClient() {
+  if (!aiClient) {
+    // Pokušavamo da učitamo ključ iz Vite okruženja (za Render) ili iz process.env (za AI Studio)
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      console.error("Nedostaje Gemini API ključ! Dodajte VITE_GEMINI_API_KEY u Environment Variables na Renderu.");
+      throw new Error("API ključ nije podešen.");
+    }
+    
+    aiClient = new GoogleGenAI({ apiKey });
+  }
+  return aiClient;
+}
 
 const SYSTEM_INSTRUCTION = `
 Ti si Aura Fit AI, inteligentni jezgro hibridne fitnes platforme. Tvoj zadatak je da funkcionišeš kao napredni asistent za ishranu i trening, pružajući personalizovanu podršku klijentima i analitičku podršku trenerima. Tvoj ton je motivacioni, profesionalan, jasan i direktan.
@@ -33,7 +48,8 @@ Language: Odgovaraj na jeziku na kojem ti se korisnik obrati (primarno srpski il
 
 export async function askAuraFitAI(prompt: string, isCoach: boolean = false, jsonMode: boolean = false) {
   try {
-    const response = await ai.models.generateContent({
+    const client = getAIClient();
+    const response = await client.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
