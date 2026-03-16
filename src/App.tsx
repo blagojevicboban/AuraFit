@@ -10,6 +10,7 @@ import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import ClientDashboard from "./pages/ClientDashboard";
 import CoachDashboard from "./pages/CoachDashboard";
+import CoachClients from "./pages/CoachClients";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
               <Route index element={<Landing />} />
               <Route path="client" element={<ClientDashboard />} />
               <Route path="coach" element={<CoachDashboard />} />
+              <Route path="coach/clients" element={<CoachClients />} />
             </Route>
           </Routes>
         </BrowserRouter>
