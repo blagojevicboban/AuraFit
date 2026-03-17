@@ -5,6 +5,7 @@ import {
   Search, Bell, User, Star, Play, Clock, Flame, 
   Home, BookOpen, Headphones, ChevronLeft
 } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
 
 // ─────────────────────────────────────────────
 // Data (Matching UI Kit)
@@ -57,7 +58,7 @@ const Workouts: React.FC = () => {
             >
               <ChevronLeft size={24} />
             </button>
-            <h1 className="text-2xl font-extrabold text-[#afa3ff]">Workout</h1>
+            <h1 className="text-3xl font-black text-[#afa3ff] tracking-tight">Workouts</h1>
           </div>
           <div className="flex gap-4">
             <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
@@ -122,7 +123,7 @@ const Workouts: React.FC = () => {
                 {/* Content */}
                 <div className="relative z-10 p-5 flex flex-col justify-end h-full">
                   {workout.tag && (
-                    <span className="absolute top-0 right-0 bg-[#d6ff3e] text-[#1c1c1c] text-xs font-bold px-3 py-1 rounded-bl-xl">
+                    <span className="absolute top-0 right-0 bg-[#d6ff3e] text-[#1c1c1c] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow-lg">
                       {workout.tag}
                     </span>
                   )}
@@ -147,24 +148,7 @@ const Workouts: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      {/* ── Fixed Bottom Navigation ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 px-6 py-4 flex items-center justify-around z-50">
-        {[
-          { icon: Home, label: 'Home', active: false, path: '/home' },
-          { icon: BookOpen, label: 'Workouts', active: true, path: '/workouts' },
-          { icon: Star, label: 'Favorites', active: false, path: '/favorites' },
-          { icon: Headphones, label: 'Support', active: false, path: '/support' },
-        ].map(({ icon: Icon, label, active, path }) => (
-          <button
-            key={label}
-            onClick={() => navigate(path)}
-            className={`flex flex-col items-center gap-1 ${active ? 'text-[#afa3ff]' : 'text-zinc-500 hover:text-white'} transition-colors`}
-          >
-            <Icon size={24} strokeWidth={active ? 2.5 : 1.5} />
-            <span className="text-[10px] font-bold">{label}</span>
-          </button>
-        ))}
-      </div>
+      <BottomNav />
 
     </div>
   );

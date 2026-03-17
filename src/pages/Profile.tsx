@@ -5,6 +5,7 @@ import {
   ChevronLeft, User, Heart, Lock, Settings, HelpCircle, LogOut, ChevronRight,
   Home, BookOpen, Apple, Headphones
 } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ const Profile: React.FC = () => {
             {/* Avatar */}
             <div className="relative mb-4">
                 <div className="w-32 h-32 rounded-full border-4 border-[#d6ff3e] overflow-hidden shadow-xl bg-zinc-800 flex items-center justify-center">
-                    <span className="text-6xl opacity-20">👩</span>
+                    <img src="/assets/profile-hero.png" alt="Avatar" className="w-full h-full object-cover" />
                 </div>
             </div>
 
@@ -92,24 +93,7 @@ const Profile: React.FC = () => {
         ))}
       </div>
 
-      {/* ── Fixed Bottom Navigation ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 px-6 py-4 flex items-center justify-around z-50">
-        {[
-          { icon: Home, label: 'Home', active: false, path: '/home' },
-          { icon: BookOpen, label: 'Workouts', active: false, path: '/workouts' },
-          { icon: Apple, label: 'Nutrition', active: false, path: '/nutrition' },
-          { icon: User, label: 'Profile', active: true, path: '/profile' },
-        ].map(({ icon: Icon, label, active, path }) => (
-          <button
-            key={label}
-            onClick={() => navigate(path)}
-            className={`flex flex-col items-center gap-1 ${active ? 'text-[#afa3ff]' : 'text-zinc-500 hover:text-white'} transition-colors`}
-          >
-            <Icon size={24} strokeWidth={active ? 2.5 : 1.5} />
-            <span className="text-[10px] font-bold">{label}</span>
-          </button>
-        ))}
-      </div>
+      <BottomNav />
 
     </div>
   );

@@ -5,6 +5,7 @@ import {
   Search, Bell, User, Star, Play, Clock, Flame, 
   Home, BookOpen, Headphones, ChevronLeft
 } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
 
 // ─────────────────────────────────────────────
 // Data (Matching UI Kit)
@@ -20,6 +21,13 @@ const historyData = [
   { day: 'Thu', date: '14', steps: '3,679', duration: '1hr40m' },
   { day: 'Wen', date: '20', steps: '5,789', duration: '1hr20m' },
   { day: 'Sat', date: '22', steps: '1,859', duration: '1hr10m' },
+];
+
+const workoutMetrics = [
+  { muscle: 'Chest', volume: 85, color: '#afa3ff' },
+  { muscle: 'Back', volume: 65, color: '#d6ff3e' },
+  { muscle: 'Legs', volume: 95, color: '#7c3aed' },
+  { muscle: 'Arms', volume: 45, color: '#f59e0b' },
 ];
 
 const Progress: React.FC = () => {
@@ -158,33 +166,45 @@ const Progress: React.FC = () => {
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                exit={{ opacity: 0, y: -10 }}
+               className="space-y-6"
              >
-                <div className="py-20 text-center text-zinc-500 font-bold">
-                  Workout Progress Metrics Here
+                <div className="bg-[#1c1c1c] border border-zinc-700 rounded-3xl p-6 shadow-xl">
+                  <h3 className="text-[#afa3ff] font-bold text-lg mb-6">Muscle Group Distribution</h3>
+                  <div className="space-y-4">
+                    {workoutMetrics.map((metric) => (
+                      <div key={metric.muscle} className="space-y-2">
+                        <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
+                          <span className="text-zinc-400">{metric.muscle}</span>
+                          <span className="text-white">{metric.volume}%</span>
+                        </div>
+                        <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${metric.volume}%` }}
+                            transition={{ duration: 1, ease: 'easeOut' }}
+                            className="h-full rounded-full"
+                            style={{ backgroundColor: metric.color }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-[#afa3ff] rounded-3xl p-6 relative overflow-hidden">
+                  <div className="relative z-10">
+                    <h3 className="text-[#1c1c1c] font-black text-xl mb-1">Total Volume</h3>
+                    <p className="text-[#1c1c1c]/70 text-sm font-bold mb-4">You've reached 85% of your weekly goal!</p>
+                    <div className="text-4xl font-black text-[#1c1c1c]">12,450 <span className="text-sm font-bold opacity-60">kg</span></div>
+                  </div>
+                  <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-white/10 rounded-full blur-3xl" />
                 </div>
              </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ── Fixed Bottom Navigation ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 px-6 py-4 flex items-center justify-around z-50">
-        {[
-          { icon: Home, label: 'Home', active: false, path: '/home' },
-          { icon: BookOpen, label: 'Workouts', active: false, path: '/workouts' },
-          { icon: Star, label: 'Favorites', active: false, path: '/favorites' },
-          { icon: Headphones, label: 'Support', active: false, path: '/support' },
-        ].map(({ icon: Icon, label, active, path }) => (
-          <button
-            key={label}
-            onClick={() => navigate(path)}
-            className={`flex flex-col items-center gap-1 ${active ? 'text-[#afa3ff]' : 'text-zinc-500 hover:text-white'} transition-colors`}
-          >
-            <Icon size={24} strokeWidth={active ? 2.5 : 1.5} />
-            <span className="text-[10px] font-bold">{label}</span>
-          </button>
-        ))}
-      </div>
+      <BottomNav />
 
     </div>
   );

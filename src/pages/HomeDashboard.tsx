@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { 
-  Search, Bell, User, Home, BookOpen, Star, Headphones,
-  Dumbbell, BarChart2, Apple, Users, Play, Clock, Flame, ChevronRight
+  Search, Bell, User, Star, Dumbbell, BarChart2, Apple, Users, Play, Clock, Flame, ChevronRight
 } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
 
 // ─────────────────────────────────────────────
 // Data
@@ -176,23 +176,23 @@ const HomeDashboard: React.FC = () => {
         </section>
       </div>
 
-      {/* ── Bottom Navigation Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#afa3ff] px-6 py-4 flex items-center justify-around z-50 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]">
-        {[
-          { icon: Home, label: 'Home', active: true, path: '/home' },
-          { icon: BookOpen, label: 'Workouts', active: false, path: '/workouts' },
-          { icon: Apple, label: 'Nutrition', active: false, path: '/nutrition' },
-          { icon: User, label: 'Profile', active: false, path: '/profile' },
-        ].map(({ icon: Icon, label, active, path }) => (
-          <button
-            key={label}
-            onClick={() => navigate(path)}
-            className={`flex flex-col items-center gap-1 ${active ? 'text-[#1c1c1c]' : 'text-white/60 hover:text-white'} transition-colors`}
-          >
-            <Icon size={22} strokeWidth={active ? 2.5 : 1.5} />
-            <span className="text-[9px] font-bold">{label}</span>
-          </button>
-        ))}
+      <BottomNav />
+      {/* ── Temporary Seed Button ── */}
+      <div className="fixed top-4 left-4 z-[60]">
+        <button 
+          onClick={async () => {
+            const { seedDatabase } = await import('../lib/dbSeeder');
+            const result = await seedDatabase();
+            if (result.success) {
+              alert(`Successfully seeded ${result.count} documents!`);
+            } else {
+              alert(`Seed failed: ${result.error}`);
+            }
+          }}
+          className="bg-red-500/20 hover:bg-red-500/40 text-red-500 text-[8px] font-bold px-2 py-1 rounded-full border border-red-500/50 backdrop-blur-md"
+        >
+          DEBUG: SEED DB
+        </button>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import {
   Search, Bell, User, Star, Clock, Flame, Play,
   Home, BookOpen, Headphones, ChevronLeft, Apple
 } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
 
 // ─────────────────────────────────────────────
 // Data (Matching UI Kit)
@@ -15,8 +16,15 @@ const recommendedRecipes = [
 ];
 
 const recipesForYou = [
-  { id: 3, title: 'Delights With\nGreek Yogurt', time: '6 Minutes', kcal: '200 Cal', isFavorite: true },
-  { id: 4, title: 'Baked Salmon', time: '30 Minutes', kcal: '350 Cal', isFavorite: true },
+  { id: 3, title: 'Delights With\nGreek Yogurt', time: '6 Minutes', kcal: '200 Cal', isFavorite: true, image: '/assets/breakfast.png' },
+  { id: 4, title: 'Baked Salmon', time: '30 Minutes', kcal: '350 Cal', isFavorite: true, image: '/assets/cooking.png' },
+];
+
+const mealIdeas = [
+  { id: 5, title: 'Avocado Toast', image: '/assets/breakfast.png', tags: ['Breakfast', 'Vegan'] },
+  { id: 6, title: 'Protein Bowl', image: '/assets/stretching.png', tags: ['Lunch', 'High Protein'] },
+  { id: 7, title: 'Berry Smoothie', image: '/assets/cycling.png', tags: ['Snack', 'Low Cal'] },
+  { id: 8, title: 'Grilled Chicken', image: '/assets/squat.png', tags: ['Dinner', 'Keto'] },
 ];
 
 const Nutrition: React.FC = () => {
@@ -173,8 +181,8 @@ const Nutrition: React.FC = () => {
                          </div>
                        </div>
                        {/* Image side */}
-                       <div className="w-2/5 bg-zinc-200 relative flex items-center justify-center">
-                          <span className="text-5xl opacity-20">🐟</span>
+                       <div className="w-2/5 bg-zinc-800 relative flex items-center justify-center overflow-hidden">
+                          <img src={recipe.image} className="w-full h-full object-cover opacity-60" alt={recipe.title} />
                           <button className="absolute top-3 right-3 text-white drop-shadow-md">
                             <Star size={16} fill="currentColor" />
                           </button>
@@ -187,31 +195,38 @@ const Nutrition: React.FC = () => {
           )}
 
           {activeTab === 'Meal Ideas' && (
-            <div className="flex-grow flex items-center justify-center text-zinc-500 font-bold">
-              Meal Ideas Discovery Feed
+            <div className="px-6 pb-8">
+              <h2 className="text-[#d6ff3e] text-xl font-extrabold mb-4">Discover Ideas</h2>
+              <div className="grid grid-cols-2 gap-4">
+                {mealIdeas.map((idea, i) => (
+                  <motion.div
+                    key={idea.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="aspect-square bg-zinc-800 rounded-3xl relative overflow-hidden group cursor-pointer"
+                  >
+                    <img src={idea.image} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" alt={idea.title} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <p className="text-white font-bold text-xs mb-1">{idea.title}</p>
+                      <div className="flex gap-1">
+                        {idea.tags.map(tag => (
+                          <span key={tag} className="text-[8px] bg-[#d6ff3e]/20 text-[#d6ff3e] px-1.5 py-0.5 rounded-full font-bold">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* ── Fixed Bottom Navigation ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 px-6 py-4 flex items-center justify-around z-50">
-        {[
-          { icon: Home, label: 'Home', active: false, path: '/home' },
-          { icon: BookOpen, label: 'Workouts', active: false, path: '/workouts' },
-          { icon: Apple, label: 'Nutrition', active: true, path: '/nutrition' },
-          { icon: Headphones, label: 'Support', active: false, path: '/support' },
-        ].map(({ icon: Icon, label, active, path }) => (
-          <button
-            key={label}
-            onClick={() => navigate(path)}
-            className={`flex flex-col items-center gap-1 ${active ? 'text-[#afa3ff]' : 'text-zinc-500 hover:text-white'} transition-colors`}
-          >
-            <Icon size={24} strokeWidth={active ? 2.5 : 1.5} />
-            <span className="text-[10px] font-bold">{label}</span>
-          </button>
-        ))}
-      </div>
+      <BottomNav />
 
     </div>
   );
