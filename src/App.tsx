@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "motion/react";
+import PageTransition from "./components/PageTransition";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Layout from "./components/Layout";
@@ -26,8 +28,55 @@ import Progress from "./pages/Progress";
 import RoutineDetail from "./pages/RoutineDetail";
 import CreateRoutine from "./pages/CreateRoutine";
 import Nutrition from "./pages/Nutrition";
+import MealPlanList from "./pages/MealPlanList";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import Community from "./pages/Community";
+import Settings from "./pages/Settings";
+import NotificationSettings from "./pages/NotificationSettings";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
+
+function AppContent() {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location}>
+        {/* Full-screen routes */}
+        <Route path="/" element={<PageTransition><Launch /></PageTransition>} />
+        <Route path="/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
+        <Route path="/setup" element={<PageTransition><ProfileSetup /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/signup" element={<PageTransition><SignUp /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+        <Route path="/home" element={<PageTransition><HomeDashboard /></PageTransition>} />
+        <Route path="/workouts" element={<PageTransition><Workouts /></PageTransition>} />
+        <Route path="/routine" element={<PageTransition><RoutineDetail /></PageTransition>} />
+        <Route path="/create-routine" element={<PageTransition><CreateRoutine /></PageTransition>} />
+        <Route path="/progress" element={<PageTransition><Progress /></PageTransition>} />
+        <Route path="/nutrition" element={<PageTransition><Nutrition /></PageTransition>} />
+        <Route path="/meal-plan" element={<PageTransition><MealPlanList /></PageTransition>} />
+        <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+        <Route path="/profile/edit" element={<PageTransition><EditProfile /></PageTransition>} />
+        <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+        <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+        <Route path="/settings/notifications" element={<PageTransition><NotificationSettings /></PageTransition>} />
+
+        {/* App routes with Layout wrapper */}
+        <Route path="/app" element={<Layout />}>
+          <Route index element={<Landing />} />
+          <Route path="client" element={<ClientDashboard />} />
+          <Route path="client/workouts" element={<ClientWorkouts />} />
+          <Route path="coach" element={<CoachDashboard />} />
+          <Route path="coach/clients" element={<CoachClients />} />
+          <Route path="admin" element={<AdminDashboard />} />
+          <Route path="admin/users" element={<AdminUsers />} />
+        </Route>
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
 export default function App() {
   return (
@@ -35,32 +84,7 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <BrowserRouter>
-            <Routes>
-              {/* Full-screen routes (no Layout wrapper) */}
-              <Route path="/" element={<Launch />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/setup" element={<ProfileSetup />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/home" element={<HomeDashboard />} />
-              <Route path="/workouts" element={<Workouts />} />
-              <Route path="/routine" element={<RoutineDetail />} />
-              <Route path="/create-routine" element={<CreateRoutine />} />
-              <Route path="/progress" element={<Progress />} />
-              <Route path="/nutrition" element={<Nutrition />} />
-
-              {/* App routes with Layout wrapper */}
-              <Route path="/app" element={<Layout />}>
-                <Route index element={<Landing />} />
-                <Route path="client" element={<ClientDashboard />} />
-                <Route path="client/workouts" element={<ClientWorkouts />} />
-                <Route path="coach" element={<CoachDashboard />} />
-                <Route path="coach/clients" element={<CoachClients />} />
-                <Route path="admin" element={<AdminDashboard />} />
-                <Route path="admin/users" element={<AdminUsers />} />
-              </Route>
-            </Routes>
+            <AppContent />
           </BrowserRouter>
         </AuthProvider>
       </ThemeProvider>

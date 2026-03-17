@@ -1,20 +1,69 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AuraFit 🏋️‍♂️
 
-# Run and deploy your AI Studio app
+A modern, high-tech fitness application UI built with React, Vite, and Tailwind CSS. Featuring a premium dark theme with neon accents, smooth animations, and a comprehensive workout/nutrition tracking system.
 
-This contains everything you need to run your app locally.
+![AuraFit Preview](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/home_dashboard_manual_1773755762265.png)
 
-View your app in AI Studio: https://ai.studio/apps/7a23db32-a268-413e-af88-e7a43a74b6f2
+## ✨ Features
 
-## Run Locally
+- **🚀 Polish Onboarding**: Multi-step flow to get users started with high-energy animations.
+- **📊 Personalized Setup**: Comprehensive questionnaire to tailor the experience to user goals.
+- **🏋️ Workout Discovery**: Categorized routines (Beginner, Intermediate, Advanced) and custom routine creation.
+- **🥗 Nutrition & Meal Plans**: Recipe discovery, daily recommendations, and structured meal plans.
+- **📈 Progress Tracking**: Visual representation of activity history with animated charts.
+- **👥 Community & Profile**: Discussion forums, fitness challenges, and detailed user settings.
 
-**Prerequisites:**  Node.js
+## 🛠 Tech Stack
 
+- **Framework**: [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Animations**: [Motion/React](https://motion.dev/)
+- **Icons**: [Lucide React](https://lucide-dev.github.io/lucide-react/)
+- **Routing**: [React Router](https://reactrouter.com/)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 📸 Screen Gallery
+
+| Home Dashboard | Workout Discovery | Nutrition |
+| :---: | :---: | :---: |
+| ![Home](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/home_dashboard_manual_1773755762265.png) | ![Workouts](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/workouts_page_final_1773755800102.png) | ![Nutrition](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/nutrition_page_final_1773755807217.png) |
+
+| Profile | Community |
+| :---: | :---: |
+| ![Profile](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/profile_page_final_1773755814588.png) | ![Community](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/community_page_final_1773755827640.png) |
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd AuraFit
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+   The app will be available at `http://localhost:3000`.
+
+## 📂 Project Structure
+
+- `src/components`: Reusable UI components (Buttons, Inputs, Layout).
+- `src/pages`: Main application screens (Home, Workouts, Nutrition, etc.).
+- `src/index.css`: Global styles and Tailwind configuration.
+- `src/App.tsx`: Main routing and provider setup.
+
+---
+
+> [!TIP]
+> This project is a UI prototype focused on high-end aesthetics and user experience. It uses Framer Motion for all transitions as defined in Phase 7 of the implementation plan.

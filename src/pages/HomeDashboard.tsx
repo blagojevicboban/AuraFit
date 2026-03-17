@@ -43,7 +43,12 @@ const HomeDashboard: React.FC = () => {
               <Bell size={22} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#d6ff3e] rounded-full" />
             </button>
-            <button className="text-white hover:text-[#d6ff3e] transition-colors"><User size={22} /></button>
+            <button 
+              onClick={() => navigate('/profile')}
+              className="text-white hover:text-[#d6ff3e] transition-colors"
+            >
+              <User size={22} />
+            </button>
           </div>
         </div>
       </div>
@@ -52,7 +57,7 @@ const HomeDashboard: React.FC = () => {
       <div className="px-6 py-4">
         <div className="flex items-center justify-around">
           {[
-            { icon: Dumbbell, label: 'Workout', path: '/workout' },
+            { icon: Dumbbell, label: 'Workout', path: '/workouts' },
             { icon: BarChart2, label: 'Progress\nTracking', path: '/progress' },
             { icon: Apple, label: 'Nutrition', path: '/nutrition' },
             { icon: Users, label: 'Community', path: '/community' },
@@ -175,7 +180,7 @@ const HomeDashboard: React.FC = () => {
           { icon: Home, label: 'Home', active: true, path: '/home' },
           { icon: BookOpen, label: 'Workouts', active: false, path: '/workouts' },
           { icon: Apple, label: 'Nutrition', active: false, path: '/nutrition' },
-          { icon: Headphones, label: 'Support', active: false, path: '/support' },
+          { icon: User, label: 'Profile', active: false, path: '/profile' },
         ].map(({ icon: Icon, label, active, path }) => (
           <button
             key={label}

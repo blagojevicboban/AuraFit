@@ -79,7 +79,10 @@ const Nutrition: React.FC = () => {
         >
           {/* ── Recipe of the Day (Shared Top Section) ── */}
           <div className="px-6 mb-8">
-            <div className="bg-[#afa3ff] rounded-3xl p-1 relative overflow-hidden group cursor-pointer shadow-lg">
+            <div 
+              onClick={() => navigate('/meal-plan')}
+              className="bg-[#afa3ff] rounded-3xl p-1 relative overflow-hidden group cursor-pointer shadow-lg"
+            >
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10 pointer-events-none" />
               {/* Visual Placeholder for Image */}
               <div className="h-44 bg-zinc-800 rounded-[22px] flex items-center justify-center overflow-hidden">
