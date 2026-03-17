@@ -37,7 +37,7 @@ const Profile: React.FC = () => {
             {/* Avatar */}
             <div className="relative mb-4">
                 <div className="w-32 h-32 rounded-full border-4 border-[#d6ff3e] overflow-hidden shadow-xl bg-zinc-800 flex items-center justify-center">
-                    <img src="/assets/profile-hero.png" alt="Avatar" className="w-full h-full object-cover" />
+                    <img src="/assets/profile.png" alt="Avatar" className="w-full h-full object-cover" />
                 </div>
             </div>
 

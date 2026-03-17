@@ -17,7 +17,7 @@ const recommendedRecipes = [
 
 const recipesForYou = [
   { id: 3, title: 'Delights With\nGreek Yogurt', time: '6 Minutes', kcal: '200 Cal', isFavorite: true, image: '/assets/breakfast.png' },
-  { id: 4, title: 'Baked Salmon', time: '30 Minutes', kcal: '350 Cal', isFavorite: true, image: '/assets/cooking.png' },
+  { id: 4, title: 'Baked Salmon', time: '30 Minutes', kcal: '350 Cal', isFavorite: true, image: '/assets/nutrition-hero.png' },
 ];
 
 const mealIdeas = [

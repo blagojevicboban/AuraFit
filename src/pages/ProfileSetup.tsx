@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, ArrowRight, Activity, Weight, Ruler, Target } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../contexts/AuthContext';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const ProfileSetup: React.FC = () => {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  const { currentUser, userData } = useAuth();
 
   // Form State
   const [gender, setGender] = useState<'Male' | 'Female' | null>(null);
@@ -15,13 +19,38 @@ const ProfileSetup: React.FC = () => {
   const [height, setHeight] = useState<number>(175);
   const [goal, setGoal] = useState<string>('');
   const [activityLevel, setActivityLevel] = useState<string>('');
+  const [loading, setLoading] = useState(false);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 6) {
       setStep(step + 1);
     } else {
-      // Setup complete, navigate to login
-      navigate('/login');
+      // Setup complete, save to Firestore
+      if (!currentUser) {
+        navigate('/login');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        await setDoc(userDocRef, {
+          gender,
+          age,
+          weight,
+          height,
+          goal,
+          activityLevel,
+          setupCompleted: true
+        }, { merge: true });
+        
+        navigate('/home');
+      } catch (error) {
+        console.error("Error saving profile:", error);
+        alert("Failed to save profile. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -204,9 +233,10 @@ const ProfileSetup: React.FC = () => {
           <button className="text-white/50 font-bold hover:text-white transition-colors">Skip</button>
           <Button 
             onClick={handleNext}
+            isLoading={loading}
             className="rounded-full shadow-[0_0_20px_rgba(214,255,62,0.3)] gap-2"
           >
-            Continue <ArrowRight className="w-5 h-5" />
+            {step === 6 ? 'Finish' : 'Continue'} <ArrowRight className="w-5 h-5" />
           </Button>
         </div>
       </div>

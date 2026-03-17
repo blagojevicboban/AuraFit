@@ -31,13 +31,15 @@ const Launch: React.FC = () => {
         }}
         className="relative z-10 flex flex-col items-center"
       >
-        {/* Generated FitBody Logo */}
-        <div className="w-48 h-48 mb-6 relative">
-          <img 
-            src="file:///C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/launch_logo_fitbody_1773745923855.png" 
-            alt="FitBody Logo"
-            className="w-full h-full object-contain"
-          />
+        {/* Premium CSS Logo */}
+        <div className="w-48 h-48 mb-6 relative flex items-center justify-center">
+          <div className="absolute inset-0 bg-[#d6ff3e]/20 rounded-full blur-3xl animate-pulse" />
+          <div className="relative w-32 h-32 border-4 border-[#d6ff3e] rounded-[2rem] flex items-center justify-center rotate-45">
+            <div className="w-16 h-16 border-t-4 border-l-4 border-[#d6ff3e] absolute -top-1 -left-1" />
+            <div className="w-12 h-12 bg-[#d6ff3e] rounded-lg -rotate-45 flex items-center justify-center shadow-[0_0_20px_rgba(214,255,62,0.5)]">
+               <span className="text-[#1c1c1c] font-black text-3xl">F</span>
+            </div>
+          </div>
         </div>
         
         <h1 className="text-5xl font-extrabold tracking-[0.2em] uppercase italic">

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, signInWithEmail, logOut, handleFirestoreError, OperationType } from '../lib/firebase';
 
@@ -16,6 +16,7 @@ interface AuthContextType {
   userData: UserData | null;
   loading: boolean;
   signIn: (role: 'client' | 'coach' | 'admin') => Promise<void>;
+  signUp: (email: string, pass: string, displayName: string, role: 'client' | 'coach') => Promise<void>;
   passwordSignIn: (username: string, pass: string, role: 'client' | 'coach') => Promise<void>;
   adminSignIn: (username: string, pass: string) => Promise<void>;
   impersonateUser: (userId: string) => Promise<void>;
@@ -107,6 +108,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error?.code !== 'auth/popup-closed-by-user') {
         console.error("Error signing in", error);
       }
+      throw error;
+    }
+  };
+
+  const signUp = async (email: string, pass: string, displayName: string, role: 'client' | 'coach') => {
+    try {
+      const user = await createUserWithEmailAndPassword(auth, email, pass);
+      const userDocRef = doc(db, 'users', user.user.uid);
+      
+      const newUserData: any = {
+        uid: user.user.uid,
+        email: email,
+        displayName: displayName,
+        role: role,
+        createdAt: serverTimestamp(),
+      };
+      
+      await setDoc(userDocRef, newUserData);
+      setUserData(newUserData);
+    } catch (error: any) {
+      console.error("Error signing up", error);
       throw error;
     }
   };
@@ -242,6 +264,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       userData, 
       loading, 
       signIn, 
+      signUp,
       passwordSignIn,
       adminSignIn, 
       signOut,

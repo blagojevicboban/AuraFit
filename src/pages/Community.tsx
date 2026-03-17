@@ -16,7 +16,7 @@ const forumCategories = [
 
 const challenges = [
   { title: 'Cycling Challenge', time: '15 Minutes', kcal: '100 Kcal', image: '/assets/cycling.png' },
-  { title: 'Summer Yoga Quest', time: '20 Minutes', kcal: '80 Kcal', image: '/assets/yoga.png' },
+  { title: 'Summer Yoga Quest', time: '20 Minutes', kcal: '80 Kcal', image: '/assets/stretching.png' },
   { title: '30 Day Plank', time: '5 Minutes', kcal: '50 Kcal', image: '/assets/plank.png' },
 ];
 

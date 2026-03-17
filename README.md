@@ -2,7 +2,7 @@
 
 A modern, high-tech fitness application UI built with React, Vite, and Tailwind CSS. Featuring a premium dark theme with neon accents, smooth animations, and a comprehensive workout/nutrition tracking system.
 
-![AuraFit Preview](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/home_dashboard_manual_1773755762265.png)
+![AuraFit Preview](/assets/home.png)
 
 ## ✨ Features
 
@@ -27,11 +27,11 @@ A modern, high-tech fitness application UI built with React, Vite, and Tailwind 
 
 | Home Dashboard | Workout Discovery | Nutrition |
 | :---: | :---: | :---: |
-| ![Home](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/plank_challenge_hero_1773757890720.png) | ![Workouts](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/workout_discovery_hero_functional_1773757924088.png) | ![Nutrition](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/nutrition_recipe_of_day_hero_1773757962558.png) |
+| ![Home](/assets/home.png) | ![Workouts](/assets/workouts.png) | ![Nutrition](/assets/nutrition.png) |
 
 | Profile | Community | Onboarding |
 | :---: | :---: | :---: |
-| ![Profile](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/profile_page_final_1773755814588.png) | ![Community](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/community_page_final_1773755827640.png) | ![Onboarding](/C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/onboarding_fitness_hero_1_1773757799345.png) |
+| ![Profile](/assets/profile.png) | ![Community](/assets/community.png) | ![Onboarding](/assets/onboarding.png) |
 
 ## 🚀 Getting Started
 

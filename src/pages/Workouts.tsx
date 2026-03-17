@@ -32,10 +32,10 @@ const workoutsData: Record<string, WorkoutItem[]> = {
     { id: 4, title: 'Glutes & Abs', duration: '45 Minutes', kcal: '1200 Kcal', exercises: '4 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/squat.png' },
   ],
   Intermediate: [
-    { id: 5, title: 'Core Strength', duration: '50 Minutes', kcal: '1600 Kcal', exercises: '6 Exercises', tag: 'Recommended', isFavorite: false, height: 'h-48' }
+    { id: 5, title: 'Core Strength', duration: '50 Minutes', kcal: '1600 Kcal', exercises: '6 Exercises', tag: 'Recommended', isFavorite: false, height: 'h-48', image: '/assets/plank.png' }
   ],
   Advanced: [
-    { id: 6, title: 'HIIT Extreme', duration: '30 Minutes', kcal: '2000 Kcal', exercises: '8 Exercises', tag: 'Intense', isFavorite: false, height: 'h-48' }
+    { id: 6, title: 'HIIT Extreme', duration: '30 Minutes', kcal: '2000 Kcal', exercises: '8 Exercises', tag: 'Intense', isFavorite: false, height: 'h-48', image: '/assets/cycling.png' }
   ]
 };
 
