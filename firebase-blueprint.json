@@ -2,158 +2,84 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "Korisnički profil (klijent ili trener)",
+      "description": "Korisnički profil sa biometrijskim podacima i ciljevima",
       "type": "object",
       "properties": {
-        "uid": { "type": "string", "description": "Firebase Auth UID" },
-        "email": { "type": "string", "format": "email" },
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
         "displayName": { "type": "string" },
         "role": { "type": "string", "enum": ["client", "coach", "admin"] },
-        "coachId": { "type": "string", "description": "UID trenera (ako je klijent)" },
+        "gender": { "type": "string" },
+        "age": { "type": "number" },
+        "height": { "type": "number" },
+        "weight": { "type": "number" },
+        "goal": { "type": "string" },
+        "activityLevel": { "type": "string" },
+        "fitnessLevel": { "type": "string" },
         "createdAt": { "type": "timestamp" }
       },
       "required": ["uid", "email", "role", "createdAt"]
     },
-    "Meal": {
-      "title": "Meal",
-      "description": "Zabeleženi obrok klijenta",
+    "DailyActivity": {
+      "title": "DailyActivity",
+      "description": "Dnevna statistika (koraci, kalorije)",
       "type": "object",
       "properties": {
-        "userId": { "type": "string", "description": "UID klijenta" },
-        "description": { "type": "string" },
+        "steps": { "type": "number" },
+        "caloriesBurned": { "type": "number" },
+        "workoutDuration": { "type": "number" },
+        "waterIntake": { "type": "number" }
+      }
+    },
+    "Recipe": {
+      "title": "Recipe",
+      "description": "Recept za ishranu",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
         "calories": { "type": "number" },
         "protein": { "type": "number" },
         "carbs": { "type": "number" },
         "fat": { "type": "number" },
-        "aiAdvice": { "type": "string" },
-        "createdAt": { "type": "timestamp" }
-      },
-      "required": ["userId", "description", "createdAt"]
+        "prepTime": { "type": "string" },
+        "isRecipeOfDay": { "type": "boolean" },
+        "imageUrl": { "type": "string" }
+      }
     },
-    "Workout": {
-      "title": "Workout",
-      "description": "Zabeleženi trening klijenta",
-      "type": "object",
+    "MealPlan": {
+      "title": "MealPlan",
+      "description": "Plan ishrane",
       "properties": {
-        "userId": { "type": "string", "description": "UID klijenta" },
-        "title": { "type": "string" },
-        "exercises": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string" },
-              "sets": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "reps": { "type": "number" },
-                    "weight": { "type": "number" },
-                    "rpe": { "type": "number" }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "duration": { "type": "number", "description": "Trajanje u minutima" },
-        "createdAt": { "type": "timestamp" }
-      },
-      "required": ["userId", "title", "createdAt"]
-    },
-    "Biometric": {
-      "title": "Biometric",
-      "description": "Biometrijski podaci klijenta (težina, obimi, mast)",
-      "type": "object",
-      "properties": {
-        "userId": { "type": "string" },
-        "weight": { "type": "number" },
-        "bodyFat": { "type": "number" },
-        "measurements": {
-          "type": "object",
-          "properties": {
-            "waist": { "type": "number" },
-            "chest": { "type": "number" },
-            "arms": { "type": "number" }
-          }
-        },
-        "createdAt": { "type": "timestamp" }
-      },
-      "required": ["userId", "weight", "createdAt"]
-    },
-    "WorkoutTemplate": {
-      "title": "WorkoutTemplate",
-      "description": "Šablon treninga koji kreira trener",
-      "type": "object",
-      "properties": {
-        "coachId": { "type": "string" },
         "title": { "type": "string" },
         "description": { "type": "string" },
-        "exercises": { "type": "array", "items": { "type": "object" } },
-        "createdAt": { "type": "timestamp" }
-      },
-      "required": ["coachId", "title", "createdAt"]
+        "recipeIds": { "type": "array", "items": { "type": "string" } },
+        "durationDays": { "type": "number" }
+      }
     },
-    "Notification": {
-      "title": "Notification",
-      "description": "Pametni podsetnici i obaveštenja",
-      "type": "object",
+    "ForumCategory": {
+      "title": "ForumCategory",
       "properties": {
-        "userId": { "type": "string" },
         "title": { "type": "string" },
-        "message": { "type": "string" },
-        "type": { "type": "string", "enum": ["ai_reminder", "coach_feedback", "system"] },
-        "read": { "type": "boolean" },
-        "createdAt": { "type": "timestamp" }
-      },
-      "required": ["userId", "message", "createdAt"]
+        "description": { "type": "string" },
+        "postCount": { "type": "number" }
+      }
     },
-    "CoachFeedback": {
-      "title": "CoachFeedback",
-      "description": "Video feedback i korekcije trenera",
-      "type": "object",
+    "Challenge": {
+      "title": "Challenge",
       "properties": {
-        "userId": { "type": "string" },
-        "coachId": { "type": "string" },
-        "videoUrl": { "type": "string" },
-        "exerciseName": { "type": "string" },
-        "markupData": { "type": "object", "description": "Podaci o crtežima na videu" },
-        "voiceNoteUrl": { "type": "string" },
-        "comment": { "type": "string" },
-        "createdAt": { "type": "timestamp" }
-      },
-      "required": ["userId", "coachId", "videoUrl", "createdAt"]
+        "title": { "type": "string" },
+        "intensity": { "type": "string" },
+        "duration": { "type": "string" },
+        "participantsCount": { "type": "number" }
+      }
     }
   },
   "firestore": {
-    "/users/{userId}": {
-      "schema": { "$ref": "#/entities/User" },
-      "description": "Kolekcija korisnika"
-    },
-    "/meals/{mealId}": {
-      "schema": { "$ref": "#/entities/Meal" },
-      "description": "Kolekcija obroka"
-    },
-    "/workouts/{workoutId}": {
-      "schema": { "$ref": "#/entities/Workout" },
-      "description": "Kolekcija treninga"
-    },
-    "/biometrics/{biometricId}": {
-      "schema": { "$ref": "#/entities/Biometric" },
-      "description": "Kolekcija biometrijskih podataka"
-    },
-    "/templates/{templateId}": {
-      "schema": { "$ref": "#/entities/WorkoutTemplate" },
-      "description": "Kolekcija šablona treninga"
-    },
-    "/notifications/{notificationId}": {
-      "schema": { "$ref": "#/entities/Notification" },
-      "description": "Kolekcija obaveštenja"
-    },
-    "/feedback/{feedbackId}": {
-      "schema": { "$ref": "#/entities/CoachFeedback" },
-      "description": "Kolekcija video feedback-a"
-    }
+    "/users/{userId}": { "schema": { "$ref": "#/entities/User" } },
+    "/users/{userId}/activity/{date}": { "schema": { "$ref": "#/entities/DailyActivity" } },
+    "/recipes/{recipeId}": { "schema": { "$ref": "#/entities/Recipe" } },
+    "/mealPlans/{planId}": { "schema": { "$ref": "#/entities/MealPlan" } },
+    "/forumCategories/{catId}": { "schema": { "$ref": "#/entities/ForumCategory" } },
+    "/challenges/{challengeId}": { "schema": { "$ref": "#/entities/Challenge" } }
   }
 }

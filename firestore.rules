@@ -65,13 +65,26 @@ service cloud.firestore {
     //   - read: bool (optional)
     //   - createdAt: timestamp (required)
     //
-    // Collection: feedback
-    // Document ID: {feedbackId}
-    // Fields:
-    //   - userId: string (required)
-    //   - coachId: string (required)
-    //   - videoUrl: string (required)
-    //   - createdAt: timestamp (required)
+    // Collection: forumCategories
+    // Document ID: {catId}
+    // Fields: title, description, postCount
+    //
+    // Collection: forumCategories/{catId}/posts
+    // Document ID: {postId}
+    // Fields: authorId, authorName, content, createdAt
+    //
+    // Collection: recipes
+    // Document ID: {recipeId}
+    //
+    // Collection: mealPlans
+    // Document ID: {planId}
+    //
+    // Collection: challenges
+    // Document ID: {challengeId}
+    //
+    // Collection: users/{userId}/activity
+    // Document ID: {dateStr} (YYYY-MM-DD)
+    // Fields: steps, caloriesBurned, workoutDuration, waterIntake
     //
     // ===============================================================
 
@@ -144,7 +157,14 @@ service cloud.firestore {
              data.role in ['client', 'coach', 'admin'] &&
              data.createdAt is timestamp &&
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
-             (!('coachId' in data) || (data.coachId is string && data.coachId.size() < 100));
+             (!('coachId' in data) || (data.coachId is string && data.coachId.size() < 100)) &&
+             (!('gender' in data) || data.gender is string) &&
+             (!('age' in data) || data.age is number) &&
+             (!('height' in data) || data.height is number) &&
+             (!('weight' in data) || data.weight is number) &&
+             (!('goal' in data) || data.goal is string) &&
+             (!('activityLevel' in data) || data.activityLevel is string) &&
+             (!('fitnessLevel' in data) || data.fitnessLevel is string);
     }
 
     function isValidMeal(data) {
@@ -200,6 +220,25 @@ service cloud.firestore {
              data.coachId is string && data.coachId.size() > 0 && data.coachId.size() < 100 &&
              data.videoUrl is string && data.videoUrl.size() > 0 &&
              data.createdAt is timestamp;
+    }
+
+    function isValidActivity(data) {
+      return (!('steps' in data) || data.steps is number) &&
+             (!('caloriesBurned' in data) || data.caloriesBurned is number) &&
+             (!('workoutDuration' in data) || data.workoutDuration is number) &&
+             (!('waterIntake' in data) || data.waterIntake is number);
+    }
+
+    function isValidRecipe(data) {
+      return hasRequiredFields(['title', 'category']) &&
+             data.title is string && data.category is string &&
+             (!('calories' in data) || data.calories is number);
+    }
+
+    function isValidPost(data) {
+      return hasRequiredFields(['authorId', 'authorName', 'content', 'createdAt']) &&
+             data.authorId == request.auth.uid &&
+             data.content is string && data.content.size() > 0;
     }
 
     // ===============================================================
@@ -267,6 +306,38 @@ service cloud.firestore {
       allow update: if (isCoachOwner() && isCoachReqOwner() && isValidFeedback(request.resource.data) &&
                     request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
       allow delete: if isCoachOwner() || isAdmin();
+    }
+
+    // New Collections
+    match /users/{userId}/activity/{date} {
+      allow read, write: if isOwner(userId) && isValidActivity(request.resource.data);
+    }
+
+    match /recipes/{recipeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidRecipe(request.resource.data);
+    }
+
+    match /mealPlans/{planId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /forumCategories/{catId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+      
+      match /posts/{postId} {
+        allow read: if isAuthenticated();
+        // Use custom logic for post ownership
+        allow create: if isAuthenticated() && isValidPost(request.resource.data);
+        allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.authorId;
+      }
+    }
+
+    match /challenges/{challengeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
   }
 }
