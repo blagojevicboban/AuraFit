@@ -13,7 +13,7 @@ service cloud.firestore {
     //   - uid: string (required)
     //   - email: string (required)
     //   - displayName: string (optional)
-    //   - role: string (required, 'client' or 'coach')
+    //   - role: string (required, 'client', 'coach', or 'admin')
     //   - coachId: string (optional)
     //   - createdAt: timestamp (required)
     //
@@ -85,6 +85,7 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() && 
              (request.auth.token.email == 'admin@system.local' || 
+              (request.auth.token.email == 'ai4vetschools@gmail.com' && request.auth.token.email_verified == true) ||
              (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
     }

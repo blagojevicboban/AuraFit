@@ -14,23 +14,27 @@ import CoachClients from "./pages/CoachClients";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Landing />} />
-              <Route path="client" element={<ClientDashboard />} />
-              <Route path="coach" element={<CoachDashboard />} />
-              <Route path="coach/clients" element={<CoachClients />} />
-              <Route path="admin" element={<AdminDashboard />} />
-              <Route path="admin/users" element={<AdminUsers />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Landing />} />
+                <Route path="client" element={<ClientDashboard />} />
+                <Route path="coach" element={<CoachDashboard />} />
+                <Route path="coach/clients" element={<CoachClients />} />
+                <Route path="admin" element={<AdminDashboard />} />
+                <Route path="admin/users" element={<AdminUsers />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

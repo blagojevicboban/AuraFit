@@ -8,7 +8,7 @@
         "uid": { "type": "string", "description": "Firebase Auth UID" },
         "email": { "type": "string", "format": "email" },
         "displayName": { "type": "string" },
-        "role": { "type": "string", "enum": ["client", "coach"] },
+        "role": { "type": "string", "enum": ["client", "coach", "admin"] },
         "coachId": { "type": "string", "description": "UID trenera (ako je klijent)" },
         "createdAt": { "type": "timestamp" }
       },

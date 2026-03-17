@@ -1,9 +1,9 @@
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Activity, Brain, Users, Sparkles, Sun, Moon, Shield, X } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
-import { useEffect, useState } from "react";
 
 export default function Landing() {
   const { signIn, adminSignIn, userData } = useAuth();

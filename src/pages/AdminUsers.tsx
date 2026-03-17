@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Filter, Shield, Edit2, Trash2, X } from "lucide-react";
 import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";

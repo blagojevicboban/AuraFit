@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, signInWithGoogle, signInWithEmail, logOut } from '../lib/firebase';
+import { auth, db, signInWithGoogle, signInWithEmail, logOut, handleFirestoreError, OperationType } from '../lib/firebase';
 
 interface UserData {
   uid: string;
@@ -33,13 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (user) {
         // Fetch user data from Firestore
         const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-          setUserData(userDoc.data() as UserData);
-        } else {
-          // If user doesn't exist in DB, we'll create them during sign-in
-          setUserData(null);
+        try {
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            setUserData(userDoc.data() as UserData);
+          } else {
+            setUserData(null);
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
         }
       } else {
         setUserData(null);
@@ -56,18 +58,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Check if user exists in Firestore
       const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
+      let userDoc;
+      try {
+        userDoc = await getDoc(userDocRef);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
+      }
       
-      if (!userDoc.exists()) {
+      if (!userDoc?.exists()) {
         // Create new user profile
+        // Bootstrap admin check
+        const isBootstrapAdmin = user.email === 'ai4vetschools@gmail.com';
+        const finalRole = isBootstrapAdmin ? 'admin' : role;
+
         const newUserData: any = {
           uid: user.uid,
           email: user.email || '',
           displayName: user.displayName || 'Korisnik',
-          role: role,
+          role: finalRole,
           createdAt: serverTimestamp(),
         };
-        await setDoc(userDocRef, newUserData);
+        try {
+          await setDoc(userDocRef, newUserData);
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}`);
+        }
         setUserData(newUserData);
       } else {
         setUserData(userDoc.data() as UserData);
@@ -88,9 +103,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Check if user exists in Firestore
       const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
+      let userDoc;
+      try {
+        userDoc = await getDoc(userDocRef);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
+      }
       
-      if (!userDoc.exists()) {
+      if (!userDoc?.exists()) {
         // Create new admin profile
         const newUserData: any = {
           uid: user.uid,
@@ -99,7 +119,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: 'admin',
           createdAt: serverTimestamp(),
         };
-        await setDoc(userDocRef, newUserData);
+        try {
+          await setDoc(userDocRef, newUserData);
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}`);
+        }
         setUserData(newUserData);
       } else {
         setUserData(userDoc.data() as UserData);
