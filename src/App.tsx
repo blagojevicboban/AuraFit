@@ -24,6 +24,8 @@ import HomeDashboard from "./pages/HomeDashboard";
 import Workouts from "./pages/Workouts";
 import Progress from "./pages/Progress";
 import RoutineDetail from "./pages/RoutineDetail";
+import CreateRoutine from "./pages/CreateRoutine";
+import Nutrition from "./pages/Nutrition";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -44,7 +46,9 @@ export default function App() {
               <Route path="/home" element={<HomeDashboard />} />
               <Route path="/workouts" element={<Workouts />} />
               <Route path="/routine" element={<RoutineDetail />} />
+              <Route path="/create-routine" element={<CreateRoutine />} />
               <Route path="/progress" element={<Progress />} />
+              <Route path="/nutrition" element={<Nutrition />} />
 
               {/* App routes with Layout wrapper */}
               <Route path="/app" element={<Layout />}>

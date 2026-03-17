@@ -172,9 +172,9 @@ const HomeDashboard: React.FC = () => {
       {/* ── Bottom Navigation Bar ── */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#afa3ff] px-6 py-4 flex items-center justify-around z-50 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]">
         {[
-          { icon: Home, label: 'Home', active: true, path: '/' },
+          { icon: Home, label: 'Home', active: true, path: '/home' },
           { icon: BookOpen, label: 'Workouts', active: false, path: '/workouts' },
-          { icon: Star, label: 'Favorites', active: false, path: '/favorites' },
+          { icon: Apple, label: 'Nutrition', active: false, path: '/nutrition' },
           { icon: Headphones, label: 'Support', active: false, path: '/support' },
         ].map(({ icon: Icon, label, active, path }) => (
           <button

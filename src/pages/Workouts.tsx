@@ -74,9 +74,17 @@ const Workouts: React.FC = () => {
 
       {/* ── Content ── */}
       <div className="flex-grow px-6 pt-6 overflow-y-auto">
-        <div className="mb-4">
-          <h2 className="text-xl font-extrabold text-[#d6ff3e]">Let's Go {activeCategory}</h2>
-          <p className="text-zinc-400 text-sm">Explore Different Workout Styles</p>
+        <div className="mb-4 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-extrabold text-[#d6ff3e]">Let's Go {activeCategory}</h2>
+            <p className="text-zinc-400 text-sm">Explore Different Workout Styles</p>
+          </div>
+          <button 
+            onClick={() => navigate('/create-routine')}
+            className="text-xs bg-[#afa3ff] text-[#1c1c1c] font-bold px-3 py-1.5 rounded-full hover:bg-white transition-colors"
+          >
+            + Create Custom
+          </button>
         </div>
 
         <AnimatePresence mode="popLayout">
