@@ -31,8 +31,15 @@ const Launch: React.FC = () => {
         }}
         className="relative z-10 flex flex-col items-center"
       >
-        {/* We can use the text FITBODY matching the UI Kit, 
-            or Aura Fit as per the current app. Sticking to the UI kit style: */}
+        {/* Generated FitBody Logo */}
+        <div className="w-48 h-48 mb-6 relative">
+          <img 
+            src="file:///C:/Users/Mejkerslab/.gemini/antigravity/brain/f05b05fc-4d14-4796-9f22-5bbd83dc36ed/launch_logo_fitbody_1773745923855.png" 
+            alt="FitBody Logo"
+            className="w-full h-full object-contain"
+          />
+        </div>
+        
         <h1 className="text-5xl font-extrabold tracking-[0.2em] uppercase italic">
           FitBody
         </h1>

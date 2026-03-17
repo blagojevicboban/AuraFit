@@ -20,8 +20,8 @@ const ProfileSetup: React.FC = () => {
     if (step < 6) {
       setStep(step + 1);
     } else {
-      // Setup complete, navigate to dashboard
-      navigate('/client');
+      // Setup complete, navigate to login
+      navigate('/login');
     }
   };
 

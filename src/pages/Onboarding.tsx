@@ -31,8 +31,8 @@ const Onboarding: React.FC = () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
-      // Navigate to Setup or Auth based on the flow
-      navigate('/login');
+      // Navigate to profile setup after onboarding
+      navigate('/setup');
     }
   };
 

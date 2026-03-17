@@ -20,6 +20,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Launch from "./pages/Launch";
 import Onboarding from "./pages/Onboarding";
 import ProfileSetup from "./pages/ProfileSetup";
+import HomeDashboard from "./pages/HomeDashboard";
+import Workouts from "./pages/Workouts";
+import Progress from "./pages/Progress";
+import RoutineDetail from "./pages/RoutineDetail";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -37,6 +41,10 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/home" element={<HomeDashboard />} />
+              <Route path="/workouts" element={<Workouts />} />
+              <Route path="/routine" element={<RoutineDetail />} />
+              <Route path="/progress" element={<Progress />} />
 
               {/* App routes with Layout wrapper */}
               <Route path="/app" element={<Layout />}>
