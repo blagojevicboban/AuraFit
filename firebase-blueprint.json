@@ -39,12 +39,91 @@
         "title": { "type": "string" },
         "exercises": {
           "type": "array",
-          "items": { "type": "object" }
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "sets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reps": { "type": "number" },
+                    "weight": { "type": "number" },
+                    "rpe": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
         },
         "duration": { "type": "number", "description": "Trajanje u minutima" },
         "createdAt": { "type": "timestamp" }
       },
       "required": ["userId", "title", "createdAt"]
+    },
+    "Biometric": {
+      "title": "Biometric",
+      "description": "Biometrijski podaci klijenta (težina, obimi, mast)",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "weight": { "type": "number" },
+        "bodyFat": { "type": "number" },
+        "measurements": {
+          "type": "object",
+          "properties": {
+            "waist": { "type": "number" },
+            "chest": { "type": "number" },
+            "arms": { "type": "number" }
+          }
+        },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["userId", "weight", "createdAt"]
+    },
+    "WorkoutTemplate": {
+      "title": "WorkoutTemplate",
+      "description": "Šablon treninga koji kreira trener",
+      "type": "object",
+      "properties": {
+        "coachId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "exercises": { "type": "array", "items": { "type": "object" } },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["coachId", "title", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Pametni podsetnici i obaveštenja",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["ai_reminder", "coach_feedback", "system"] },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["userId", "message", "createdAt"]
+    },
+    "CoachFeedback": {
+      "title": "CoachFeedback",
+      "description": "Video feedback i korekcije trenera",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "coachId": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "exerciseName": { "type": "string" },
+        "markupData": { "type": "object", "description": "Podaci o crtežima na videu" },
+        "voiceNoteUrl": { "type": "string" },
+        "comment": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["userId", "coachId", "videoUrl", "createdAt"]
     }
   },
   "firestore": {
@@ -59,6 +138,22 @@
     "/workouts/{workoutId}": {
       "schema": { "$ref": "#/entities/Workout" },
       "description": "Kolekcija treninga"
+    },
+    "/biometrics/{biometricId}": {
+      "schema": { "$ref": "#/entities/Biometric" },
+      "description": "Kolekcija biometrijskih podataka"
+    },
+    "/templates/{templateId}": {
+      "schema": { "$ref": "#/entities/WorkoutTemplate" },
+      "description": "Kolekcija šablona treninga"
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Kolekcija obaveštenja"
+    },
+    "/feedback/{feedbackId}": {
+      "schema": { "$ref": "#/entities/CoachFeedback" },
+      "description": "Kolekcija video feedback-a"
     }
   }
 }

@@ -38,6 +38,41 @@ service cloud.firestore {
     //   - duration: number (optional)
     //   - createdAt: timestamp (required)
     //
+    // Collection: biometrics
+    // Document ID: {biometricId}
+    // Fields:
+    //   - userId: string (required)
+    //   - weight: number (required)
+    //   - bodyFat: number (optional)
+    //   - measurements: map (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: templates
+    // Document ID: {templateId}
+    // Fields:
+    //   - coachId: string (required)
+    //   - title: string (required)
+    //   - description: string (optional)
+    //   - exercises: list (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: notifications
+    // Document ID: {notificationId}
+    // Fields:
+    //   - userId: string (required)
+    //   - message: string (required)
+    //   - type: string (required)
+    //   - read: bool (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: feedback
+    // Document ID: {feedbackId}
+    // Fields:
+    //   - userId: string (required)
+    //   - coachId: string (required)
+    //   - videoUrl: string (required)
+    //   - createdAt: timestamp (required)
+    //
     // ===============================================================
 
     // ===============================================================
@@ -58,6 +93,14 @@ service cloud.firestore {
     
     function isReqOwner() {
       return isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+
+    function isCoachOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.coachId;
+    }
+
+    function isCoachReqOwner() {
+      return isAuthenticated() && request.auth.uid == request.resource.data.coachId;
     }
 
     function uidUnchanged() {
@@ -125,6 +168,40 @@ service cloud.firestore {
              (!('exercises' in data) || (data.exercises is list && data.exercises.size() < 50));
     }
 
+    function isValidBiometric(data) {
+      return hasRequiredFields(['userId', 'weight', 'createdAt']) &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.weight is number && data.weight > 0 &&
+             data.createdAt is timestamp &&
+             (!('bodyFat' in data) || data.bodyFat is number) &&
+             (!('measurements' in data) || data.measurements is map);
+    }
+
+    function isValidTemplate(data) {
+      return hasRequiredFields(['coachId', 'title', 'createdAt']) &&
+             data.coachId is string && data.coachId.size() > 0 && data.coachId.size() < 100 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.createdAt is timestamp &&
+             (!('exercises' in data) || (data.exercises is list && data.exercises.size() < 50));
+    }
+
+    function isValidNotification(data) {
+      return hasRequiredFields(['userId', 'message', 'createdAt']) &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.message is string && data.message.size() > 0 && data.message.size() < 1000 &&
+             data.createdAt is timestamp &&
+             (!('type' in data) || data.type is string) &&
+             (!('read' in data) || data.read is bool);
+    }
+
+    function isValidFeedback(data) {
+      return hasRequiredFields(['userId', 'coachId', 'videoUrl', 'createdAt']) &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.coachId is string && data.coachId.size() > 0 && data.coachId.size() < 100 &&
+             data.videoUrl is string && data.videoUrl.size() > 0 &&
+             data.createdAt is timestamp;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -146,31 +223,50 @@ service cloud.firestore {
     }
 
     match /meals/{mealId} {
-      // Allow read if owner or coach or admin
       allow read: if isDocOwner() || isCoach() || isAdmin();
-      
-      // Allow create if owner and valid, or admin
       allow create: if (isReqOwner() && isValidMeal(request.resource.data)) || isAdmin();
-      
-      // Allow update if owner and valid
       allow update: if (isDocOwner() && isReqOwner() && isValidMeal(request.resource.data) &&
                     request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
-                    
       allow delete: if isDocOwner() || isAdmin();
     }
 
     match /workouts/{workoutId} {
-      // Allow read if owner or coach or admin
       allow read: if isDocOwner() || isCoach() || isAdmin();
-      
-      // Allow create if owner and valid, or admin
       allow create: if (isReqOwner() && isValidWorkout(request.resource.data)) || isAdmin();
-      
-      // Allow update if owner and valid
       allow update: if (isDocOwner() && isReqOwner() && isValidWorkout(request.resource.data) &&
                     request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
-                    
       allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /biometrics/{biometricId} {
+      allow read: if isDocOwner() || isCoach() || isAdmin();
+      allow create: if (isReqOwner() && isValidBiometric(request.resource.data)) || isAdmin();
+      allow update: if (isDocOwner() && isReqOwner() && isValidBiometric(request.resource.data) &&
+                    request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /templates/{templateId} {
+      allow read: if isAuthenticated();
+      allow create: if (isCoachReqOwner() && isValidTemplate(request.resource.data)) || isAdmin();
+      allow update: if (isCoachOwner() && isCoachReqOwner() && isValidTemplate(request.resource.data) &&
+                    request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
+      allow delete: if isCoachOwner() || isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAdmin() || isCoach(); // AI or Coach can create
+      allow update: if (isDocOwner() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])) || isAdmin();
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /feedback/{feedbackId} {
+      allow read: if isDocOwner() || isCoachOwner() || isAdmin();
+      allow create: if (isCoachReqOwner() && isValidFeedback(request.resource.data)) || isAdmin();
+      allow update: if (isCoachOwner() && isCoachReqOwner() && isValidFeedback(request.resource.data) &&
+                    request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
+      allow delete: if isCoachOwner() || isAdmin();
     }
   }
 }

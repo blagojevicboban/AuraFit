@@ -36,7 +36,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            setUserData(userDoc.data() as UserData);
+            const data = userDoc.data() as UserData;
+            // Force admin role for bootstrap email
+            if (user.email === 'ai4vetschools@gmail.com' && data.role !== 'admin') {
+              data.role = 'admin';
+              await setDoc(userDocRef, { role: 'admin' }, { merge: true });
+            }
+            setUserData(data);
           } else {
             setUserData(null);
           }
@@ -85,7 +91,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setUserData(newUserData);
       } else {
-        setUserData(userDoc.data() as UserData);
+        const data = userDoc.data() as UserData;
+        // Force admin role for bootstrap email
+        if (user.email === 'ai4vetschools@gmail.com' && data.role !== 'admin') {
+          data.role = 'admin';
+          await setDoc(userDocRef, { role: 'admin' }, { merge: true });
+        }
+        setUserData(data);
       }
     } catch (error: any) {
       if (error?.code !== 'auth/popup-closed-by-user') {
