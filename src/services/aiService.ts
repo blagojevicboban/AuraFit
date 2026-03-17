@@ -1,6 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+let aiClient: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("Gemini API Key is not set. Please configure GEMINI_API_KEY or VITE_GEMINI_API_KEY.");
+    }
+    aiClient = new GoogleGenAI({ apiKey });
+  }
+  return aiClient;
+}
 
 export interface ParsedMeal {
   description: string;
@@ -12,6 +23,7 @@ export interface ParsedMeal {
 }
 
 export async function parseMealWithAI(input: string): Promise<ParsedMeal> {
+  const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `Analiziraj sledeći opis obroka na srpskom jeziku i izvuci nutritivne vrednosti. 
@@ -45,6 +57,7 @@ export async function parseMealWithAI(input: string): Promise<ParsedMeal> {
 }
 
 export async function generateWeeklySummary(clientData: any): Promise<string> {
+  const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `Ti si stručni fitnes trener. Analiziraj podatke klijenta za proteklu nedelju i sastavi kratak, motivacioni izveštaj za trenera.
