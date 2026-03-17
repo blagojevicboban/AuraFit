@@ -9,17 +9,17 @@ const onboardingSteps = [
   {
     title: "Find the right\nworkout for what\nyou need",
     subtitle: "We have something suitable for everyone.",
-    imageBg: "bg-zinc-800" // Placeholder for actual image
+    image: "/assets/onboarding-1.png"
   },
   {
     title: "Make suitable\nworkouts and\ngreat results",
     subtitle: "Customized plans to help you reach your goals faster.",
-    imageBg: "bg-zinc-700"
+    image: "/assets/onboarding-2.png"
   },
   {
     title: "Let's do a\nworkout and live\nhealthy with us",
     subtitle: "Join our community and transform your lifestyle.",
-    imageBg: "bg-zinc-600"
+    image: "/assets/onboarding-3.png"
   }
 ];
 
@@ -48,9 +48,14 @@ const Onboarding: React.FC = () => {
           className="flex-grow flex flex-col"
         >
           {/* Top Image Section - takes up ~60% of the screen */}
-          <div className={`h-[60vh] w-full rounded-b-[3rem] ${onboardingSteps[currentStep].imageBg} flex items-center justify-center p-8 relative overflow-hidden`}>
+          <div className="h-[60vh] w-full rounded-b-[3rem] bg-zinc-900 flex items-center justify-center p-8 relative overflow-hidden">
+            <img 
+              src={onboardingSteps[currentStep].image} 
+              alt="Onboarding Illustration" 
+              className="absolute inset-0 w-full h-full object-cover opacity-80"
+            />
             {/* Visual placeholder for the character illustrations in the UI Kit */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1c1c1c] to-transparent opacity-60 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1c1c1c] via-[#1c1c1c]/20 to-transparent pointer-events-none" />
             <div className="w-64 h-64 bg-white/5 rounded-full blur-3xl absolute top-10" />
             
             {/* Action Text over Image (skip) */}

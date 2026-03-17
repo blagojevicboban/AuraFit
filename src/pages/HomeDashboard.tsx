@@ -10,8 +10,8 @@ import {
 // Data
 // ─────────────────────────────────────────────
 const recommendations = [
-  { id: 1, title: 'Squat Exercise', duration: '12 Minutes', kcal: '120 Kcal', bg: 'from-zinc-700 to-zinc-900', icon: '🏋️' },
-  { id: 2, title: 'Full Body Stretching', duration: '12 Minutes', kcal: '120 Kcal', bg: 'from-zinc-600 to-zinc-800', icon: '🧘' },
+  { id: 1, title: 'Squat Exercise', duration: '12 Minutes', kcal: '120 Kcal', bg: 'from-zinc-700 to-zinc-900', img: '/assets/squat.png' },
+  { id: 2, title: 'Full Body Stretching', duration: '12 Minutes', kcal: '120 Kcal', bg: 'from-zinc-600 to-zinc-800', img: '/assets/stretching.png' },
 ];
 
 const articles = [
@@ -97,8 +97,8 @@ const HomeDashboard: React.FC = () => {
                 whileTap={{ scale: 0.97 }}
                 className={`relative rounded-3xl overflow-hidden cursor-pointer bg-gradient-to-br ${item.bg} h-48`}
               >
-                {/* Placeholder image bg */}
-                <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-20">{item.icon}</div>
+                {/* Generated image bg */}
+                <img src={item.img} className="absolute inset-0 w-full h-full object-cover opacity-60" alt={item.title} />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 {/* Favorite star */}
@@ -130,10 +130,12 @@ const HomeDashboard: React.FC = () => {
             style={{ minHeight: 160 }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-[#1c1c1c]/80 to-transparent z-10" />
-            {/* Placeholder for the challenge image on right side */}
-            <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-zinc-700 to-transparent flex items-center justify-center text-6xl opacity-30">
-              🏋️‍♀️
-            </div>
+            {/* Image for the challenge */}
+            <img 
+              src="/assets/plank.png" 
+              className="absolute right-0 top-0 bottom-0 w-full h-full object-cover opacity-80" 
+              alt="Challenge" 
+            />
             <div className="relative z-20 p-6">
               <p className="text-zinc-300 text-xs font-bold uppercase tracking-widest mb-1">Weekly Challenge</p>
               <h3 className="text-3xl font-black text-[#d6ff3e] leading-tight mb-1">

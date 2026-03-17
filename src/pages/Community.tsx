@@ -81,8 +81,12 @@ const Community: React.FC = () => {
             <div className="bg-[#afa3ff] rounded-3xl p-1 relative overflow-hidden group cursor-pointer shadow-lg aspect-video">
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
               {/* Image Placeholder */}
-              <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center">
-                <span className="text-6xl opacity-20">🚴‍♀️</span>
+              <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/assets/cycling.png" 
+                  className="w-full h-full object-cover opacity-80" 
+                  alt="Cycling Challenge" 
+                />
               </div>
               
               <button className="absolute bottom-4 right-4 text-white z-20">

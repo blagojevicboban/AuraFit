@@ -11,12 +11,24 @@ import {
 // ─────────────────────────────────────────────
 const categories = ['Beginner', 'Intermediate', 'Advanced'];
 
-const workoutsData = {
+interface WorkoutItem {
+  id: number;
+  title: string;
+  duration: string;
+  kcal: string;
+  exercises: string;
+  tag: string;
+  isFavorite: boolean;
+  height: string;
+  image?: string;
+}
+
+const workoutsData: Record<string, WorkoutItem[]> = {
   Beginner: [
-    { id: 1, title: 'Functional Training', duration: '45 Minutes', kcal: '1450 Kcal', exercises: '5 Exercises', tag: 'Training Of The Day', isFavorite: true, height: 'h-48' },
-    { id: 2, title: 'Upper Body', duration: '60 Minutes', kcal: '1320 Kcal', exercises: '5 Exercises', tag: '', isFavorite: true, height: 'h-32' },
-    { id: 3, title: 'Full Body Stretching', duration: '45 Minutes', kcal: '1450 Kcal', exercises: '5 Exercises', tag: '', isFavorite: true, height: 'h-32' },
-    { id: 4, title: 'Glutes & Abs', duration: '45 Minutes', kcal: '1200 Kcal', exercises: '4 Exercises', tag: '', isFavorite: true, height: 'h-32' },
+    { id: 1, title: 'Functional Training', duration: '45 Minutes', kcal: '1450 Kcal', exercises: '5 Exercises', tag: 'Training Of The Day', isFavorite: true, height: 'h-48', image: '/assets/functional.png' },
+    { id: 2, title: 'Upper Body', duration: '60 Minutes', kcal: '1320 Kcal', exercises: '5 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/upperbody.png' },
+    { id: 3, title: 'Full Body Stretching', duration: '45 Minutes', kcal: '1450 Kcal', exercises: '5 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/stretching.png' },
+    { id: 4, title: 'Glutes & Abs', duration: '45 Minutes', kcal: '1200 Kcal', exercises: '4 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/squat.png' },
   ],
   Intermediate: [
     { id: 5, title: 'Core Strength', duration: '50 Minutes', kcal: '1600 Kcal', exercises: '6 Exercises', tag: 'Recommended', isFavorite: false, height: 'h-48' }
@@ -100,9 +112,8 @@ const Workouts: React.FC = () => {
                 onClick={() => navigate('/routine')}
               >
                 {/* Visual Placeholder for Image */}
-                <div className="absolute top-0 bottom-0 right-0 w-1/2 bg-gradient-to-l from-zinc-700 to-zinc-800 rounded-l-full overflow-hidden flex items-center justify-center">
-                   <div className="w-full h-full bg-zinc-700/50 mix-blend-overlay"></div>
-                   <span className="text-6xl opacity-10 absolute">🏃</span>
+                <div className="absolute top-0 bottom-0 right-0 w-1/2 overflow-hidden flex items-center justify-center">
+                   <img src={workout.image} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" alt={workout.title} />
                 </div>
                 
                 {/* Gradient for Text Readability */}

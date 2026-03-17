@@ -10,8 +10,8 @@ import {
 // Data (Matching UI Kit)
 // ─────────────────────────────────────────────
 const recommendedRecipes = [
-  { id: 1, title: 'Fruit Smoothie', time: '12 Minutes', kcal: '120 Cal', isFavorite: true },
-  { id: 2, title: 'Salads With Quinoa', time: '12 Minutes', kcal: '120 Cal', isFavorite: true },
+  { id: 1, title: 'Fruit Smoothie', time: '12 Minutes', kcal: '120 Cal', isFavorite: true, image: '/assets/breakfast.png' },
+  { id: 2, title: 'Salads With Quinoa', time: '12 Minutes', kcal: '120 Cal', isFavorite: true, image: '/assets/nutrition-hero.png' },
 ];
 
 const recipesForYou = [
@@ -85,8 +85,12 @@ const Nutrition: React.FC = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10 pointer-events-none" />
               {/* Visual Placeholder for Image */}
-              <div className="h-44 bg-zinc-800 rounded-[22px] flex items-center justify-center overflow-hidden">
-                <span className="text-6xl opacity-20">🥤</span>
+              <div className="h-44 bg-zinc-800 rounded-[22px] flex items-center justify-center overflow-hidden relative">
+                <img 
+                  src="/assets/nutrition-hero.png" 
+                  alt="Recipe of the day" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               
               <div className="absolute top-3 right-3 bg-[#d6ff3e] text-[#1c1c1c] text-xs font-bold px-3 py-1.5 rounded-full z-20">
@@ -122,8 +126,8 @@ const Nutrition: React.FC = () => {
                       className="min-w-[200px] bg-zinc-800 rounded-3xl overflow-hidden relative shadow-md flex-shrink-0 cursor-pointer"
                     >
                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent z-10" />
-                       <div className="h-40 bg-zinc-700 flex items-center justify-center">
-                         <span className="text-5xl opacity-20">🥗</span>
+                       <div className="h-40 bg-zinc-700 flex items-center justify-center overflow-hidden">
+                         <img src={recipe.image} className="w-full h-full object-cover opacity-80" alt={recipe.title} />
                        </div>
                        
                        <button className="absolute top-3 right-3 text-white z-20">
