@@ -15,7 +15,7 @@ const Profile: React.FC = () => {
     { icon: Heart, label: 'Favorite', onClick: () => {} },
     { icon: Lock, label: 'Privacy Policy', onClick: () => {} },
     { icon: Settings, label: 'Settings', onClick: () => navigate('/settings') },
-    { icon: HelpCircle, label: 'Help', onClick: () => {} },
+    { icon: HelpCircle, label: 'Help', onClick: () => navigate('/help') },
     { icon: LogOut, label: 'Logout', onClick: () => navigate('/login'), danger: true },
   ];
 

@@ -1,0 +1,6 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="100" fill="#1C1C1C"/>
+  <path d="M256 100L400 350H112L256 100Z" stroke="#D6FF3E" stroke-width="20" stroke-linejoin="round"/>
+  <circle cx="256" cy="280" r="40" fill="#AFA3FF"/>
+  <text x="256" y="450" fill="#D6FF3E" font-family="Arial" font-size="60" font-weight="900" text-anchor="middle">AURAFIT</text>
+</svg>

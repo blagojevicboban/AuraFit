@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, signInWithGoogle, signInWithEmail, logOut, handleFirestoreError, OperationType } from '../lib/firebase';
+import { auth, db, signInWithGoogle, signInWithEmail, logOut, handleFirestoreError, OperationType, requestForToken, onMessageListener } from '../lib/firebase';
 
 interface UserData {
   uid: string;
@@ -22,6 +22,7 @@ interface AuthContextType {
   impersonateUser: (userId: string) => Promise<void>;
   stopImpersonating: () => void;
   isImpersonating: boolean;
+  initNotifications: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -258,6 +259,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const initNotifications = async () => {
+    if (!currentUser) return;
+    try {
+      const token = await requestForToken();
+      if (token) {
+        await setDoc(doc(db, 'users', currentUser.uid), {
+          fcmToken: token,
+          notificationsEnabled: true
+        }, { merge: true });
+        console.log('FCM Token registered');
+      }
+    } catch (error) {
+      console.error('Error initializing notifications', error);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       currentUser, 
@@ -270,7 +287,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signOut,
       impersonateUser,
       stopImpersonating,
-      isImpersonating: !!originalUserData
+      isImpersonating: !!originalUserData,
+      initNotifications
     }}>
       {!loading && children}
     </AuthContext.Provider>

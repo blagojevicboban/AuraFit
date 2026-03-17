@@ -34,6 +34,7 @@ import EditProfile from "./pages/EditProfile";
 import Community from "./pages/Community";
 import Settings from "./pages/Settings";
 import NotificationSettings from "./pages/NotificationSettings";
+import Help from "./pages/Help";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -62,6 +63,7 @@ function AppContent() {
         <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
         <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
         <Route path="/settings/notifications" element={<PageTransition><NotificationSettings /></PageTransition>} />
+        <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
 
         {/* App routes with Layout wrapper */}
         <Route path="/app" element={<Layout />}>

@@ -1,11 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, getDocFromServer, doc } from 'firebase/firestore';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
+export const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
 
 export const googleProvider = new GoogleAuthProvider();
 
@@ -115,3 +117,27 @@ export const logOut = async () => {
     throw error;
   }
 };
+
+export const requestForToken = async () => {
+  if (!messaging) return null;
+  try {
+    const currentToken = await getToken(messaging, {
+      vapidKey: 'BPEv0m-p-V6q-q-q-q-q-q-q-q-q-q-q-q-q-q-q' // Placeholder
+    });
+    if (currentToken) {
+      return currentToken;
+    }
+    return null;
+  } catch (err) {
+    console.log('An error occurred while retrieving token. ', err);
+    return null;
+  }
+};
+
+export const onMessageListener = () =>
+  new Promise((resolve) => {
+    if (!messaging) return;
+    onMessage(messaging, (payload) => {
+      resolve(payload);
+    });
+  });

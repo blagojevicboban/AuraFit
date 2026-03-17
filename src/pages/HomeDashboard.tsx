@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Search, Bell, User, Star, Dumbbell, BarChart2, Apple, Users, Play, Clock, Flame, ChevronRight
+  Search, Bell, User, Star, Dumbbell, BarChart2, Apple, Users, Play, Clock, Flame, ChevronRight, X
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import { useAuth } from '../contexts/AuthContext';
 
 // ─────────────────────────────────────────────
 // Data
@@ -24,9 +25,64 @@ const articles = [
 // ─────────────────────────────────────────────
 const HomeDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { initNotifications, userData } = useAuth();
+  const [showPrompt, setShowPrompt] = useState(false);
+
+  useEffect(() => {
+    // Show prompt if notifications are not enabled and it hasn't been shown this session
+    if (userData && !userData.notificationsEnabled && !sessionStorage.getItem('pwa_prompt_shown')) {
+      const timer = setTimeout(() => setShowPrompt(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [userData]);
+
+  const handleEnableNotifications = async () => {
+    await initNotifications();
+    setShowPrompt(false);
+    sessionStorage.setItem('pwa_prompt_shown', 'true');
+  };
 
   return (
     <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col overflow-x-hidden">
+      
+      {/* ── Notification Prompt ── */}
+      <AnimatePresence>
+        {showPrompt && (
+          <motion.div 
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className="fixed top-0 left-0 right-0 z-[100] p-4 pt-12"
+          >
+            <div className="bg-[#afa3ff] rounded-3xl p-6 shadow-2xl relative border border-white/20 backdrop-blur-xl">
+              <button 
+                onClick={() => {
+                  setShowPrompt(false);
+                  sessionStorage.setItem('pwa_prompt_shown', 'true');
+                }}
+                className="absolute top-4 right-4 text-[#1c1c1c]/60 hover:text-[#1c1c1c]"
+              >
+                <X size={20} />
+              </button>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#d6ff3e] flex items-center justify-center flex-shrink-0">
+                  <Bell className="text-[#1c1c1c]" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-[#1c1c1c] font-black text-lg leading-tight mb-1">Stay Notified!</h3>
+                  <p className="text-[#1c1c1c]/70 text-sm font-medium mb-4">Get real-time updates on your workouts and nutrition plans.</p>
+                  <button 
+                    onClick={handleEnableNotifications}
+                    className="w-full py-3 bg-[#1c1c1c] text-[#d6ff3e] rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-black transition-colors"
+                  >
+                    Enable Notifications
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* ── Header ── */}
       <div className="px-6 pt-12 pb-4">
