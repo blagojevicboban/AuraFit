@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowRight, Activity, Brain, Users, Sparkles, Sun, Moon, Shield, X } from "lucide-react";
+import { ArrowRight, Activity, Brain, Users, Sparkles, Sun, Moon, Shield, X, User } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 
 export default function Landing() {
-  const { signIn, adminSignIn, userData } = useAuth();
+  const { signIn, passwordSignIn, adminSignIn, userData } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const [adminUsername, setAdminUsername] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
-  const [adminLoading, setAdminLoading] = useState(false);
-  const [adminError, setAdminError] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginRole, setLoginRole] = useState<'client' | 'coach' | 'admin'>('client');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
     if (userData) {
@@ -29,8 +30,17 @@ export default function Landing() {
   }, [userData, navigate]);
 
   const handleSignIn = async (role: 'client' | 'coach' | 'admin') => {
+    setLoginRole(role);
+    setShowLoginModal(true);
+    setLoginError("");
+    setUsername("");
+    setPassword("");
+  };
+
+  const handleGoogleSignIn = async () => {
     try {
-      await signIn(role);
+      await signIn(loginRole);
+      setShowLoginModal(false);
     } catch (error: any) {
       if (error?.code !== 'auth/popup-closed-by-user') {
         console.error("Login failed", error);
@@ -38,22 +48,22 @@ export default function Landing() {
     }
   };
 
-  const handleAdminLogin = async (e: React.FormEvent) => {
+  const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAdminError("");
-    setAdminLoading(true);
+    setLoginError("");
+    setLoginLoading(true);
     try {
-      await adminSignIn(adminUsername, adminPassword);
-      setShowAdminModal(false);
-    } catch (error: any) {
-      console.error("Admin login failed", error);
-      if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
-        setAdminError("Nemate dozvolu za pristup. Kontaktirajte podršku.");
+      if (loginRole === 'admin') {
+        await adminSignIn(username, password);
       } else {
-        setAdminError("Pogrešno korisničko ime ili lozinka.");
+        await passwordSignIn(username, password, loginRole);
       }
+      setShowLoginModal(false);
+    } catch (error: any) {
+      console.error("Login failed", error);
+      setLoginError("Pogrešno korisničko ime ili lozinka.");
     } finally {
-      setAdminLoading(false);
+      setLoginLoading(false);
     }
   };
 
@@ -76,7 +86,7 @@ export default function Landing() {
             <button onClick={toggleTheme} className="p-2 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-zinc-900">
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <button onClick={() => setShowAdminModal(true)} className="hidden md:block text-xs font-medium text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+            <button onClick={() => handleSignIn('admin')} className="hidden md:block text-xs font-medium text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
               Admin
             </button>
             <button onClick={() => handleSignIn('client')} className="hidden sm:block text-sm font-medium text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
@@ -185,15 +195,15 @@ export default function Landing() {
         </div>
       </main>
 
-      {/* Admin Login Modal */}
+      {/* Login Modal */}
       <AnimatePresence>
-        {showAdminModal && (
+        {showLoginModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowAdminModal(false)}
+              onClick={() => setShowLoginModal(false)}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
             <motion.div
@@ -204,31 +214,33 @@ export default function Landing() {
             >
               <div className="flex justify-between items-center mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/20">
-                  <Shield className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                  {loginRole === 'admin' ? <Shield className="w-6 h-6 text-indigo-600 dark:text-indigo-400" /> : <User className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
                 </div>
                 <button
-                  onClick={() => setShowAdminModal(false)}
+                  onClick={() => setShowLoginModal(false)}
                   className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
               
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Admin Prijava</h2>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                {loginRole === 'admin' ? 'Admin Prijava' : loginRole === 'coach' ? 'Portal za trenere' : 'Prijava za klijente'}
+              </h2>
               <p className="text-slate-600 dark:text-zinc-400 mb-8">
-                Unesite vaše administratorske podatke za pristup kontrolnom panelu.
+                Prijavite se na svoj nalog koristeći Google ili korisničko ime.
               </p>
 
-              <form onSubmit={handleAdminLogin} className="space-y-4">
-                {adminError && (
+              <form onSubmit={handlePasswordLogin} className="space-y-4">
+                {loginError && (
                   <div className="p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl text-sm text-rose-600 dark:text-rose-400">
-                    {adminError}
+                    {loginError}
                   </div>
                 )}
                 
                 <button
                   type="button"
-                  onClick={() => handleSignIn('admin')}
+                  onClick={handleGoogleSignIn}
                   className="w-full flex items-center justify-center gap-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 px-4 py-3 rounded-xl font-medium text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors mb-6"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -264,9 +276,9 @@ export default function Landing() {
                   </label>
                   <input
                     type="text"
-                    value={adminUsername}
-                    onChange={(e) => setAdminUsername(e.target.value)}
-                    placeholder="npr. admin"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="npr. ana"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-indigo-500/30 text-slate-900 dark:text-white transition-colors duration-200"
                     required
                   />
@@ -278,8 +290,8 @@ export default function Landing() {
                   </label>
                   <input
                     type="password"
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-indigo-500/30 text-slate-900 dark:text-white transition-colors duration-200"
                     required
@@ -288,10 +300,10 @@ export default function Landing() {
 
                 <button
                   type="submit"
-                  disabled={adminLoading}
+                  disabled={loginLoading}
                   className="w-full mt-4 flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-3 rounded-xl font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
                 >
-                  {adminLoading ? (
+                  {loginLoading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     "Prijavi se"

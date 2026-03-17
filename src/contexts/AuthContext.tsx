@@ -16,8 +16,11 @@ interface AuthContextType {
   userData: UserData | null;
   loading: boolean;
   signIn: (role: 'client' | 'coach' | 'admin') => Promise<void>;
+  passwordSignIn: (username: string, pass: string, role: 'client' | 'coach') => Promise<void>;
   adminSignIn: (username: string, pass: string) => Promise<void>;
-  signOut: () => Promise<void>;
+  impersonateUser: (userId: string) => Promise<void>;
+  stopImpersonating: () => void;
+  isImpersonating: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -25,6 +28,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [originalUserData, setOriginalUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -127,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const newUserData: any = {
           uid: user.uid,
           email: email,
-          displayName: 'Administrator',
+          displayName: username.charAt(0).toUpperCase() + username.slice(1),
           role: 'admin',
           createdAt: serverTimestamp(),
         };
@@ -146,12 +150,89 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const passwordSignIn = async (username: string, pass: string, role: 'client' | 'coach') => {
+    try {
+      // Map username to an email format for Firebase Auth
+      const email = `${username}@aura.fit`;
+      const user = await signInWithEmail(email, pass);
+      
+      // Check if user exists in Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      let userDoc;
+      try {
+        userDoc = await getDoc(userDocRef);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
+      }
+      
+      if (!userDoc?.exists()) {
+        // Create new profile
+        const newUserData: any = {
+          uid: user.uid,
+          email: email,
+          displayName: username.charAt(0).toUpperCase() + username.slice(1),
+          role: role,
+          createdAt: serverTimestamp(),
+        };
+        try {
+          await setDoc(userDocRef, newUserData);
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}`);
+        }
+        setUserData(newUserData);
+      } else {
+        setUserData(userDoc.data() as UserData);
+      }
+    } catch (error: any) {
+      console.error(`Error signing in as ${role}`, error);
+      throw error;
+    }
+  };
+
   const signOut = async () => {
+    setOriginalUserData(null);
     await logOut();
   };
 
+  const impersonateUser = async (userId: string) => {
+    if (userData?.role !== 'admin' && !originalUserData) {
+      throw new Error("Only admins can impersonate users");
+    }
+
+    try {
+      const userDocRef = doc(db, 'users', userId);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        if (!originalUserData) {
+          setOriginalUserData(userData);
+        }
+        setUserData(userDoc.data() as UserData);
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.GET, `users/${userId}`);
+    }
+  };
+
+  const stopImpersonating = () => {
+    if (originalUserData) {
+      setUserData(originalUserData);
+      setOriginalUserData(null);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ currentUser, userData, loading, signIn, adminSignIn, signOut }}>
+    <AuthContext.Provider value={{ 
+      currentUser, 
+      userData, 
+      loading, 
+      signIn, 
+      passwordSignIn,
+      adminSignIn, 
+      signOut,
+      impersonateUser,
+      stopImpersonating,
+      isImpersonating: !!originalUserData
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );

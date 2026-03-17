@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Filter, Shield, Edit2, Trash2, X } from "lucide-react";
+import { Search, Filter, Shield, Edit2, Trash2, X, LogIn } from "lucide-react";
 import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface UserData {
   id: string;
@@ -13,6 +15,8 @@ interface UserData {
 }
 
 export default function AdminUsers() {
+  const { impersonateUser } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -81,6 +85,18 @@ export default function AdminUsers() {
     const matchesRole = filterRole === "all" || user.role === filterRole;
     return matchesSearch && matchesRole;
   });
+
+  const handleImpersonate = async (userId: string, role: string) => {
+    try {
+      await impersonateUser(userId);
+      // Redirect based on role
+      if (role === 'admin') navigate('/admin');
+      else if (role === 'coach') navigate('/coach');
+      else navigate('/client');
+    } catch (error) {
+      console.error("Error impersonating user:", error);
+    }
+  };
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto">
@@ -173,6 +189,13 @@ export default function AdminUsers() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button 
+                            onClick={() => handleImpersonate(user.id, user.role)}
+                            className="p-2 text-slate-400 hover:text-emerald-600 dark:text-zinc-500 dark:hover:text-emerald-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
+                            title="Prijavi se kao ovaj korisnik"
+                          >
+                            <LogIn className="w-4 h-4" />
+                          </button>
                           <button 
                             onClick={() => setEditingUser(user)}
                             className="p-2 text-slate-400 hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-indigo-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"

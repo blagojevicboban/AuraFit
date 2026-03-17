@@ -1,6 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { Send, Utensils, Activity, Flame, ChevronRight, Search, Plus, Sparkles, Users, Timer, Dumbbell, TrendingUp, Camera, Bell } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { 
+  Send, 
+  Utensils, 
+  Activity, 
+  Flame, 
+  ChevronRight, 
+  Search, 
+  Plus, 
+  Sparkles, 
+  Users, 
+  Timer, 
+  Dumbbell, 
+  TrendingUp, 
+  Camera, 
+  Bell,
+  Mic,
+  MicOff,
+  CheckCircle2,
+  XCircle
+} from "lucide-react";
 import { askAuraFitAI } from "../lib/gemini";
+import { parseMealWithAI } from "../services/aiService";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../contexts/AuthContext";
 import { db } from "../lib/firebase";
@@ -43,6 +63,47 @@ export default function ClientDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'sr-RS';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setMealInput(prev => prev + (prev ? " " : "") + transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current?.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Failed to start recognition", err);
+      }
+    }
+  };
 
   // Biometrics
   const [biometrics, setBiometrics] = useState<any[]>([]);
@@ -145,38 +206,28 @@ export default function ClientDashboard() {
     if (!mealInput.trim() || !userData) return;
 
     setIsLoading(true);
-    const prompt = `Klijent je uneo sledeći obrok: "${mealInput}". Analiziraj ga prema tvojim instrukcijama. Vrati odgovor u formatu:
-    Kalorije: [broj] kcal
-    Proteini: [broj] g
-    Ugljeni hidrati: [broj] g
-    Masti: [broj] g
-    Savet: [tvoj savet]`;
-    
-    const response = await askAuraFitAI(prompt, false);
-    setAiResponse(response);
-    
     try {
-      const calMatch = response.match(/Kalorije:\s*(\d+)/i);
-      const protMatch = response.match(/Proteini:\s*(\d+)/i);
-      const carbMatch = response.match(/Ugljeni hidrati:\s*(\d+)/i);
-      const fatMatch = response.match(/Masti:\s*(\d+)/i);
-
+      const result = await parseMealWithAI(mealInput);
+      setAiResponse(result.aiAdvice);
+      
       await addDoc(collection(db, "meals"), {
         userId: userData.uid,
-        description: mealInput,
-        calories: calMatch ? parseInt(calMatch[1]) : 0,
-        protein: protMatch ? parseInt(protMatch[1]) : 0,
-        carbs: carbMatch ? parseInt(carbMatch[1]) : 0,
-        fat: fatMatch ? parseInt(fatMatch[1]) : 0,
-        aiAdvice: response,
+        description: result.description,
+        calories: result.calories,
+        protein: result.protein,
+        carbs: result.carbs,
+        fat: result.fat,
+        aiAdvice: result.aiAdvice,
         createdAt: serverTimestamp()
       });
+      
+      setMealInput("");
     } catch (error) {
       console.error("Error saving meal:", error);
+      setAiResponse("Došlo je do greške pri analizi obroka. Pokušajte ponovo.");
     }
 
     setIsLoading(false);
-    setMealInput("");
   };
 
   const handleSearchFatSecret = async (e: React.FormEvent) => {
@@ -322,20 +373,35 @@ export default function ClientDashboard() {
                         value={mealInput}
                         onChange={(e) => setMealInput(e.target.value)}
                         placeholder="Šta si pojeo? (npr. 'Dve pljeskavice...')"
-                        className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl px-5 py-4 pr-16 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                        className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl px-5 py-4 pr-32 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                         disabled={isLoading}
                       />
-                      <button
-                        type="submit"
-                        disabled={isLoading || !mealInput.trim()}
-                        className="absolute right-2 top-2 bottom-2 aspect-square bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 transition-colors cursor-pointer"
-                      >
-                        {isLoading ? (
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        ) : (
-                          <Sparkles className="w-5 h-5" />
-                        )}
-                      </button>
+                      <div className="absolute right-2 top-2 bottom-2 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={toggleListening}
+                          className={cn(
+                            "aspect-square rounded-xl flex items-center justify-center transition-all cursor-pointer px-3",
+                            isListening 
+                              ? "bg-red-500 text-white animate-pulse" 
+                              : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
+                          )}
+                          title={isListening ? "Zaustavi snimanje" : "Diktiraj obrok"}
+                        >
+                          {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isLoading || !mealInput.trim()}
+                          className="aspect-square bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 transition-colors cursor-pointer px-3"
+                        >
+                          {isLoading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          ) : (
+                            <Sparkles className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
                     </form>
 
                     {aiResponse && (

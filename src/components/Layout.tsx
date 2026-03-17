@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Activity, LayoutDashboard, Users, LogOut, Menu, X, User, Sun, Moon } from "lucide-react";
+import { Activity, LayoutDashboard, Users, LogOut, Menu, X, User, Sun, Moon, Shield } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "motion/react";
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userData, signOut, loading } = useAuth();
+  const { userData, signOut, loading, isImpersonating, stopImpersonating } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -59,7 +59,25 @@ export default function Layout() {
   const links = userData.role === 'admin' ? adminLinks : userData.role === 'coach' ? coachLinks : clientLinks;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-50 flex flex-col md:flex-row transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-50 flex flex-col transition-colors duration-200">
+      {isImpersonating && (
+        <div className="bg-indigo-600 text-white px-4 py-2 flex items-center justify-between sticky top-0 z-[60] shadow-lg">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Shield className="w-4 h-4" />
+            <span>Prijavljeni ste kao: <strong>{userData.displayName}</strong> ({userData.role})</span>
+          </div>
+          <button 
+            onClick={() => {
+              stopImpersonating();
+              navigate('/admin/users');
+            }}
+            className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-xs font-bold transition-colors"
+          >
+            Nazad na Admin
+          </button>
+        </div>
+      )}
+      <div className="flex flex-col md:flex-row flex-1">
       
       {/* Mobile Top Bar */}
       <header className="md:hidden flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40 transition-colors duration-200">
@@ -210,5 +228,6 @@ export default function Layout() {
         </div>
       </nav>
     </div>
-  );
+  </div>
+);
 }
