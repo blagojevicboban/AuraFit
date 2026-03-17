@@ -47,7 +47,11 @@ export default function Landing() {
       setShowAdminModal(false);
     } catch (error: any) {
       console.error("Admin login failed", error);
-      setAdminError("Pogrešno korisničko ime ili lozinka.");
+      if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+        setAdminError("Nemate dozvolu za pristup. Kontaktirajte podršku.");
+      } else {
+        setAdminError("Pogrešno korisničko ime ili lozinka.");
+      }
     } finally {
       setAdminLoading(false);
     }
