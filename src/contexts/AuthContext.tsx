@@ -113,8 +113,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const adminSignIn = async (username: string, pass: string) => {
     try {
-      // Map username to an email format for Firebase Auth
-      const email = `${username}@system.local`;
+      // If username is already an email, use it, otherwise append suffix
+      const email = username.includes('@') ? username : `${username}@system.local`;
       const user = await signInWithEmail(email, pass);
       
       // Check if user exists in Firestore
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const newUserData: any = {
           uid: user.uid,
           email: email,
-          displayName: username.charAt(0).toUpperCase() + username.slice(1),
+          displayName: username.includes('@') ? username.split('@')[0] : username.charAt(0).toUpperCase() + username.slice(1),
           role: 'admin',
           createdAt: serverTimestamp(),
         };
@@ -142,7 +142,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setUserData(newUserData);
       } else {
-        setUserData(userDoc.data() as UserData);
+        const data = userDoc.data() as UserData;
+        // Force admin role if it's the bootstrap email or if they are signing in via admin portal
+        if (data.role !== 'admin') {
+          data.role = 'admin';
+          await setDoc(userDocRef, { role: 'admin' }, { merge: true });
+        }
+        setUserData(data);
       }
     } catch (error: any) {
       console.error("Error signing in as admin", error);
@@ -152,8 +158,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const passwordSignIn = async (username: string, pass: string, role: 'client' | 'coach') => {
     try {
-      // Map username to an email format for Firebase Auth
-      const email = `${username}@aura.fit`;
+      // If username is already an email, use it, otherwise append suffix
+      const email = username.includes('@') ? username : `${username}@aura.fit`;
       const user = await signInWithEmail(email, pass);
       
       // Check if user exists in Firestore
@@ -167,11 +173,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!userDoc?.exists()) {
         // Create new profile
+        // Bootstrap admin check even for password login if email matches
+        const isBootstrapAdmin = email === 'ai4vetschools@gmail.com';
+        const finalRole = isBootstrapAdmin ? 'admin' : role;
+
         const newUserData: any = {
           uid: user.uid,
           email: email,
-          displayName: username.charAt(0).toUpperCase() + username.slice(1),
-          role: role,
+          displayName: username.includes('@') ? username.split('@')[0] : username.charAt(0).toUpperCase() + username.slice(1),
+          role: finalRole,
           createdAt: serverTimestamp(),
         };
         try {
@@ -181,7 +191,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setUserData(newUserData);
       } else {
-        setUserData(userDoc.data() as UserData);
+        const data = userDoc.data() as UserData;
+        // Force admin role for bootstrap email
+        if (email === 'ai4vetschools@gmail.com' && data.role !== 'admin') {
+          data.role = 'admin';
+          await setDoc(userDocRef, { role: 'admin' }, { merge: true });
+        }
+        setUserData(data);
       }
     } catch (error: any) {
       console.error(`Error signing in as ${role}`, error);

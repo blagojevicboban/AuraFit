@@ -61,7 +61,7 @@ export default function Landing() {
       setShowLoginModal(false);
     } catch (error: any) {
       console.error("Login failed", error);
-      setLoginError("Pogrešno korisničko ime ili lozinka.");
+      setLoginError(error.message || "Pogrešno korisničko ime ili lozinka.");
     } finally {
       setLoginLoading(false);
     }
@@ -292,7 +292,7 @@ export default function Landing() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="npr. ana12345"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-indigo-500/30 text-slate-900 dark:text-white transition-colors duration-200"
                     required
                   />
