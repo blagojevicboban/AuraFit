@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, signInWithGoogle, logOut } from '../lib/firebase';
+import { auth, db, signInWithGoogle, signInWithEmail, logOut } from '../lib/firebase';
 
 interface UserData {
   uid: string;
   email: string;
   displayName: string;
-  role: 'client' | 'coach';
+  role: 'client' | 'coach' | 'admin';
   coachId?: string;
 }
 
@@ -15,7 +15,8 @@ interface AuthContextType {
   currentUser: User | null;
   userData: UserData | null;
   loading: boolean;
-  signIn: (role: 'client' | 'coach') => Promise<void>;
+  signIn: (role: 'client' | 'coach' | 'admin') => Promise<void>;
+  adminSignIn: (username: string, pass: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, []);
 
-  const signIn = async (role: 'client' | 'coach') => {
+  const signIn = async (role: 'client' | 'coach' | 'admin') => {
     try {
       const user = await signInWithGoogle();
       
@@ -79,12 +80,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const adminSignIn = async (username: string, pass: string) => {
+    try {
+      // Map username to an email format for Firebase Auth
+      const email = `${username}@system.local`;
+      const user = await signInWithEmail(email, pass);
+      
+      // Check if user exists in Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        // Create new admin profile
+        const newUserData: any = {
+          uid: user.uid,
+          email: email,
+          displayName: 'Administrator',
+          role: 'admin',
+          createdAt: serverTimestamp(),
+        };
+        await setDoc(userDocRef, newUserData);
+        setUserData(newUserData);
+      } else {
+        setUserData(userDoc.data() as UserData);
+      }
+    } catch (error: any) {
+      console.error("Error signing in as admin", error);
+      throw error;
+    }
+  };
+
   const signOut = async () => {
     await logOut();
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, userData, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ currentUser, userData, loading, signIn, adminSignIn, signOut }}>
       {!loading && children}
     </AuthContext.Provider>
   );

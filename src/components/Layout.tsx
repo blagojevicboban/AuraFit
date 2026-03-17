@@ -15,14 +15,15 @@ export default function Layout() {
   
   const isCoach = location.pathname.includes("/coach");
   const isClient = location.pathname.includes("/client");
+  const isAdmin = location.pathname.includes("/admin");
 
   useEffect(() => {
-    if (!loading && !userData && (isCoach || isClient)) {
+    if (!loading && !userData && (isCoach || isClient || isAdmin)) {
       navigate('/');
     }
-  }, [userData, loading, isCoach, isClient, navigate]);
+  }, [userData, loading, isCoach, isClient, isAdmin, navigate]);
 
-  if (!isCoach && !isClient) {
+  if (!isCoach && !isClient && !isAdmin) {
     return <Outlet />;
   }
 
@@ -50,7 +51,12 @@ export default function Layout() {
     { to: "/coach/clients", icon: Users, label: "Klijenti" },
   ];
 
-  const links = userData.role === 'coach' ? coachLinks : clientLinks;
+  const adminLinks = [
+    { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+    { to: "/admin/users", icon: Users, label: "Korisnici" },
+  ];
+
+  const links = userData.role === 'admin' ? adminLinks : userData.role === 'coach' ? coachLinks : clientLinks;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-50 flex flex-col md:flex-row transition-colors duration-200">

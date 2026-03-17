@@ -80,6 +80,10 @@ service cloud.firestore {
       return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach';
     }
 
+    function isAdmin() {
+      return isAuthenticated() && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || request.auth.token.email == 'admin@system.local');
+    }
+
     // ===============================================================
     // Domain Validators
     // ===============================================================
@@ -88,7 +92,7 @@ service cloud.firestore {
       return hasRequiredFields(['uid', 'email', 'role', 'createdAt']) &&
              data.uid is string && data.uid.size() > 0 && data.uid.size() < 100 &&
              data.email is string && isValidEmail(data.email) && data.email.size() < 100 &&
-             data.role in ['client', 'coach'] &&
+             data.role in ['client', 'coach', 'admin'] &&
              data.createdAt is timestamp &&
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
              (!('coachId' in data) || (data.coachId is string && data.coachId.size() < 100));
@@ -120,44 +124,47 @@ service cloud.firestore {
     // ===============================================================
 
     match /users/{userId} {
-      // Allow read if owner, or if the reader is a coach (to see clients)
-      allow read: if isOwner(userId) || isCoach();
+      // Allow read if owner, or if the reader is a coach (to see clients), or admin
+      allow read: if isOwner(userId) || isCoach() || isAdmin();
       
       // Allow create if authenticated, uid matches, and data is valid
-      allow create: if isOwner(userId) && isValidUser(request.resource.data) && uidUnchanged();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && uidUnchanged() &&
+                    (request.resource.data.role in ['client', 'coach'] || isAdmin() || request.auth.token.email == 'admin@system.local');
       
-      // Allow update if owner and data is valid. Role cannot be escalated.
-      allow update: if isOwner(userId) && isValidUser(request.resource.data) && uidNotModified() &&
+      // Allow update if owner and data is valid. Role cannot be escalated unless admin.
+      allow update: if (isOwner(userId) && isValidUser(request.resource.data) && uidNotModified() &&
                     request.resource.data.role == resource.data.role &&
-                    request.resource.data.createdAt == resource.data.createdAt;
+                    request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
+      
+      allow delete: if isAdmin();
     }
 
     match /meals/{mealId} {
-      // Allow read if owner or coach
-      allow read: if isDocOwner() || isCoach();
+      // Allow read if owner or coach or admin
+      allow read: if isDocOwner() || isCoach() || isAdmin();
       
       // Allow create if owner and valid
       allow create: if isReqOwner() && isValidMeal(request.resource.data);
       
       // Allow update if owner and valid
-      allow update: if isDocOwner() && isReqOwner() && isValidMeal(request.resource.data) &&
-                    request.resource.data.createdAt == resource.data.createdAt;
+      allow update: if (isDocOwner() && isReqOwner() && isValidMeal(request.resource.data) &&
+                    request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
                     
-      allow delete: if isDocOwner();
+      allow delete: if isDocOwner() || isAdmin();
     }
 
     match /workouts/{workoutId} {
-      // Allow read if owner or coach
-      allow read: if isDocOwner() || isCoach();
+      // Allow read if owner or coach or admin
+      allow read: if isDocOwner() || isCoach() || isAdmin();
       
       // Allow create if owner and valid
       allow create: if isReqOwner() && isValidWorkout(request.resource.data);
       
       // Allow update if owner and valid
-      allow update: if isDocOwner() && isReqOwner() && isValidWorkout(request.resource.data) &&
-                    request.resource.data.createdAt == resource.data.createdAt;
+      allow update: if (isDocOwner() && isReqOwner() && isValidWorkout(request.resource.data) &&
+                    request.resource.data.createdAt == resource.data.createdAt) || isAdmin();
                     
-      allow delete: if isDocOwner();
+      allow delete: if isDocOwner() || isAdmin();
     }
   }
 }
