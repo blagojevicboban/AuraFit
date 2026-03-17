@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Send, 
   Utensils, 
@@ -53,6 +54,7 @@ function RestTimer({ duration, onComplete }: { duration: number, onComplete: () 
 
 export default function ClientDashboard() {
   const { userData } = useAuth();
+  const navigate = useNavigate();
   const [mealInput, setMealInput] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -589,7 +591,6 @@ export default function ClientDashboard() {
                   </div>
                   <h2 className="text-lg font-semibold text-slate-900 dark:text-white transition-colors duration-200">Trening Dnevnik</h2>
                 </div>
-                {restTimer && <RestTimer duration={restTimer} onComplete={() => setRestTimer(null)} />}
               </div>
 
               {previousWorkout ? (
@@ -607,17 +608,22 @@ export default function ClientDashboard() {
                     </div>
                   </div>
                   <button 
-                    onClick={() => setRestTimer(60)}
+                    onClick={() => navigate('/client/workouts')}
                     className="w-full py-3 rounded-xl bg-blue-600 dark:bg-blue-500 text-white font-bold text-sm hover:bg-blue-700 transition-colors cursor-pointer flex items-center justify-center gap-2"
                   >
-                    <Plus className="w-4 h-4" />
-                    Započni novi trening
+                    <Activity className="w-4 h-4" />
+                    Otvori sve treninge
                   </button>
                 </div>
               ) : (
                 <div className="text-center py-8 bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800/50">
                   <p className="text-sm text-slate-500 dark:text-zinc-500">Nema zabeleženih treninga.</p>
-                  <button className="mt-4 text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline">Započni prvi trening</button>
+                  <button 
+                    onClick={() => navigate('/client/workouts')}
+                    className="mt-4 text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline"
+                  >
+                    Započni prvi trening
+                  </button>
                 </div>
               )}
             </div>

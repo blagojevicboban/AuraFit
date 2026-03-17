@@ -9,6 +9,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import ClientDashboard from "./pages/ClientDashboard";
+import ClientWorkouts from "./pages/ClientWorkouts";
 import CoachDashboard from "./pages/CoachDashboard";
 import CoachClients from "./pages/CoachClients";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -26,6 +27,7 @@ export default function App() {
               <Route path="/" element={<Layout />}>
                 <Route index element={<Landing />} />
                 <Route path="client" element={<ClientDashboard />} />
+                <Route path="client/workouts" element={<ClientWorkouts />} />
                 <Route path="coach" element={<CoachDashboard />} />
                 <Route path="coach/clients" element={<CoachClients />} />
                 <Route path="admin" element={<AdminDashboard />} />

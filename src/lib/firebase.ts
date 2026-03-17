@@ -89,26 +89,20 @@ export const signInWithEmail = async (email: string, pass: string) => {
     const result = await signInWithEmailAndPassword(auth, email, pass);
     return result.user;
   } catch (error: any) {
-    // auth/invalid-credential is the new unified error for both user-not-found and wrong-password
-    // but we want to try creating the user if they don't exist.
-    if (error?.code === 'auth/user-not-found' || error?.code === 'auth/invalid-credential' || error?.code === 'auth/wrong-password') {
-      console.log("Sign in failed, checking if user needs to be created...");
+    console.log("Auth error code:", error.code);
+    
+    // auth/invalid-credential can mean user not found OR wrong password in newer SDKs
+    if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
       try {
         const result = await createUserWithEmailAndPassword(auth, email, pass);
         return result.user;
       } catch (createError: any) {
-        if (createError?.code === 'auth/email-already-in-use') {
-          // If email is already in use, it means the password was wrong in the first place
-          throw new Error("Pogrešna lozinka za ovaj nalog.");
+        if (createError.code === 'auth/email-already-in-use') {
+          throw new Error("Pogrešna lozinka.");
         }
-        if (createError?.code === 'auth/weak-password') {
-          throw new Error("Lozinka mora imati najmanje 6 karaktera.");
-        }
-        console.error("Error creating user", createError);
         throw createError;
       }
     }
-    console.error("Error signing in with Email", error);
     throw error;
   }
 };
