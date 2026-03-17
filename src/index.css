@@ -11,6 +11,13 @@
   --color-brand-primary: #10b981; /* Emerald 500 */
   --color-brand-secondary: #34d399; /* Emerald 400 */
   --color-brand-dark: #064e3b; /* Emerald 900 */
+
+  /* New Auth Theme colors from screenshots */
+  --color-auth-bg: #1c1c1c;
+  --color-auth-accent: #d6ff3e;
+  --color-auth-card: #afa3ff;
+  --color-auth-button: #2d2d2d;
+  --color-auth-text-dark: #1c1c1c;
 }
 
 body {
