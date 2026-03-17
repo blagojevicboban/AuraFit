@@ -1,685 +1,345 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  Send, 
-  Utensils, 
-  Activity, 
-  Flame, 
-  ChevronRight, 
-  Search, 
-  Plus, 
-  Sparkles, 
-  Users, 
-  Timer, 
-  Dumbbell, 
-  TrendingUp, 
-  Camera, 
-  Bell,
-  Mic,
-  MicOff,
-  CheckCircle2,
-  XCircle
-} from "lucide-react";
-import { askAuraFitAI } from "../lib/gemini";
-import { parseMealWithAI } from "../services/aiService";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { 
+  Flame, Activity, Droplets, Dumbbell, LayoutGrid, 
+  Utensils, TrendingUp, Plus, Brain, User, Users,
+  ChevronRight, Save, X, Play, Timer, CheckCircle2
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { db } from "../lib/firebase";
-import { collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, limit } from "firebase/firestore";
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp, orderBy, limit, getDocs } from "firebase/firestore";
 import { cn } from "../lib/utils";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useNavigate } from "react-router-dom";
 
-function RestTimer({ duration, onComplete }: { duration: number, onComplete: () => void }) {
-  const [timeLeft, setTimeLeft] = useState(duration);
+interface Meal {
+  id: string;
+  name: string;
+  calories: number;
+  proteins: number;
+  time: string;
+}
 
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      onComplete();
-      return;
-    }
-    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft, onComplete]);
-
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-
-  return (
-    <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono font-bold">
-      <Timer className="w-4 h-4 animate-pulse" />
-      {minutes}:{seconds.toString().padStart(2, '0')}
-    </div>
-  );
+interface Workout {
+  id: string;
+  type: string;
+  duration: string;
+  date: any;
+  exercises: any[];
 }
 
 export default function ClientDashboard() {
-  const { userData } = useAuth();
+  const { userData, user } = useAuth();
   const navigate = useNavigate();
-  const [mealInput, setMealInput] = useState("");
-  const [aiResponse, setAiResponse] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [recentMeals, setRecentMeals] = useState<any[]>([]);
-  
-  const [activeTab, setActiveTab] = useState<'meals' | 'biometrics' | 'workout' | 'feedback'>('meals');
-  const [mealLogMode, setMealLogMode] = useState<'ai' | 'search'>('ai');
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'nutrition' | 'workout' | 'progress'>('overview');
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [lastWorkout, setLastWorkout] = useState<Workout | null>(null);
+  const [aiInput, setAiInput] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // Stats
+  const [dailyCalories, setDailyCalories] = useState(0);
+  const [dailyProteins, setDailyProteins] = useState(0);
+  const dailyGoal = 2400;
+  const proteinGoal = 180;
+  const waterIntake = 2.5;
 
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'sr-RS';
+    if (!user) return;
 
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setMealInput(prev => prev + (prev ? " " : "") + transcript);
-        setIsListening(false);
-      };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      recognitionRef.current.onerror = (event: any) => {
-        console.error("Speech recognition error", event.error);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-    }
-  }, []);
-
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-    } else {
-      try {
-        recognitionRef.current?.start();
-        setIsListening(true);
-      } catch (err) {
-        console.error("Failed to start recognition", err);
-      }
-    }
-  };
-
-  // Biometrics
-  const [biometrics, setBiometrics] = useState<any[]>([]);
-  const [weightInput, setWeightInput] = useState("");
-  const [isLoggingBiometrics, setIsLoggingBiometrics] = useState(false);
-
-  // Workouts
-  const [previousWorkout, setPreviousWorkout] = useState<any>(null);
-  const [isLoggingWorkout, setIsLoggingWorkout] = useState(false);
-  const [restTimer, setRestTimer] = useState<number | null>(null);
-
-  const [feedbackVideos, setFeedbackVideos] = useState<any[]>([]);
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-
-  useEffect(() => {
-    if (!userData) return;
-
-    // Fetch biometrics
-    const bioQ = query(
-      collection(db, "biometrics"),
-      where("userId", "==", userData.uid),
-      orderBy("createdAt", "asc")
+    const mealsQuery = query(
+      collection(db, "meals"),
+      where("userId", "==", user.uid),
+      where("date", ">=", today)
     );
-    const unsubBio = onSnapshot(bioQ, (snapshot) => {
-      setBiometrics(snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        date: doc.data().createdAt?.toDate().toLocaleDateString()
-      })));
+
+    const unsubscribeMeals = onSnapshot(mealsQuery, (snapshot) => {
+      const mealsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Meal));
+      setMeals(mealsData);
+      
+      const totalCal = mealsData.reduce((acc, meal) => acc + meal.calories, 0);
+      const totalProt = mealsData.reduce((acc, meal) => acc + meal.proteins, 0);
+      setDailyCalories(totalCal);
+      setDailyProteins(totalProt);
     });
 
-    // Fetch last workout
-    const workQ = query(
+    const workoutQuery = query(
       collection(db, "workouts"),
-      where("userId", "==", userData.uid),
-      orderBy("createdAt", "desc"),
+      where("userId", "==", user.uid),
+      orderBy("date", "desc"),
       limit(1)
     );
-    const unsubWork = onSnapshot(workQ, (snapshot) => {
-      if (!snapshot.empty) {
-        setPreviousWorkout(snapshot.docs[0].data());
-      }
-    });
 
-    // Fetch feedback videos
-    const feedQ = query(
-      collection(db, "feedback"),
-      where("userId", "==", userData.uid),
-      orderBy("createdAt", "desc")
-    );
-    const unsubFeed = onSnapshot(feedQ, (snapshot) => {
-      setFeedbackVideos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const unsubscribeWorkout = onSnapshot(workoutQuery, (snapshot) => {
+      if (!snapshot.empty) {
+        setLastWorkout({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Workout);
+      }
     });
 
     return () => {
-      unsubBio();
-      unsubWork();
-      unsubFeed();
+      unsubscribeMeals();
+      unsubscribeWorkout();
     };
-  }, [userData]);
+  }, [user]);
 
-  const handleLogBiometrics = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!weightInput || !userData) return;
-    setIsLoggingBiometrics(true);
-    try {
-      await addDoc(collection(db, "biometrics"), {
-        userId: userData.uid,
-        weight: parseFloat(weightInput),
-        createdAt: serverTimestamp()
-      });
-      setWeightInput("");
-    } catch (err) {
-      console.error(err);
-    }
-    setIsLoggingBiometrics(false);
-  };
-
-  useEffect(() => {
-    if (!userData) return;
-
-    const q = query(
-      collection(db, "meals"),
-      where("userId", "==", userData.uid),
-      orderBy("createdAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const meals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setRecentMeals(meals);
-    }, (error) => {
-      console.error("Error fetching meals:", error);
-    });
-
-    return () => unsubscribe();
-  }, [userData]);
-
-  const handleAnalyzeMeal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!mealInput.trim() || !userData) return;
-
-    setIsLoading(true);
-    try {
-      const result = await parseMealWithAI(mealInput);
-      setAiResponse(result.aiAdvice);
-      
-      await addDoc(collection(db, "meals"), {
-        userId: userData.uid,
-        description: result.description,
-        calories: result.calories,
-        protein: result.protein,
-        carbs: result.carbs,
-        fat: result.fat,
-        aiAdvice: result.aiAdvice,
-        createdAt: serverTimestamp()
-      });
-      
-      setMealInput("");
-    } catch (error) {
-      console.error("Error saving meal:", error);
-      setAiResponse("Došlo je do greške pri analizi obroka. Pokušajte ponovo.");
-    }
-
-    setIsLoading(false);
-  };
-
-  const handleSearchFatSecret = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    
-    setIsSearching(true);
-    try {
-      const res = await fetch(`/api/fatsecret/search?q=${encodeURIComponent(searchQuery)}`);
-      const data = await res.json();
-      
-      if (data.foods && data.foods.food) {
-        const foodsArray = Array.isArray(data.foods.food) ? data.foods.food : [data.foods.food];
-        setSearchResults(foodsArray);
-      } else {
-        setSearchResults([]);
+  const handleAiLog = async () => {
+    setAiLoading(true);
+    // Simulate AI processing
+    setTimeout(async () => {
+      try {
+        await addDoc(collection(db, "meals"), {
+          userId: user?.uid,
+          name: "AI Logged Meal",
+          calories: 450,
+          proteins: 30,
+          date: serverTimestamp(),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        setAiInput("");
+      } catch (error) {
+        console.error("Error logging meal:", error);
+      } finally {
+        setAiLoading(false);
       }
-    } catch (err) {
-      console.error("Search error", err);
-    }
-    setIsSearching(false);
+    }, 1500);
   };
-
-  const handleAddFatSecretFood = async (food: any) => {
-    if (!userData) return;
-    
-    const desc = food.food_description || "";
-    const calMatch = desc.match(/Calories:\s*(\d+)kcal/i);
-    const protMatch = desc.match(/Protein:\s*([\d.]+)g/i);
-    const carbMatch = desc.match(/Carbs:\s*([\d.]+)g/i);
-    const fatMatch = desc.match(/Fat:\s*([\d.]+)g/i);
-
-    try {
-      await addDoc(collection(db, "meals"), {
-        userId: userData.uid,
-        description: food.food_name + " (" + desc.split('-')[0].trim() + ")",
-        calories: calMatch ? parseInt(calMatch[1]) : 0,
-        protein: protMatch ? parseFloat(protMatch[1]) : 0,
-        carbs: carbMatch ? parseFloat(carbMatch[1]) : 0,
-        fat: fatMatch ? parseFloat(fatMatch[1]) : 0,
-        aiAdvice: "Uneto iz FatSecret baze.",
-        createdAt: serverTimestamp()
-      });
-      
-      setSearchQuery("");
-      setSearchResults([]);
-      setActiveTab('ai');
-    } catch (error) {
-      console.error("Error saving meal:", error);
-    }
-  };
-
-  if (!userData) return null;
 
   return (
-    <div className="p-4 md:p-8 space-y-6 md:space-y-8 transition-colors duration-200">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors duration-200">Zdravo, {userData.displayName.split(' ')[0]} 👋</h1>
-          <p className="text-slate-500 dark:text-zinc-400 mt-1 text-sm md:text-base transition-colors duration-200">Tvoj dnevni pregled (Lite Mode)</p>
-        </div>
-        <div className="flex bg-slate-100 dark:bg-zinc-950 p-1 rounded-2xl border border-slate-200 dark:border-zinc-800 transition-colors duration-200">
-          <button
-            onClick={() => setActiveTab('meals')}
-            className={cn(
-              "px-4 py-2 rounded-xl text-sm font-medium transition-all",
-              activeTab === 'meals' ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-slate-500 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300"
-            )}
-          >
-            Ishrana
-          </button>
-          <button
-            onClick={() => setActiveTab('biometrics')}
-            className={cn(
-              "px-4 py-2 rounded-xl text-sm font-medium transition-all",
-              activeTab === 'biometrics' ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-slate-500 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300"
-            )}
-          >
-            Biometrija
-          </button>
-          <button
-            onClick={() => setActiveTab('workout')}
-            className={cn(
-              "px-4 py-2 rounded-xl text-sm font-medium transition-all",
-              activeTab === 'workout' ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-slate-500 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300"
-            )}
-          >
-            Trening
-          </button>
-          <button
-            onClick={() => setActiveTab('feedback')}
-            className={cn(
-              "px-4 py-2 rounded-xl text-sm font-medium transition-all",
-              activeTab === 'feedback' ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-slate-500 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300"
-            )}
-          >
-            Feedback
-          </button>
+    <div className="min-h-screen bg-zinc-950 text-zinc-50 pb-20">
+      {/* Header */}
+      <header className="bg-zinc-900/50 backdrop-blur-md border-b border-white/5 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center text-zinc-950 font-black">
+              AF
+            </div>
+            <h1 className="text-xl font-display font-bold tracking-tight">Aura Fit</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20">
+              <User className="w-4 h-4 text-emerald-400" />
+            </div>
+            <span className="text-sm font-medium hidden sm:block">{userData?.displayName || 'Korisnik'}</span>
+          </div>
         </div>
       </header>
 
-      <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
-        {activeTab === 'meals' ? (
-          <>
-            {/* AI Meal Logger / FatSecret Search */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-zinc-800 transition-colors duration-200">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center transition-colors duration-200">
-                      <Utensils className="w-5 h-5 text-indigo-600 dark:text-indigo-400 transition-colors duration-200" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-slate-900 dark:text-white transition-colors duration-200">Unos Obroka</h2>
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: "Kalorije", value: `${dailyCalories}/${dailyGoal}`, unit: "kcal", icon: Flame, color: "emerald" },
+            { label: "Proteini", value: `${dailyProteins}/${proteinGoal}`, unit: "g", icon: Activity, color: "cyan" },
+            { label: "Voda", value: `${waterIntake}`, unit: "L", icon: Droplets, color: "blue" },
+            { label: "Trening", value: lastWorkout ? "Završen" : "Danas", unit: "", icon: Dumbbell, color: "indigo" }
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="glass-card p-5 rounded-3xl"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className={`p-2 rounded-xl bg-${stat.color || 'emerald'}-500/10 border border-${stat.color || 'emerald'}-500/20`}>
+                  <stat.icon className={`w-5 h-5 text-${stat.color || 'emerald'}-400`} />
+                </div>
+                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{stat.label}</span>
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-display font-bold">{stat.value}</span>
+                <span className="text-xs text-zinc-500 font-light">{stat.unit}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-8 bg-zinc-900/50 p-1.5 rounded-2xl border border-white/5 w-fit">
+          {[
+            { id: 'overview', label: 'Pregled', icon: LayoutGrid },
+            { id: 'nutrition', label: 'Ishrana', icon: Utensils },
+            { id: 'workout', label: 'Trening', icon: Dumbbell },
+            { id: 'progress', label: 'Napredak', icon: TrendingUp }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={cn(
+                "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all",
+                activeTab === tab.id 
+                  ? "bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.3)]" 
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+              )}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {activeTab === 'overview' && (
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* AI Logging Card */}
+                <div className="md:col-span-2 glass-card p-8 rounded-[2.5rem] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-10">
+                    <Brain className="w-32 h-32 text-emerald-400" />
                   </div>
+                  <h2 className="text-3xl font-display font-bold mb-2">AI Smart Log</h2>
+                  <p className="text-zinc-400 mb-8 font-light">Opiši svoj obrok ili trening prirodnim jezikom.</p>
                   
-                  <div className="flex bg-slate-50 dark:bg-zinc-950 p-1 rounded-xl border border-slate-200 dark:border-zinc-800/50 transition-colors duration-200">
-                    <button
-                      onClick={() => setMealLogMode('ai')}
-                      className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex-1 sm:flex-none text-center",
-                        mealLogMode === 'ai' ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300"
-                      )}
-                    >
-                      AI Analiza
-                    </button>
-                    <button
-                      onClick={() => setMealLogMode('search')}
-                      className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex-1 sm:flex-none text-center",
-                        mealLogMode === 'search' ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300"
-                      )}
-                    >
-                      Baza
-                    </button>
-                  </div>
-                </div>
-
-                {mealLogMode === 'ai' ? (
-                  <>
-                    <form onSubmit={handleAnalyzeMeal} className="relative">
-                      <input
-                        type="text"
-                        value={mealInput}
-                        onChange={(e) => setMealInput(e.target.value)}
-                        placeholder="Šta si pojeo? (npr. 'Dve pljeskavice...')"
-                        className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl px-5 py-4 pr-32 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
-                        disabled={isLoading}
-                      />
-                      <div className="absolute right-2 top-2 bottom-2 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={toggleListening}
-                          className={cn(
-                            "aspect-square rounded-xl flex items-center justify-center transition-all cursor-pointer px-3",
-                            isListening 
-                              ? "bg-red-500 text-white animate-pulse" 
-                              : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
-                          )}
-                          title={isListening ? "Zaustavi snimanje" : "Diktiraj obrok"}
-                        >
-                          {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isLoading || !mealInput.trim()}
-                          className="aspect-square bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 transition-colors cursor-pointer px-3"
-                        >
-                          {isLoading ? (
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          ) : (
-                            <Sparkles className="w-5 h-5" />
-                          )}
-                        </button>
-                      </div>
-                    </form>
-
-                    {aiResponse && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-6 p-5 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl border border-indigo-100 dark:border-indigo-500/20 transition-colors duration-200"
-                      >
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-6 h-6 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-[10px] text-white font-bold transition-colors duration-200">
-                            AI
-                          </div>
-                          <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 transition-colors duration-200">Aura Fit Analiza</span>
-                        </div>
-                        <p className="text-slate-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap text-sm transition-colors duration-200">
-                          {aiResponse}
-                        </p>
-                      </motion.div>
-                    )}
-                  </>
-                ) : (
-                  <div className="space-y-4">
-                    <form onSubmit={handleSearchFatSecret} className="relative">
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Pretraži namirnice (npr. 'Banana')"
-                        className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl px-5 py-4 pr-16 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
-                        disabled={isSearching}
-                      />
-                      <button
-                        type="submit"
-                        disabled={isSearching || !searchQuery.trim()}
-                        className="absolute right-2 top-2 bottom-2 aspect-square bg-slate-800 dark:bg-zinc-800 text-white rounded-xl flex items-center justify-center hover:bg-slate-700 dark:hover:bg-zinc-700 disabled:opacity-50 transition-colors cursor-pointer"
-                      >
-                        {isSearching ? (
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        ) : (
-                          <Search className="w-5 h-5" />
-                        )}
-                      </button>
-                    </form>
-
-                    {searchResults.length > 0 && (
-                      <div className="mt-4 space-y-2 border border-slate-200 dark:border-zinc-800/50 rounded-2xl overflow-hidden bg-slate-50 dark:bg-zinc-950/50 transition-colors duration-200">
-                        {searchResults.map((food, idx) => (
-                          <div key={idx} className="p-4 hover:bg-slate-100 dark:hover:bg-zinc-800/50 border-b border-slate-200 dark:border-zinc-800/50 last:border-0 flex items-center justify-between transition-colors">
-                            <div className="pr-4">
-                              <h4 className="font-semibold text-slate-900 dark:text-white text-sm md:text-base transition-colors duration-200">{food.food_name}</h4>
-                              <p className="text-xs text-slate-500 dark:text-zinc-500 mt-1 transition-colors duration-200">{food.food_description}</p>
-                            </div>
-                            <button
-                              onClick={() => handleAddFatSecretFood(food)}
-                              className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center hover:bg-indigo-200 dark:hover:bg-indigo-500/30 transition-colors cursor-pointer"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Recent Meals */}
-              <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-zinc-800 transition-colors duration-200">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-500/10 flex items-center justify-center transition-colors duration-200">
-                      <Flame className="w-5 h-5 text-orange-500" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-slate-900 dark:text-white transition-colors duration-200">Današnji Obroci</h2>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {recentMeals.length === 0 ? (
-                    <div className="text-center py-8 px-4 bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 border-dashed transition-colors duration-200">
-                      <Utensils className="w-8 h-8 text-slate-400 dark:text-zinc-700 mx-auto mb-3 transition-colors duration-200" />
-                      <p className="text-sm text-slate-500 dark:text-zinc-500 transition-colors duration-200">Nema unetih obroka danas.</p>
-                    </div>
-                  ) : (
-                    recentMeals.slice(0, 3).map((meal) => (
-                      <div key={meal.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold text-slate-900 dark:text-white truncate pr-4 text-sm md:text-base transition-colors duration-200">{meal.description}</h3>
-                          <span className="text-sm font-bold text-orange-500 dark:text-orange-400 whitespace-nowrap transition-colors duration-200">{meal.calories || 0} kcal</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-zinc-500 transition-colors duration-200">
-                          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500/50"></span> P: {meal.protein || 0}g</span>
-                          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500/50"></span> UH: {meal.carbs || 0}g</span>
-                          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500/50"></span> M: {meal.fat || 0}g</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Sidebar / Stats & Tools */}
-            <div className="space-y-6">
-              {/* Smart Reminders */}
-              <div className="bg-indigo-600 dark:bg-indigo-500 p-6 rounded-3xl text-white shadow-lg shadow-indigo-500/20 transition-colors duration-200">
-                <div className="flex items-center gap-3 mb-4">
-                  <Bell className="w-5 h-5" />
-                  <h3 className="font-bold">Pametni Podsetnik</h3>
-                </div>
-                <p className="text-indigo-100 text-sm leading-relaxed mb-4">
-                  "Primetio sam da nisi uneo ručak, a cilj nam je visok unos proteina danas. Treba ti ideja?"
-                </p>
-                <button className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-colors backdrop-blur-sm">
-                  Prikaži predloge obroka
-                </button>
-              </div>
-            </div>
-          </>
-        ) : activeTab === 'biometrics' ? (
-          <div className="lg:col-span-3 grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-zinc-800 transition-colors duration-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center transition-colors duration-200">
-                    <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white transition-colors duration-200">Biometrija</h2>
-                </div>
-              </div>
-
-              <div className="h-64 w-full mb-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={biometrics}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#88888822" />
-                    <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                    <YAxis stroke="#888" fontSize={12} domain={['dataMin - 2', 'dataMax + 2']} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#18181b', border: 'none', borderRadius: '8px', color: '#fff' }}
-                      itemStyle={{ color: '#10b981' }}
+                  <div className="relative">
+                    <textarea
+                      value={aiInput}
+                      onChange={(e) => setAiInput(e.target.value)}
+                      placeholder="npr. Pojeo sam 3 jaja, parče hleba i popio kafu..."
+                      className="w-full h-32 bg-zinc-950/50 border border-white/10 rounded-3xl p-6 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all resize-none"
                     />
-                    <Line type="monotone" dataKey="weight" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              <form onSubmit={handleLogBiometrics} className="flex gap-2">
-                <input
-                  type="number"
-                  step="0.1"
-                  value={weightInput}
-                  onChange={(e) => setWeightInput(e.target.value)}
-                  placeholder="Težina (kg)"
-                  className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-2 text-sm text-slate-900 dark:text-white transition-all"
-                />
-                <button
-                  type="submit"
-                  disabled={isLoggingBiometrics || !weightInput}
-                  className="bg-emerald-600 dark:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  Log
-                </button>
-              </form>
-            </div>
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-200 dark:border-zinc-800">
-              <h3 className="font-bold text-slate-900 dark:text-white mb-4">Cilj i Napredak</h3>
-              <div className="space-y-4">
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold uppercase">Preostalo do cilja</p>
-                  <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">5.5 kg</p>
-                </div>
-                <p className="text-sm text-slate-500 dark:text-zinc-400">
-                  Sa trenutnim tempom od 0.5kg nedeljno, tvoj cilj ćeš dostići za otprilike 11 nedelja.
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : activeTab === 'workout' ? (
-          <div className="lg:col-span-3 grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 bg-white dark:bg-zinc-900 p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-zinc-800 transition-colors duration-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center transition-colors duration-200">
-                    <Dumbbell className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <button
+                      onClick={handleAiLog}
+                      disabled={aiLoading || !aiInput.trim()}
+                      className="absolute bottom-4 right-4 brand-gradient text-zinc-950 px-6 py-3 rounded-2xl font-black text-sm hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      {aiLoading ? "ANALIZIRAM..." : "LOGUJ ODMAH"}
+                    </button>
                   </div>
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white transition-colors duration-200">Trening Dnevnik</h2>
+                </div>
+
+                {/* Coach Message Card */}
+                <div className="glass-card p-8 rounded-[2.5rem] flex flex-col">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/20">
+                      <Users className="w-7 h-7 text-indigo-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold">Poruka trenera</h3>
+                      <p className="text-xs text-zinc-500">Pre 2 sata</p>
+                    </div>
+                  </div>
+                  <p className="text-zinc-300 font-light leading-relaxed mb-8 italic">
+                    "Odličan posao sa jučerašnjim treningom! Primetio sam da si povećao težinu na čučnju. Nastavi tako, danas fokus na hidrataciju."
+                  </p>
+                  <button className="mt-auto w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all">
+                    ODGOVORI TRENERU
+                  </button>
                 </div>
               </div>
+            )}
 
-              {previousWorkout ? (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800/50">
-                    <p className="text-xs text-slate-500 dark:text-zinc-500 mb-1 uppercase font-bold tracking-wider">Prošli trening</p>
-                    <h4 className="font-bold text-slate-900 dark:text-white mb-2">{previousWorkout.title}</h4>
-                    <div className="space-y-2">
-                      {previousWorkout.exercises?.slice(0, 2).map((ex: any, i: number) => (
-                        <div key={i} className="flex justify-between text-sm">
-                          <span className="text-slate-600 dark:text-zinc-400">{ex.name}</span>
-                          <span className="font-mono text-slate-900 dark:text-white">{ex.sets?.[0]?.weight}kg x {ex.sets?.[0]?.reps}</span>
+            {activeTab === 'nutrition' && (
+              <div className="space-y-8">
+                <div className="grid md:grid-cols-3 gap-8">
+                  <div className="md:col-span-2 glass-card p-8 rounded-[2.5rem]">
+                    <div className="flex items-center justify-between mb-8">
+                      <h2 className="text-2xl font-display font-bold">Dnevnik Ishrane</h2>
+                      <button className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 hover:bg-emerald-500/20 transition-all">
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {meals.length > 0 ? meals.map((meal) => (
+                        <div key={meal.id} className="flex items-center justify-between p-5 bg-white/5 rounded-3xl border border-white/5">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-zinc-950 flex items-center justify-center">
+                              <Utensils className="w-5 h-5 text-zinc-500" />
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-sm">{meal.name}</h4>
+                              <p className="text-xs text-zinc-500 font-light">{meal.time}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-display font-bold">{meal.calories}</span>
+                            <span className="text-[10px] text-zinc-500 ml-1 uppercase">kcal</span>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="text-center py-12 text-zinc-500 font-light">Nema unetih obroka za danas.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-8 rounded-[2.5rem]">
+                    <h3 className="text-xl font-display font-bold mb-8">Makronutrijenti</h3>
+                    <div className="space-y-8">
+                      {[
+                        { label: 'Proteini', current: dailyProteins, goal: proteinGoal, color: 'emerald' },
+                        { label: 'Ugljeni hidrati', current: 145, goal: 250, color: 'cyan' },
+                        { label: 'Masti', current: 42, goal: 70, color: 'indigo' }
+                      ].map((macro, i) => (
+                        <div key={i}>
+                          <div className="flex justify-between text-xs mb-3 uppercase tracking-widest font-black text-zinc-500">
+                            <span>{macro.label}</span>
+                            <span className="text-white">{macro.current}g / {macro.goal}g</span>
+                          </div>
+                          <div className="h-2 bg-zinc-950 rounded-full overflow-hidden border border-white/5">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(macro.current / macro.goal) * 100}%` }}
+                              className={`h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]`}
+                            />
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <button 
-                    onClick={() => navigate('/client/workouts')}
-                    className="w-full py-3 rounded-xl bg-blue-600 dark:bg-blue-500 text-white font-bold text-sm hover:bg-blue-700 transition-colors cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <Activity className="w-4 h-4" />
-                    Otvori sve treninge
-                  </button>
                 </div>
-              ) : (
-                <div className="text-center py-8 bg-slate-50 dark:bg-zinc-950/50 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800/50">
-                  <p className="text-sm text-slate-500 dark:text-zinc-500">Nema zabeleženih treninga.</p>
-                  <button 
-                    onClick={() => navigate('/client/workouts')}
-                    className="mt-4 text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline"
-                  >
-                    Započni prvi trening
-                  </button>
-                </div>
-              )}
-            </div>
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-200 dark:border-zinc-800">
-              <h3 className="font-bold text-slate-900 dark:text-white mb-4">Tajmer za odmor</h3>
-              <div className="flex flex-wrap gap-2">
-                {[30, 60, 90, 120].map(s => (
-                  <button 
-                    key={s}
-                    onClick={() => setRestTimer(s)}
-                    className="px-4 py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl text-sm font-medium hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    {s}s
-                  </button>
-                ))}
               </div>
-            </div>
-          </div>
-        ) : (
-          <div className="lg:col-span-3 space-y-6">
-            <div className="bg-white dark:bg-zinc-900 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 text-center">
-              <Camera className="w-12 h-12 text-slate-300 dark:text-zinc-700 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Video Feedback</h2>
-              <p className="text-slate-500 dark:text-zinc-400 mb-6 max-w-md mx-auto">
-                Snimi svoju seriju i pošalji treneru na analizu. Dobićeš video sa markup korekcijama i glasovnom porukom.
-              </p>
-              <button className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">
-                Otpremi video
-              </button>
-            </div>
+            )}
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {feedbackVideos.map((video) => (
-                <div key={video.id} className="bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-slate-200 dark:border-zinc-800">
-                  <div className="aspect-video bg-slate-100 dark:bg-zinc-800 rounded-2xl mb-3 flex items-center justify-center">
-                    <Camera className="w-8 h-8 text-slate-300" />
+            {activeTab === 'workout' && (
+              <div className="glass-card p-10 rounded-[2.5rem] text-center max-w-2xl mx-auto">
+                <div className="w-20 h-20 rounded-3xl brand-gradient flex items-center justify-center text-zinc-950 mx-auto mb-8 shadow-[0_0_40px_rgba(16,185,129,0.3)]">
+                  <Dumbbell className="w-10 h-10" />
+                </div>
+                <h2 className="text-3xl font-display font-bold mb-4">Vreme je za trening!</h2>
+                <p className="text-zinc-400 mb-10 font-light leading-relaxed">
+                  Vaš današnji plan je spreman. Pratite serije, težine i ponavljanja kako biste osigurali napredak.
+                </p>
+                <button 
+                  onClick={() => navigate('/client/workouts')}
+                  className="w-full brand-gradient text-zinc-950 py-5 rounded-3xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+                >
+                  ZAPOČNI TRENING
+                </button>
+              </div>
+            )}
+
+            {activeTab === 'progress' && (
+              <div className="glass-card p-10 rounded-[2.5rem] text-center max-w-2xl mx-auto">
+                <div className="w-20 h-20 rounded-3xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 mx-auto mb-8 border border-indigo-500/20">
+                  <TrendingUp className="w-10 h-10" />
+                </div>
+                <h2 className="text-3xl font-display font-bold mb-4">Prati svoj napredak</h2>
+                <p className="text-zinc-400 mb-10 font-light leading-relaxed">
+                  Vizuelizujte svoje rezultate kroz grafikone i biometrijske podatke.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-zinc-950/50 p-6 rounded-3xl border border-white/5">
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Težina</p>
+                    <p className="text-2xl font-display font-bold">84.5 <span className="text-xs font-light text-zinc-500">kg</span></p>
                   </div>
-                  <h4 className="font-bold text-slate-900 dark:text-white">{video.exerciseName || 'Vežba'}</h4>
-                  <p className="text-xs text-slate-500 mt-1">{new Date(video.createdAt?.seconds * 1000).toLocaleDateString()}</p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className={cn(
-                      "text-[10px] font-bold px-2 py-1 rounded-full",
-                      video.status === 'reviewed' ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"
-                    )}>
-                      {video.status === 'reviewed' ? 'PREGLEDANO' : 'NA ČEKANJU'}
-                    </span>
-                    {video.status === 'reviewed' && (
-                      <button className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Vidi feedback</button>
-                    )}
+                  <div className="bg-zinc-950/50 p-6 rounded-3xl border border-white/5">
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Body Fat</p>
+                    <p className="text-2xl font-display font-bold">14.2 <span className="text-xs font-light text-zinc-500">%</span></p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </main>
     </div>
   );
 }
