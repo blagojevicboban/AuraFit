@@ -1,9 +1,79 @@
-import { motion } from "motion/react";
-import { Users, Activity, TrendingUp, ShieldAlert } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Users, Activity, TrendingUp, ShieldAlert, Database, Loader2, AlertTriangle, X } from "lucide-react";
+import { seedDatabase } from "../utils/seedData";
 
 export default function AdminDashboard() {
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [seedMessage, setSeedMessage] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const handleSeedDatabase = async () => {
+    setShowConfirmModal(false);
+    setIsSeeding(true);
+    setSeedMessage("");
+    
+    try {
+      await seedDatabase();
+      setSeedMessage("Baza je uspešno inicijalizovana test podacima.");
+    } catch (error) {
+      console.error("Greška pri inicijalizaciji baze:", error);
+      setSeedMessage("Došlo je do greške pri inicijalizaciji baze.");
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+      <AnimatePresence>
+        {showConfirmModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-zinc-800"
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                    </div>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Potvrda inicijalizacije</h2>
+                  </div>
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <p className="text-slate-600 dark:text-zinc-400 mb-6">
+                  Da li ste sigurni da želite da inicijalizujete bazu sa test podacima? Ovo će dodati nove korisnike (trenera i klijente), treninge i obroke.
+                </p>
+
+                <div className="flex gap-3 justify-end">
+                  <button
+                    onClick={() => setShowConfirmModal(false)}
+                    className="px-4 py-2 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl font-medium transition-colors"
+                  >
+                    Odustani
+                  </button>
+                  <button
+                    onClick={handleSeedDatabase}
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-medium transition-colors"
+                  >
+                    Inicijalizuj
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Admin Dashboard</h1>
@@ -48,7 +118,22 @@ export default function AdminDashboard() {
         <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6">
            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Sistemske Postavke</h2>
            <div className="space-y-4">
-             <p className="text-sm text-slate-500 dark:text-zinc-400">Uskoro: Konfiguracija globalnih parametara aplikacije.</p>
+             <p className="text-sm text-slate-500 dark:text-zinc-400">
+               Inicijalizujte bazu podataka sa testnim korisnicima (trener i klijenti), treninzima i obrocima za potrebe testiranja aplikacije.
+             </p>
+             <button
+               onClick={() => setShowConfirmModal(true)}
+               disabled={isSeeding}
+               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+             >
+               {isSeeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+               Inicijalizuj Test Podatke
+             </button>
+             {seedMessage && (
+               <p className={`text-sm ${seedMessage.includes('Greška') ? 'text-rose-500' : 'text-emerald-500'}`}>
+                 {seedMessage}
+               </p>
+             )}
            </div>
         </div>
       </div>
