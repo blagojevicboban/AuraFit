@@ -11,9 +11,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 // ─────────────────────────────────────────────
 // Data
 // ─────────────────────────────────────────────
-const recommendations = [
-  { id: 1, title: 'Squat', duration: '12', kcal: '120', bg: 'from-zinc-700 to-zinc-900', img: '/assets/squat.png' },
-  { id: 2, title: 'Stretching', duration: '12', kcal: '120', bg: 'from-zinc-600 to-zinc-800', img: '/assets/stretching.png' },
+const recommendations = (t: any) => [
+  { id: 1, title: t('common.squat'), duration: '12', kcal: '120', bg: 'from-zinc-700 to-zinc-900', img: '/assets/squat.png' },
+  { id: 2, title: t('common.stretching'), duration: '12', kcal: '120', bg: 'from-zinc-600 to-zinc-800', img: '/assets/stretching.png' },
 ];
 
 const articles = [
@@ -91,7 +91,7 @@ const HomeDashboard: React.FC = () => {
         <div className="flex items-start justify-between mb-1">
           <div>
             <h1 className="text-3xl font-extrabold" style={{ color: '#afa3ff' }}>
-              {t('home.welcome').replace('{{name}}', userData?.displayName || 'Champ')}
+              {t('home.welcome').replace('{{name}}', userData?.displayName || t('common.champ'))}
             </h1>
             <p className="text-zinc-700 dark:text-zinc-400 text-sm mt-1">{t('home.challengeLimits')}</p>
           </div>
@@ -148,7 +148,7 @@ const HomeDashboard: React.FC = () => {
             </button>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {recommendations.map((item) => (
+            {recommendations(t).map((item: any) => (
               <motion.div
                 key={item.id}
                 whileHover={{ scale: 1.03 }}

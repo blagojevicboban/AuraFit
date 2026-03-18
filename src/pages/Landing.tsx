@@ -24,11 +24,11 @@ export default function Landing() {
   useEffect(() => {
     if (userData) {
       if (userData.role === 'admin') {
-        navigate('/admin');
+        navigate('/app/admin');
       } else if (userData.role === 'coach') {
-        navigate('/coach');
+        navigate('/app/coach');
       } else {
-        navigate('/client');
+        navigate('/home');
       }
     }
   }, [userData, navigate]);
@@ -135,7 +135,7 @@ export default function Landing() {
           </h1>
           
           <p className="text-xl sm:text-2xl text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-            {t('landing.heroDesc').split('AI inteligenciju').map((part: string, i: number) => i === 0 ? part : <><span key={i} className="text-zinc-950 dark:text-white font-medium">AI inteligenciju</span>{part}</>)}
+            {t('landing.heroDesc').split(t('landing.aiIntelligence')).map((part: string, i: number) => i === 0 ? part : <><span key={i} className="text-zinc-950 dark:text-white font-medium">{t('landing.aiIntelligence')}</span>{part}</>)}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6 justify-center">
@@ -167,7 +167,7 @@ export default function Landing() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
-              className="glass-card p-10 rounded-[2.5rem] hover:bg-zinc-900/80 transition-all group cursor-default"
+              className="glass-card p-10 rounded-[2.5rem] hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-all group cursor-default"
             >
               <div className={`w-16 h-16 rounded-2xl bg-${feature.color}-500/20 flex items-center justify-center mb-8 border border-${feature.color}-500/20 group-hover:scale-110 transition-transform`}>
                 <feature.icon className={`w-8 h-8 text-${feature.color}-400`} />
@@ -204,7 +204,7 @@ export default function Landing() {
                 </div>
                 <button
                   onClick={() => setShowLoginModal(false)}
-                  className="p-3 text-zinc-500 hover:text-white transition-colors rounded-full hover:bg-white/5"
+                  className="p-3 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors rounded-full hover:bg-zinc-100 dark:hover:bg-white/5"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -213,7 +213,7 @@ export default function Landing() {
               <h2 className="text-3xl font-display font-bold mb-2">
                 {loginRole === 'admin' ? t('landing.adminLogin') : loginRole === 'coach' ? t('landing.coachLogin') : t('landing.clientLogin')}
               </h2>
-              <p className="text-zinc-400 mb-10 font-light">
+              <p className="text-zinc-600 dark:text-zinc-400 mb-10 font-light">
                 {t('landing.welcomeBack')}
               </p>
 
@@ -227,7 +227,7 @@ export default function Landing() {
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className="w-full flex items-center justify-center gap-3 bg-white/5 border border-white/10 px-6 py-4 rounded-2xl font-bold text-white hover:bg-white/10 transition-all"
+                  className="w-full flex items-center justify-center gap-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 px-6 py-4 rounded-2xl font-bold text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-all"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -239,28 +239,28 @@ export default function Landing() {
                 </button>
 
                 <div className="relative flex items-center gap-4 py-2">
-                  <div className="flex-grow h-px bg-white/10"></div>
-                  <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">{t('landing.or')}</span>
-                  <div className="flex-grow h-px bg-white/10"></div>
+                  <div className="flex-grow h-px bg-zinc-200 dark:bg-white/10"></div>
+                  <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-600 uppercase tracking-[0.2em]">{t('landing.or')}</span>
+                  <div className="flex-grow h-px bg-zinc-200 dark:bg-white/10"></div>
                 </div>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 px-1">
+                    <label className="block text-[10px] font-black text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-2 px-1">
                       {t('landing.username')}
                     </label>
                     <input
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="npr. nikola"
-                      className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-white transition-all"
+                      placeholder={t('landing.usernamePlaceholder')}
+                      className="w-full px-6 py-4 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-zinc-900 dark:text-white transition-all"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 px-1">
+                    <label className="block text-[10px] font-black text-zinc-600 dark:text-zinc-500 uppercase tracking-widest mb-2 px-1">
                       {t('landing.password')}
                     </label>
                     <input
@@ -268,7 +268,7 @@ export default function Landing() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-white transition-all"
+                      className="w-full px-6 py-4 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-zinc-900 dark:text-white transition-all"
                       required
                     />
                   </div>
@@ -288,8 +288,8 @@ export default function Landing() {
               </form>
 
               <div className="mt-8 text-center px-2">
-                <p className="text-zinc-500 text-sm font-medium">
-                  Don't have an account? <Link to="/signup" className="text-emerald-500 dark:text-[#d6ff3e] font-black hover:underline uppercase tracking-tighter ml-1">Sign up</Link>
+                <p className="text-zinc-600 dark:text-zinc-500 text-sm font-medium">
+                  {t('landing.noAccount')} <Link to="/signup" className="text-emerald-500 dark:text-[#d6ff3e] font-black hover:underline uppercase tracking-tighter ml-1">{t('landing.signUp')}</Link>
                 </p>
               </div>
             </motion.div>

@@ -6,11 +6,11 @@ import {
   Home, BookOpen, Headphones, ChevronLeft
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // ─────────────────────────────────────────────
 // Data (Matching UI Kit)
 // ─────────────────────────────────────────────
-const categories = ['Beginner', 'Intermediate', 'Advanced'];
 
 interface WorkoutItem {
   id: number;
@@ -24,62 +24,70 @@ interface WorkoutItem {
   image?: string;
 }
 
-const workoutsData: Record<string, WorkoutItem[]> = {
-  Beginner: [
-    { id: 1, title: 'Functional Training', duration: '45 Minutes', kcal: '1450 Kcal', exercises: '5 Exercises', tag: 'Training Of The Day', isFavorite: true, height: 'h-48', image: '/assets/functional.png' },
-    { id: 2, title: 'Upper Body', duration: '60 Minutes', kcal: '1320 Kcal', exercises: '5 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/upperbody.png' },
-    { id: 3, title: 'Full Body Stretching', duration: '45 Minutes', kcal: '1450 Kcal', exercises: '5 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/stretching.png' },
-    { id: 4, title: 'Glutes & Abs', duration: '45 Minutes', kcal: '1200 Kcal', exercises: '4 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/squat.png' },
-  ],
-  Intermediate: [
-    { id: 5, title: 'Core Strength', duration: '50 Minutes', kcal: '1600 Kcal', exercises: '6 Exercises', tag: 'Recommended', isFavorite: false, height: 'h-48', image: '/assets/plank.png' }
-  ],
-  Advanced: [
-    { id: 6, title: 'HIIT Extreme', duration: '30 Minutes', kcal: '2000 Kcal', exercises: '8 Exercises', tag: 'Intense', isFavorite: false, height: 'h-48', image: '/assets/cycling.png' }
-  ]
-};
-
 const Workouts: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  
+  const categories = [
+    { id: 'Beginner', label: t('workouts.beginner') },
+    { id: 'Intermediate', label: t('workouts.intermediate') },
+    { id: 'Advanced', label: t('workouts.advanced') }
+  ];
+  
   const [activeCategory, setActiveCategory] = useState('Beginner');
   
-  const currentWorkouts = workoutsData[activeCategory as keyof typeof workoutsData] || [];
+  const workoutsData: Record<string, WorkoutItem[]> = {
+    Beginner: [
+      { id: 1, title: t('workouts.functional'), duration: '45 Minutes', kcal: '1450 Kcal', exercises: '5 Exercises', tag: t('workouts.trainingDay'), isFavorite: true, height: 'h-48', image: '/assets/functional.png' },
+      { id: 2, title: t('workouts.upperBody'), duration: '60 Minutes', kcal: '1320 Kcal', exercises: '5 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/upperbody.png' },
+      { id: 3, title: t('workouts.fullStretching'), duration: '45 Minutes', kcal: '1450 Kcal', exercises: '5 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/stretching.png' },
+      { id: 4, title: t('workouts.glutesAbs'), duration: '45 Minutes', kcal: '1200 Kcal', exercises: '4 Exercises', tag: '', isFavorite: true, height: 'h-32', image: '/assets/squat.png' },
+    ],
+    Intermediate: [
+      { id: 5, title: t('workouts.coreStrength'), duration: '50 Minutes', kcal: '1600 Kcal', exercises: '6 Exercises', tag: '', isFavorite: false, height: 'h-48', image: '/assets/plank.png' }
+    ],
+    Advanced: [
+      { id: 6, title: t('workouts.hiitExtreme'), duration: '30 Minutes', kcal: '2000 Kcal', exercises: '8 Exercises', tag: '', isFavorite: false, height: 'h-48', image: '/assets/cycling.png' }
+    ]
+  };
+
+  const currentWorkouts = workoutsData[activeCategory] || [];
 
   return (
-    <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col pb-24">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans flex flex-col pb-24 transition-colors duration-300">
       
       {/* ── Header ── */}
-      <div className="px-6 pt-12 pb-4 bg-zinc-900 rounded-b-[2rem] shadow-lg relative z-10">
+      <div className="px-6 pt-12 pb-4 bg-white dark:bg-zinc-900 rounded-b-[2rem] shadow-lg relative z-10 transition-colors">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <button 
               onClick={() => navigate('/home')}
-              className="text-[#d6ff3e] hover:text-white transition-colors"
+              className="text-[#10b981] hover:text-emerald-600 transition-colors"
             >
               <ChevronLeft size={24} />
             </button>
-            <h1 className="text-3xl font-black text-[#afa3ff] tracking-tight">Workouts</h1>
+            <h1 className="text-3xl font-black text-[#afa3ff] dark:text-[#afa3ff] tracking-tight">{t('workouts.title')}</h1>
           </div>
           <div className="flex gap-4">
-            <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
-            <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><Bell size={22} /></button>
-            <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><User size={22} /></button>
+            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
+            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><Bell size={22} /></button>
+            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><User size={22} /></button>
           </div>
         </div>
 
         {/* ── Category Tabs ── */}
-        <div className="flex gap-2 bg-[#1c1c1c] p-1.5 rounded-full overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-full overflow-x-auto no-scrollbar">
           {categories.map(cat => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
               className={`flex-1 py-3 px-4 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300 ${
-                activeCategory === cat 
-                  ? 'bg-[#d6ff3e] text-[#1c1c1c] shadow-[0_0_15px_rgba(214,255,62,0.3)]' 
-                  : 'text-zinc-400 hover:text-white'
+                activeCategory === cat.id 
+                  ? 'bg-emerald-500 text-white dark:bg-[#d6ff3e] dark:text-[#1c1c1c] shadow-lg' 
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
-              {cat}
+              {cat.label}
             </button>
           ))}
         </div>
@@ -89,14 +97,16 @@ const Workouts: React.FC = () => {
       <div className="flex-grow px-6 pt-6 overflow-y-auto">
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <h2 className="text-xl font-extrabold text-[#d6ff3e]">Let's Go {activeCategory}</h2>
-            <p className="text-zinc-400 text-sm">Explore Different Workout Styles</p>
+            <h2 className="text-xl font-extrabold text-[#10b981] dark:text-[#d6ff3e]">
+              {t('workouts.letsGo').replace('{{level}}', categories.find(c => c.id === activeCategory)?.label || activeCategory)}
+            </h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('workouts.exploreStyles')}</p>
           </div>
           <button 
             onClick={() => navigate('/create-routine')}
-            className="text-xs bg-[#afa3ff] text-[#1c1c1c] font-bold px-3 py-1.5 rounded-full hover:bg-white transition-colors"
+            className="text-xs bg-[#afa3ff] text-[#1c1c1c] font-bold px-3 py-1.5 rounded-full hover:bg-emerald-500 hover:text-white transition-colors"
           >
-            + Create Custom
+            {t('workouts.createCustom')}
           </button>
         </div>
 
@@ -109,37 +119,37 @@ const Workouts: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className={`relative bg-zinc-800 rounded-3xl overflow-hidden cursor-pointer group ${workout.height}`}
+                className={`relative bg-white dark:bg-zinc-800 rounded-3xl overflow-hidden cursor-pointer group shadow-sm border border-zinc-100 dark:border-none ${workout.height}`}
                 onClick={() => navigate('/routine')}
               >
                 {/* Visual Placeholder for Image */}
                 <div className="absolute top-0 bottom-0 right-0 w-1/2 overflow-hidden flex items-center justify-center">
-                   <img src={workout.image} className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" alt={workout.title} />
+                   <img src={workout.image} className="w-full h-full object-cover opacity-60 dark:opacity-60 group-hover:scale-110 transition-transform duration-500" alt={workout.title} />
                 </div>
                 
                 {/* Gradient for Text Readability */}
-                <div className="absolute inset-0 bg-gradient-to-r from-zinc-800 via-zinc-800/90 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent dark:from-zinc-800 dark:via-zinc-800/90 dark:to-transparent" />
 
                 {/* Content */}
                 <div className="relative z-10 p-5 flex flex-col justify-end h-full">
                   {workout.tag && (
-                    <span className="absolute top-0 right-0 bg-[#d6ff3e] text-[#1c1c1c] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow-lg">
+                    <span className="absolute top-0 right-0 bg-emerald-500 dark:bg-[#d6ff3e] text-white dark:text-[#1c1c1c] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow-lg">
                       {workout.tag}
                     </span>
                   )}
 
-                  <button className={`absolute top-4 ${workout.height === 'h-48' ? 'right-4' : 'right-4'} ${workout.isFavorite ? 'text-yellow-400' : 'text-zinc-400'}`}>
+                  <button className={`absolute top-4 ${workout.height === 'h-48' ? 'right-4' : 'right-4'} ${workout.isFavorite ? 'text-yellow-500' : 'text-zinc-300 dark:text-zinc-500'}`}>
                     <Star size={20} fill={workout.isFavorite ? 'currentColor' : 'none'} />
                   </button>
 
-                  <h3 className={`font-extrabold text-white mb-2 ${workout.height === 'h-48' ? 'text-2xl w-2/3' : 'text-xl max-w-[60%]'}`}>
+                  <h3 className={`font-extrabold text-zinc-900 dark:text-white mb-2 ${workout.height === 'h-48' ? 'text-2xl w-2/3' : 'text-xl max-w-[60%]'}`}>
                     {workout.title}
                   </h3>
                   
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-zinc-400">
-                    <span className="flex items-center gap-1.5"><Clock size={12} className="text-[#afa3ff]"/>{workout.duration}</span>
-                    <span className="flex items-center gap-1.5"><Flame size={12} className="text-[#afa3ff]"/>{workout.kcal}</span>
-                    <span className="flex items-center gap-1.5"><Play size={12} className="text-[#afa3ff]"/>{workout.exercises}</span>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    <span className="flex items-center gap-1.5"><Clock size={12} className="text-emerald-500 dark:text-[#afa3ff]"/>{workout.duration}</span>
+                    <span className="flex items-center gap-1.5"><Flame size={12} className="text-emerald-500 dark:text-[#afa3ff]"/>{workout.kcal}</span>
+                    <span className="flex items-center gap-1.5"><Play size={12} className="text-emerald-500 dark:text-[#afa3ff]"/>{workout.exercises}</span>
                   </div>
                 </div>
               </motion.div>

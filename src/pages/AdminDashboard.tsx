@@ -62,7 +62,7 @@ export default function AdminDashboard() {
                 </div>
                 
                 <p className="text-slate-600 dark:text-zinc-400 mb-6">
-                  Da li ste sigurni da želite da inicijalizujete bazu sa test podacima? Ovo će dodati nove korisnike (trenera i klijente), treninge i obroke.
+                  {t('admin.databaseDesc')}
                 </p>
 
                 <div className="flex gap-3 justify-end">
@@ -70,13 +70,13 @@ export default function AdminDashboard() {
                     onClick={() => setShowConfirmModal(false)}
                     className="px-4 py-2 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl font-medium transition-colors"
                   >
-                    Odustani
+                    {t('admin.cancel')}
                   </button>
                   <button
                     onClick={handleSeedDatabase}
                     className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-medium transition-colors"
                   >
-                    Inicijalizuj
+                    {t('admin.initializeTest')}
                   </button>
                 </div>
               </div>
@@ -88,7 +88,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('nav.dashboard')}</h1>
-          <p className="text-slate-600 dark:text-zinc-400">Pregled sistema i aktivnosti</p>
+          <p className="text-slate-600 dark:text-zinc-400">{t('admin.systemOverview')}</p>
         </div>
       </div>
       
@@ -122,25 +122,25 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6 flex flex-col">
-           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Upravljanje Korisnicima</h2>
+           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{t('admin.manageUsers')}</h2>
            <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 flex-grow">
-             Pregledajte spisak svih korisnika, menjajte njihove uloge (admin, trener, klijent) ili privremeno pristupite njihovim nalozima.
+             {t('admin.manageUsersDesc')}
            </p>
            <Link 
              to="/app/admin/users"
              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 rounded-2xl font-black transition-all shadow-lg shadow-emerald-500/20"
            >
              <Users className="w-5 h-5" />
-             Otvori Listu Korisnika
+             {t('admin.openList')}
              <ArrowRight className="w-4 h-4 ml-2" />
            </Link>
         </div>
 
         <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6">
-           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Sistemska Baza</h2>
+           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{t('admin.systemDatabase')}</h2>
            <div className="space-y-4">
              <p className="text-sm text-slate-500 dark:text-zinc-400">
-               Inicijalizujte bazu podataka sa testnim korisnicima (trener i klijenti), treninzima i obrocima za potrebe testiranja aplikacije.
+               {t('admin.databaseDesc')}
              </p>
              <button
                onClick={() => setShowConfirmModal(true)}
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-500 border border-indigo-500/20 rounded-2xl font-bold transition-all"
              >
                {isSeeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
-               Inicijalizuj Test Podatke
+               {t('admin.initializeTest')}
              </button>
              {seedMessage && (
                <p className={`mt-4 text-sm ${seedMessage.includes('Greška') ? 'text-rose-500' : 'text-emerald-500'}`}>
@@ -159,14 +159,14 @@ export default function AdminDashboard() {
         </div>
 
         <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6">
-           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Status Sistema</h2>
+           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{t('admin.systemStatus')}</h2>
            <div className="space-y-4">
              <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                <span className="text-sm font-medium">Baza Podataka</span>
+                <span className="text-sm font-medium">{t('admin.database')}</span>
                 <span className="flex items-center gap-2 text-xs text-emerald-500 font-bold uppercase"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Online</span>
              </div>
              <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                <span className="text-sm font-medium">Storage Service</span>
+                <span className="text-sm font-medium">{t('admin.storage')}</span>
                 <span className="flex items-center gap-2 text-xs text-emerald-500 font-bold uppercase"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Online</span>
              </div>
            </div>

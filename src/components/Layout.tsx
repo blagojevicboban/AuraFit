@@ -165,7 +165,7 @@ export default function Layout() {
                 "flex items-center gap-3 px-6 py-4 rounded-2xl text-sm font-bold transition-all duration-300",
                 location.pathname === link.to 
                   ? "bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.3)]" 
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/5"
               )}
             >
               <link.icon className={cn("w-5 h-5", location.pathname === link.to ? "text-zinc-950" : "text-zinc-500")} />
@@ -218,7 +218,7 @@ export default function Layout() {
                 to={link.to}
                 className={cn(
                   "flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all duration-300",
-                  isActive ? "text-emerald-400" : "text-zinc-500 hover:text-white"
+                  isActive ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500 hover:text-emerald-600 dark:hover:text-white"
                 )}
               >
                 <div className={cn(

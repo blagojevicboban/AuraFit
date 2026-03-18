@@ -4,6 +4,7 @@ import { Search, Filter, Shield, Edit2, Trash2, X, LogIn } from "lucide-react";
 import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 
 interface UserData {
@@ -16,6 +17,7 @@ interface UserData {
 
 export default function AdminUsers() {
   const { impersonateUser } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,9 +92,9 @@ export default function AdminUsers() {
     try {
       await impersonateUser(userId);
       // Redirect based on role
-      if (role === 'admin') navigate('/admin');
-      else if (role === 'coach') navigate('/coach');
-      else navigate('/client');
+      if (role === 'admin') navigate('/app/admin');
+      else if (role === 'coach') navigate('/app/coach');
+      else navigate('/home');
     } catch (error) {
       console.error("Error impersonating user:", error);
     }
@@ -102,8 +104,8 @@ export default function AdminUsers() {
     <div className="p-6 sm:p-8 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Upravljanje Korisnicima</h1>
-          <p className="text-slate-600 dark:text-zinc-400">Pregled i administracija svih naloga na platformi</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('admin.userAdmin')}</h1>
+          <p className="text-slate-600 dark:text-zinc-400">{t('admin.userAdminDesc')}</p>
         </div>
       </div>
 
@@ -113,7 +115,7 @@ export default function AdminUsers() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-zinc-500" />
             <input 
               type="text" 
-              placeholder="Pretraži po imenu ili emailu..." 
+              placeholder={t('admin.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-indigo-500/30 text-slate-900 dark:text-white transition-colors duration-200"
@@ -127,10 +129,10 @@ export default function AdminUsers() {
                 onChange={(e) => setFilterRole(e.target.value)}
                 className="w-full sm:w-auto pl-9 pr-8 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-indigo-500/30 text-slate-900 dark:text-white appearance-none transition-colors duration-200"
               >
-                <option value="all">Sve uloge</option>
-                <option value="client">Klijenti</option>
-                <option value="coach">Treneri</option>
-                <option value="admin">Administratori</option>
+                <option value="all">{t('admin.allRoles')}</option>
+                <option value="client">{t('setup.goal4') === 'Ostalo' ? 'Klijent' : 'Client'}</option>
+                <option value="coach">{t('setup.goal4') === 'Ostalo' ? 'Trener' : 'Coach'}</option>
+                <option value="admin">Administrator</option>
               </select>
             </div>
           </div>
@@ -140,16 +142,16 @@ export default function AdminUsers() {
           {loading ? (
             <div className="p-8 text-center text-slate-500 dark:text-zinc-400">
               <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4" />
-              Učitavanje korisnika...
+              {t('admin.loadingUsers')}
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-zinc-900/50 border-b border-slate-200 dark:border-zinc-800/50 transition-colors duration-200">
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Korisnik</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Uloga</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{t('admin.user')}</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{t('admin.role')}</th>
                   <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider hidden md:table-cell">Email</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider text-right">Akcije</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider text-right">{t('admin.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-zinc-800/50">
@@ -192,7 +194,7 @@ export default function AdminUsers() {
                           <button 
                             onClick={() => handleImpersonate(user.id, user.role)}
                             className="p-2 text-slate-400 hover:text-emerald-600 dark:text-zinc-500 dark:hover:text-emerald-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
-                            title="Prijavi se kao ovaj korisnik"
+                            title={t('admin.impersonate')}
                           >
                             <LogIn className="w-4 h-4" />
                           </button>
@@ -215,7 +217,7 @@ export default function AdminUsers() {
                 ) : (
                   <tr>
                     <td colSpan={4} className="px-6 py-12 text-center text-slate-500 dark:text-zinc-400">
-                      Nema pronađenih korisnika
+                      {t('admin.noUsers')}
                     </td>
                   </tr>
                 )}
@@ -243,7 +245,7 @@ export default function AdminUsers() {
               className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-zinc-800"
             >
               <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-zinc-800">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Izmeni Ulogu</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('admin.editRole')}</h2>
                 <button
                   onClick={() => setEditingUser(null)}
                   className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
@@ -253,21 +255,21 @@ export default function AdminUsers() {
               </div>
               <form onSubmit={handleUpdateRole} className="p-6">
                 <div className="mb-6">
-                  <p className="text-sm text-slate-500 dark:text-zinc-400 mb-1">Korisnik</p>
+                  <p className="text-sm text-slate-500 dark:text-zinc-400 mb-1">{t('admin.user')}</p>
                   <p className="font-medium text-slate-900 dark:text-white">{editingUser.displayName}</p>
                   <p className="text-sm text-slate-500 dark:text-zinc-400">{editingUser.email}</p>
                 </div>
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-2">
-                    Uloga
+                    {t('admin.role')}
                   </label>
                   <select
                     value={editingUser.role}
                     onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                     className="w-full px-4 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-indigo-500/30 text-slate-900 dark:text-white appearance-none transition-colors duration-200"
                   >
-                    <option value="client">Klijent</option>
-                    <option value="coach">Trener</option>
+                    <option value="client">{t('setup.goal4') === 'Ostalo' ? 'Klijent' : 'Client'}</option>
+                    <option value="coach">{t('setup.goal4') === 'Ostalo' ? 'Trener' : 'Coach'}</option>
                     <option value="admin">Administrator</option>
                   </select>
                 </div>
@@ -277,7 +279,7 @@ export default function AdminUsers() {
                     onClick={() => setEditingUser(null)}
                     className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
                   >
-                    Otkaži
+                    {t('admin.cancel')}
                   </button>
                   <button
                     type="submit"
@@ -285,7 +287,7 @@ export default function AdminUsers() {
                     className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
                   >
                     {actionLoading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                    Sačuvaj
+                    {t('admin.save')}
                   </button>
                 </div>
               </form>
@@ -314,16 +316,16 @@ export default function AdminUsers() {
               <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center mb-4">
                 <Trash2 className="w-6 h-6 text-rose-600 dark:text-rose-400" />
               </div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Obriši korisnika</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('admin.deleteUser')}</h2>
               <p className="text-slate-600 dark:text-zinc-400 mb-6">
-                Da li ste sigurni da želite da obrišete korisnika <span className="font-semibold text-slate-900 dark:text-white">{deletingUser.displayName}</span>? Ova akcija je nepovratna.
+                {t('admin.confirmDelete').replace('{{name}}', deletingUser.displayName)}
               </p>
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setDeletingUser(null)}
                   className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
                 >
-                  Otkaži
+                  {t('admin.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteUser}
@@ -331,7 +333,7 @@ export default function AdminUsers() {
                   className="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {actionLoading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                  Obriši
+                  {t('admin.delete')}
                 </button>
               </div>
             </motion.div>

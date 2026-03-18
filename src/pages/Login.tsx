@@ -44,50 +44,49 @@ const Login: React.FC = () => {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Assuming a login function exists or will be added. For now, we simulate.
     navigate('/home');
   };
 
   return (
-    <div className="min-h-screen bg-[#1c1c1c] text-white flex flex-col font-sans">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#1c1c1c] text-zinc-900 dark:text-white flex flex-col font-sans transition-colors duration-300">
       {/* Top Header Section */}
       <div className="px-6 pt-12 pb-8 flex flex-col items-center relative">
         <button 
           onClick={() => navigate(-1)}
-          className="absolute left-6 top-13 text-[#d6ff3e]"
+          className="absolute left-6 top-13 text-emerald-500 dark:text-[#d6ff3e]"
         >
           <ChevronLeft size={24} />
         </button>
-        <h1 className="text-[#d6ff3e] text-2xl font-bold uppercase tracking-wider mb-12">Log In</h1>
+        <h1 className="text-emerald-500 dark:text-[#d6ff3e] text-2xl font-bold uppercase tracking-wider mb-12">Log In</h1>
         
         <div className="text-center max-w-xs">
-          <h2 className="text-3xl font-extrabold mb-4">Welcome</h2>
-          <p className="text-zinc-400 text-sm leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          <h2 className="text-4xl font-extrabold mb-4 text-zinc-900 dark:text-white">Welcome</h2>
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
+            Your fitness journey starts here. Sign in to access your personalized workout and nutrition plans.
           </p>
         </div>
       </div>
 
       {/* Inputs Section (Purple Card) */}
-      <div className="bg-[#afa3ff] px-8 py-10 flex flex-col gap-6 rounded-3xl mx-6 shadow-xl">
+      <div className="bg-[#afa3ff] px-8 py-10 flex flex-col gap-6 rounded-[2.5rem] mx-6 shadow-xl relative z-10 transition-all">
         <Input 
           label="Username or email"
-          labelClassName="text-[#1c1c1c]/60"
+          labelClassName="text-[#1c1c1c]/70 font-bold"
           type="text" 
           placeholder="example@example.com"
-          className="bg-white/20 border-white/30 text-[#1c1c1c] placeholder:text-[#1c1c1c]/40"
+          className="bg-white/30 border-white/40 text-[#1c1c1c] placeholder:text-[#1c1c1c]/40 font-medium"
         />
 
         <div className="space-y-2">
           <Input 
             label="Password"
-            labelClassName="text-[#1c1c1c]/60"
+            labelClassName="text-[#1c1c1c]/70 font-bold"
             type="password" 
             placeholder="**************"
-            className="bg-white/20 border-white/30 text-[#1c1c1c] placeholder:text-[#1c1c1c]/40"
+            className="bg-white/30 border-white/40 text-[#1c1c1c] placeholder:text-[#1c1c1c]/40 font-medium"
           />
           <div className="text-right mt-2">
-            <Link to="/forgot-password" size="sm" className="text-[#1c1c1c] font-bold text-sm">
+            <Link to="/forgot-password" size="sm" className="text-[#1c1c1c] font-black text-xs uppercase tracking-tighter hover:underline">
               Forgot Password?
             </Link>
           </div>
@@ -95,8 +94,8 @@ const Login: React.FC = () => {
       </div>
 
       {/* Bottom Section */}
-      <div className="px-8 pt-12 pb-10 flex flex-col items-center gap-8 bg-[#1c1c1c] flex-grow">
-        <Button size="xl" fullWidth className="max-w-xs shadow-lg">
+      <div className="px-8 pt-12 pb-10 flex flex-col items-center gap-8 bg-zinc-50 dark:bg-[#1c1c1c] flex-grow transition-colors">
+        <Button size="xl" fullWidth className="max-w-xs shadow-lg rounded-2xl">
           Log In
         </Button>
 
@@ -110,26 +109,26 @@ const Login: React.FC = () => {
           ) : (
             <>
               <div className="flex items-center gap-4 w-full">
-                <div className="h-[1px] bg-zinc-800 flex-grow" />
-                <span className="text-zinc-500 text-sm">or log in with</span>
-                <div className="h-[1px] bg-zinc-800 flex-grow" />
+                <div className="h-[1px] bg-zinc-200 dark:bg-zinc-800 flex-grow" />
+                <span className="text-zinc-400 dark:text-zinc-500 text-xs font-bold uppercase tracking-widest px-2">or log in with</span>
+                <div className="h-[1px] bg-zinc-200 dark:bg-zinc-800 flex-grow" />
               </div>
               <div className="flex gap-4">
                 <button 
                   onClick={() => handleGoogleLogin(false)}
-                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-100 transition-colors shadow-md border border-zinc-100"
                 >
                   <Chrome size={28} />
                 </button>
                 <button 
                   onClick={() => alert('Facebook Log In is coming soon!')}
-                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-100 transition-colors shadow-md border border-zinc-100"
                 >
                   <Facebook size={28} />
                 </button>
                 <button 
                   onClick={() => alert('Biometric login will be enabled in the settings.')}
-                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-100 transition-colors shadow-md border border-zinc-100"
                 >
                   <Fingerprint size={28} />
                 </button>
@@ -139,8 +138,8 @@ const Login: React.FC = () => {
         </div>
 
         <div className="mt-4">
-          <p className="text-zinc-400 text-sm">
-            Don't have an account? <Link to="/signup" className="text-[#d6ff3e] font-bold">Sign Up</Link>
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
+            Don't have an account? <Link to="/signup" className="text-emerald-500 dark:text-[#d6ff3e] font-black uppercase tracking-tighter hover:underline ml-1">Sign Up</Link>
           </p>
         </div>
       </div>

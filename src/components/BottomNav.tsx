@@ -23,7 +23,7 @@ const BottomNav: React.FC = () => {
           <button
             key={path}
             onClick={() => navigate(path)}
-            className={`flex flex-col items-center gap-1 ${isActive ? 'text-[#1c1c1c]' : 'text-white/60 hover:text-white'} transition-colors`}
+            className={`flex flex-col items-center gap-1 ${isActive ? 'text-[#1c1c1c]' : 'text-[#1c1c1c]/50 hover:text-[#1c1c1c]'} transition-colors`}
           >
             <Icon size={22} strokeWidth={isActive ? 2.5 : 1.5} />
             <span className="text-[9px] font-bold uppercase tracking-wider">{label}</span>
