@@ -73,7 +73,7 @@ export default function Landing() {
     } catch (error: any) {
       console.error("Login failed", error);
       // If it's a firebase error with a code, show the code to help debugging
-      const errorMessage = error.code ? `Greška: ${error.code}` : (error.message || "Pogrešno korisničko ime ili lozinka.");
+      const errorMessage = error.code ? `Greška: ${error.code}` : (t('landing.loginError'));
       setLoginError(errorMessage);
     } finally {
       setLoginLoading(false);

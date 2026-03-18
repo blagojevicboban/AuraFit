@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Activity, LayoutDashboard, Users, LogOut, Menu, X, User, Sun, Moon, Shield } from "lucide-react";
+import { Activity, LayoutDashboard, Users, LogOut, Menu, X, User, Sun, Moon, Shield, Home } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -58,6 +58,7 @@ export default function Layout() {
   const adminLinks = [
     { to: "/app/admin", icon: LayoutDashboard, label: t('nav.dashboard') },
     { to: "/app/admin/users", icon: Users, label: t('nav.users') },
+    { to: "/home", icon: Home, label: t('nav.home') },
   ];
 
   const links = userData.role === 'admin' ? adminLinks : userData.role === 'coach' ? coachLinks : clientLinks;

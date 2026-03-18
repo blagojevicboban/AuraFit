@@ -130,9 +130,9 @@ export default function AdminUsers() {
                 className="w-full sm:w-auto pl-9 pr-8 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-indigo-500/30 text-slate-900 dark:text-white appearance-none transition-colors duration-200"
               >
                 <option value="all">{t('admin.allRoles')}</option>
-                <option value="client">{t('setup.goal4') === 'Ostalo' ? 'Klijent' : 'Client'}</option>
-                <option value="coach">{t('setup.goal4') === 'Ostalo' ? 'Trener' : 'Coach'}</option>
-                <option value="admin">Administrator</option>
+                <option value="client">{t('common.client')}</option>
+                <option value="coach">{t('common.coach')}</option>
+                <option value="admin">{t('common.admin')}</option>
               </select>
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function AdminUsers() {
                             {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-slate-900 dark:text-white transition-colors duration-200">{user.displayName || 'Nepoznato'}</p>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white transition-colors duration-200">{user.displayName || t('common.unknown')}</p>
                             <p className="text-xs text-slate-500 dark:text-zinc-500 md:hidden">{user.email}</p>
                           </div>
                         </div>
@@ -268,9 +268,9 @@ export default function AdminUsers() {
                     onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                     className="w-full px-4 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:ring-indigo-500/30 text-slate-900 dark:text-white appearance-none transition-colors duration-200"
                   >
-                    <option value="client">{t('setup.goal4') === 'Ostalo' ? 'Klijent' : 'Client'}</option>
-                    <option value="coach">{t('setup.goal4') === 'Ostalo' ? 'Trener' : 'Coach'}</option>
-                    <option value="admin">Administrator</option>
+                    <option value="client">{t('common.client')}</option>
+                    <option value="coach">{t('common.coach')}</option>
+                    <option value="admin">{t('common.admin')}</option>
                   </select>
                 </div>
                 <div className="flex justify-end gap-3">

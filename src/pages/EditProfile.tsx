@@ -74,24 +74,24 @@ const EditProfile: React.FC = () => {
         <Input 
             label={t('profile.fullName')} 
             defaultValue={userData?.displayName || ''} 
-            placeholder={language === 'sr' ? "Unesite ime" : "Enter your name"}
+            placeholder={t('profile.fullNamePlaceholder')}
         />
         <Input 
             label={t('profile.email')} 
             defaultValue={userData?.email || ''} 
-            placeholder={language === 'sr' ? "Unesite email" : "Enter your email"}
+            placeholder={t('profile.emailPlaceholder') || "example@example.com"}
             type="email"
             disabled
         />
         <Input 
             label={t('profile.mobile')} 
             defaultValue="" 
-            placeholder={language === 'sr' ? "Unesite broj telefona" : "Enter mobile number"}
+            placeholder={t('profile.mobilePlaceholder')}
         />
         <Input 
             label={t('profile.dob')} 
             defaultValue="" 
-            placeholder="DD / MM / YYYY"
+            placeholder={t('profile.dobPlaceholder')}
         />
         <div className="flex gap-4">
             <Input 

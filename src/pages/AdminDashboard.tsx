@@ -18,10 +18,10 @@ export default function AdminDashboard() {
     
     try {
       await seedDatabase();
-      setSeedMessage("Baza je uspešno inicijalizovana test podacima.");
+      setSeedMessage(t('admin.seedSuccess'));
     } catch (error) {
-      console.error("Greška pri inicijalizaciji baze:", error);
-      setSeedMessage("Došlo je do greške pri inicijalizaciji baze.");
+      console.error("Error seeding database:", error);
+      setSeedMessage(t('admin.seedError'));
     } finally {
       setIsSeeding(false);
     }
@@ -29,9 +29,9 @@ export default function AdminDashboard() {
 
   const stats = [
     { label: t('nav.users'), value: "1,248", icon: Users, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10", border: "border-indigo-100 dark:border-indigo-500/20", to: "/app/admin/users" },
-    { label: "Aktivni Treneri", value: "42", icon: Activity, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20" },
-    { label: "Novi Klijenti (Ovaj mesec)", value: "+156", icon: TrendingUp, color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-50 dark:bg-cyan-500/10", border: "border-cyan-100 dark:border-cyan-500/20" },
-    { label: "Prijavljeni Problemi", value: "3", icon: ShieldAlert, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-500/10", border: "border-rose-100 dark:border-rose-500/20" },
+    { label: t('admin.activeCoaches'), value: "42", icon: Activity, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20" },
+    { label: t('admin.newMonthlyClients'), value: "+156", icon: TrendingUp, color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-50 dark:bg-cyan-500/10", border: "border-cyan-100 dark:border-cyan-500/20" },
+    { label: t('admin.reportedIssues'), value: "3", icon: ShieldAlert, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-500/10", border: "border-rose-100 dark:border-rose-500/20" },
   ];
 
   return (
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
                     <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center">
                       <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
                     </div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Potvrda inicijalizacije</h2>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('admin.confirmTitle')}</h2>
                   </div>
                   <button
                     onClick={() => setShowConfirmModal(false)}
