@@ -11,14 +11,20 @@ const PWAContext = createContext<PWAContextType | undefined>(undefined);
 
 export function PWAProvider({ children }: { children: React.ReactNode }) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstallable, setIsInstallable] = useState(() => {
+    // Debug override
+    return localStorage.getItem('pwa_debug_force') === 'true';
+  });
   const [showInstallPrompt, setShowInstallPrompt] = useState(() => {
     // Show prompt if it hasn't been dismissed in this session
     return !sessionStorage.getItem('pwa_prompt_dismissed');
   });
 
   useEffect(() => {
+    console.log('[PWA] Context initialized');
+    
     const handler = (e: any) => {
+      console.log('[PWA] beforeinstallprompt event caught!');
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later.
@@ -30,7 +36,10 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener('beforeinstallprompt', handler);
 
     // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+    console.log('[PWA] Standalone mode:', isStandalone);
+    
+    if (isStandalone) {
       setIsInstallable(false);
     }
 

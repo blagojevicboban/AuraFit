@@ -47,12 +47,26 @@ No Medical Claims: Nikada ne postavljaj medicinske dijagnoze. Koristi fraze popu
 Language: Odgovaraj na jeziku na kojem ti se korisnik obrati (primarno srpski ili engleski).
 `;
 
-export async function askAuraFitAI(prompt: string, isCoach: boolean = false, jsonMode: boolean = false) {
+export async function askAuraFitAI(prompt: string, isCoach: boolean = false, jsonMode: boolean = false, imageBase64?: string) {
   try {
     const client = getAIClient();
+    
+    const parts: any[] = [{ text: prompt }];
+    
+    if (imageBase64) {
+      // Assuming imageBase64 is a data URI like "data:image/jpeg;base64,..."
+      const [mimeType, base64Data] = imageBase64.split(';base64,');
+      parts.push({
+        inlineData: {
+          mimeType: mimeType.split(':')[1],
+          data: base64Data
+        }
+      });
+    }
+
     const response = await client.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: prompt,
+      contents: parts, // Now passing an array of parts
       config: {
         systemInstruction: SYSTEM_INSTRUCTION + `\nTrenutni korisnik je: ${isCoach ? 'Trener' : 'Klijent'}.`,
         responseMimeType: jsonMode ? "application/json" : "text/plain",

@@ -8,6 +8,8 @@ export function InstallPrompt() {
   const { isInstallable, installApp, showInstallPrompt, setShowInstallPrompt } = usePWA();
   const { t } = useLanguage();
 
+  console.log('[PWA] Render Prompt:', { isInstallable, showInstallPrompt, sessionDismissed: !!sessionStorage.getItem('pwa_prompt_dismissed') });
+
   const handleDismiss = () => {
     setShowInstallPrompt(false);
     sessionStorage.setItem('pwa_prompt_dismissed', 'true');
@@ -25,9 +27,9 @@ export function InstallPrompt() {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed bottom-safe left-0 right-0 z-[100] p-4 flex justify-center"
+          className="fixed bottom-0 left-0 right-0 z-[100] pb-[env(safe-area-inset-bottom)] sm:bottom-6 p-4 flex justify-center pointer-events-none"
         >
-          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-[2.5rem] p-6 shadow-2xl backdrop-blur-xl transition-colors duration-300">
+          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-[2.5rem] p-6 shadow-2xl backdrop-blur-xl transition-colors duration-300 pointer-events-auto">
             <div className="flex items-start gap-5">
               <div className="w-14 h-14 rounded-2xl brand-gradient flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
                 <Smartphone className="text-zinc-950 w-7 h-7" />

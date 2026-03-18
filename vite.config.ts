@@ -12,6 +12,9 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        devOptions: {
+          enabled: true
+        },
         manifest: {
           name: 'AuraFit Premium',
           short_name: 'AuraFit',
@@ -20,6 +23,12 @@ export default defineConfig(({mode}) => {
           background_color: '#1c1c1c',
           display: 'standalone',
           icons: [
+            {
+              src: 'pwa-icon.svg',
+              sizes: '192x192',
+              type: 'image/svg+xml',
+              purpose: 'any maskable'
+            },
             {
               src: 'pwa-icon.svg',
               sizes: '512x512',
