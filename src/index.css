@@ -21,7 +21,7 @@
 }
 
 body {
-  @apply bg-zinc-950 text-zinc-50 antialiased selection:bg-emerald-500/30 transition-colors duration-200;
+  @apply bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50 antialiased selection:bg-emerald-500/30 transition-colors duration-300;
   font-family: "Inter", sans-serif;
 }
 
@@ -30,7 +30,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-card {
-  @apply bg-zinc-900/50 backdrop-blur-xl border border-white/10 shadow-2xl;
+  @apply bg-white/70 dark:bg-zinc-900/50 backdrop-blur-xl border border-zinc-200 dark:border-white/10 shadow-xl dark:shadow-2xl transition-colors duration-300;
 }
 
 .neon-glow {
@@ -38,11 +38,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-zinc-500;
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-500 dark:from-white dark:via-white dark:to-zinc-500;
 }
 
 .brand-gradient {
-  @apply bg-gradient-to-tr from-emerald-500 to-cyan-400;
+  @apply bg-gradient-to-tr from-emerald-500 to-emerald-400;
+}
+
+.card-bg {
+  @apply bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 transition-colors duration-300;
 }
 
 /* Custom scrollbar for a sleek look */

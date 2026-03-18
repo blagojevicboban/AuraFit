@@ -43,7 +43,7 @@ const HomeDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#1c1c1c] text-zinc-900 dark:text-white font-sans flex flex-col overflow-x-hidden transition-colors duration-300">
       
       {/* ── Notification Prompt ── */}
       <AnimatePresence>
@@ -94,14 +94,14 @@ const HomeDashboard: React.FC = () => {
             <p className="text-zinc-400 text-sm mt-1">It's Time To Challenge Your Limits.</p>
           </div>
           <div className="flex gap-4 pt-1">
-            <button className="text-white hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
-            <button className="text-white hover:text-[#d6ff3e] transition-colors relative">
+            <button className="text-zinc-600 dark:text-white hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
+            <button className="text-zinc-600 dark:text-white hover:text-[#d6ff3e] transition-colors relative">
               <Bell size={22} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#d6ff3e] rounded-full" />
             </button>
             <button 
               onClick={() => navigate('/profile')}
-              className="text-white hover:text-[#d6ff3e] transition-colors"
+              className="text-zinc-600 dark:text-white hover:text-[#d6ff3e] transition-colors"
             >
               <User size={22} />
             </button>
@@ -123,12 +123,12 @@ const HomeDashboard: React.FC = () => {
                 onClick={() => navigate(path)}
                 className="flex flex-col items-center gap-1.5 group"
               >
-                <div className="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center group-hover:bg-[#afa3ff]/20 transition-colors">
+                <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#afa3ff]/20 transition-colors">
                   <Icon size={24} className="text-[#afa3ff]" />
                 </div>
-                <span className="text-[10px] text-zinc-400 text-center leading-tight whitespace-pre-line">{label}</span>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 text-center leading-tight whitespace-pre-line">{label}</span>
               </button>
-              {i < 3 && <div className="w-px h-10 bg-zinc-700/60" />}
+              {i < 3 && <div className="w-px h-10 bg-zinc-200 dark:bg-zinc-700/60" />}
             </React.Fragment>
           ))}
         </div>
@@ -205,7 +205,7 @@ const HomeDashboard: React.FC = () => {
         {/* ── Articles & Tips ── */}
         <section className="px-6 pt-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-extrabold text-white">Articles &amp; Tips</h2>
+            <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Articles &amp; Tips</h2>
             <button className="text-[#afa3ff] text-sm font-bold flex items-center gap-1">
               See All <ChevronRight size={16} />
             </button>

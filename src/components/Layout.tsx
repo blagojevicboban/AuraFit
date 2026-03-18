@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { ThemeToggle } from "./ui/ThemeToggle";
 
 export default function Layout() {
   const location = useLocation();
@@ -58,7 +59,8 @@ export default function Layout() {
 
   const links = userData.role === 'admin' ? adminLinks : userData.role === 'coach' ? coachLinks : clientLinks;
 
-  return (    <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col">
+  return (
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col transition-colors duration-300">
       {isImpersonating && (
         <div className="bg-emerald-600 text-zinc-950 px-4 py-2 flex items-center justify-between sticky top-0 z-[60] shadow-lg">
           <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest">
@@ -79,7 +81,7 @@ export default function Layout() {
       <div className="flex flex-col md:flex-row flex-1">
       
       {/* Mobile Top Bar */}
-      <header className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
+      <header className="md:hidden flex items-center justify-between p-4 border-b border-zinc-200 dark:border-white/5 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl brand-gradient flex items-center justify-center text-zinc-950 font-black shadow-[0_0_20px_rgba(16,185,129,0.3)]">
             AF
@@ -87,7 +89,8 @@ export default function Layout() {
           <span className="text-xl font-display font-bold tracking-tight">Aura Fit</span>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-zinc-400 hover:text-white transition-colors">
+          <ThemeToggle />
+          <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
             <Menu className="w-6 h-6" />
           </button>
         </div>
@@ -139,7 +142,7 @@ export default function Layout() {
       </AnimatePresence>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-72 bg-zinc-950 border-r border-white/5 flex-col sticky top-0 h-screen">
+      <aside className="hidden md:flex w-72 bg-zinc-50/50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-white/5 flex-col sticky top-0 h-screen transition-colors duration-300">
         <div className="p-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl brand-gradient flex items-center justify-center text-zinc-950 font-black shadow-[0_0_20px_rgba(16,185,129,0.3)]">
@@ -167,19 +170,20 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="p-6 border-t border-white/5 m-4 bg-white/5 rounded-[2rem]">
+        <div className="p-6 border-t border-zinc-200 dark:border-white/5 m-4 bg-white dark:bg-white/5 rounded-[2rem] shadow-sm dark:shadow-none transition-colors duration-300">
           <div className="flex items-center gap-3 mb-6 px-2">
-            <div className="w-10 h-10 rounded-xl bg-zinc-950 flex items-center justify-center text-zinc-500 border border-white/5">
+            <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center text-zinc-500 border border-zinc-200 dark:border-white/5">
               <User className="w-5 h-5" />
             </div>
-            <div className="overflow-hidden">
+            <div className="overflow-hidden flex-1">
               <p className="text-sm font-bold truncate">{userData.displayName}</p>
               <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-black">{userData.role}</p>
             </div>
+            <ThemeToggle className="w-8 h-8 rounded-lg" />
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-black text-zinc-400 hover:text-rose-400 hover:bg-rose-400/10 transition-all uppercase tracking-widest"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-black text-zinc-500 dark:text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-400/10 transition-all uppercase tracking-widest"
           >
             <LogOut className="w-4 h-4" />
             Odjavi se
@@ -188,14 +192,14 @@ export default function Layout() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto pb-24 md:pb-0 bg-zinc-950">
+      <main className="flex-1 overflow-y-auto pb-24 md:pb-0 bg-white dark:bg-zinc-950 transition-colors duration-300">
         <div className="max-w-6xl mx-auto w-full">
           <Outlet />
         </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-950/90 backdrop-blur-xl border-t border-white/5 pb-safe z-40">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200 dark:border-white/5 pb-safe z-40 transition-colors duration-300">
         <div className="flex items-center justify-around p-3">
           {links.map((link) => {
             const isActive = location.pathname === link.to;

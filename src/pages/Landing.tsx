@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Activity, Brain, Users, Sparkles, Sun, Moon, Shield, X, User } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { ThemeToggle } from "../components/ui/ThemeToggle";
 
 export default function Landing() {
   const { signIn, passwordSignIn, adminSignIn, userData } = useAuth();
@@ -70,13 +71,13 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 selection:bg-emerald-500/30 overflow-hidden relative">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 selection:bg-emerald-500/30 overflow-hidden relative transition-colors duration-300">
       {/* Background Effects */}
       <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Navigation */}
-      <nav className="border-b border-white/5 relative z-10 bg-zinc-950/50 backdrop-blur-md">
+      <nav className="border-b border-zinc-200 dark:border-white/5 relative z-10 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-md transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl brand-gradient flex items-center justify-center text-zinc-950 font-black shadow-[0_0_20px_rgba(16,185,129,0.3)]">
@@ -85,15 +86,16 @@ export default function Landing() {
             <span className="text-2xl font-display font-bold tracking-tight">Aura Fit</span>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={() => handleSignIn('admin')} className="hidden md:block text-xs font-medium text-zinc-500 hover:text-white transition-colors cursor-pointer">
+            <ThemeToggle />
+            <button onClick={() => handleSignIn('admin')} className="hidden md:block text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
               Admin
             </button>
-            <button onClick={() => handleSignIn('client')} className="hidden sm:block text-sm font-medium text-zinc-400 hover:text-white transition-colors cursor-pointer">
+            <button onClick={() => handleSignIn('client')} className="hidden sm:block text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
               Prijava
             </button>
             <button
               onClick={() => handleSignIn('coach')}
-              className="text-xs sm:text-sm font-bold bg-white/10 text-white px-6 py-2.5 rounded-full hover:bg-white/20 transition-all border border-white/10 cursor-pointer backdrop-blur-md"
+              className="text-xs sm:text-sm font-bold bg-zinc-900/5 dark:bg-white/10 text-zinc-900 dark:text-white px-6 py-2.5 rounded-full hover:bg-zinc-900/10 dark:hover:bg-white/20 transition-all border border-zinc-200 dark:border-white/10 cursor-pointer backdrop-blur-md"
             >
               PORTAL ZA TRENERE
             </button>
@@ -121,8 +123,8 @@ export default function Landing() {
             </span>
           </h1>
           
-          <p className="text-xl sm:text-2xl text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-            Hibridna platforma koja spaja <span className="text-white font-medium">AI inteligenciju</span> sa stručnošću vrhunskih trenera. 
+          <p className="text-xl sm:text-2xl text-zinc-500 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+            Hibridna platforma koja spaja <span className="text-zinc-900 dark:text-white font-medium">AI inteligenciju</span> sa stručnošću vrhunskih trenera. 
             Rezultati koji se vide, podrška koja se oseća.
           </p>
 
@@ -136,7 +138,7 @@ export default function Landing() {
             </button>
             <button
               onClick={() => handleSignIn('coach')}
-              className="w-full sm:w-auto flex items-center justify-center gap-3 bg-zinc-900/50 text-white px-10 py-5 rounded-full font-bold text-lg hover:bg-zinc-800 transition-all border border-white/10 backdrop-blur-sm cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-3 bg-zinc-100 dark:bg-zinc-900/50 text-zinc-900 dark:text-white px-10 py-5 rounded-full font-bold text-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/10 backdrop-blur-sm cursor-pointer"
             >
               POSTANI MENTOR
             </button>
@@ -161,7 +163,7 @@ export default function Landing() {
                 <feature.icon className={`w-8 h-8 text-${feature.color}-400`} />
               </div>
               <h3 className="text-2xl font-display font-bold mb-4">{feature.title}</h3>
-              <p className="text-zinc-400 leading-relaxed font-light">
+              <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed font-light">
                 {feature.desc}
               </p>
             </motion.div>
