@@ -75,8 +75,13 @@ const Help: React.FC = () => {
         ))}
       </div>
 
-      <div className="mt-auto pt-12 pb-8 text-center text-zinc-400 dark:text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em]">
-        {t('help.designedFor')}
+      <div className="mt-auto pt-12 pb-8 text-center space-y-2">
+        <div className="text-zinc-400 dark:text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em]">
+          {t('help.designedFor')}
+        </div>
+        <div className="text-emerald-500 dark:text-[#d6ff3e] text-[9px] font-black uppercase tracking-[0.3em]">
+          {t('help.author')}
+        </div>
       </div>
     </div>
   );

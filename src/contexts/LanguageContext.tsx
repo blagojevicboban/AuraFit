@@ -154,6 +154,7 @@ const translations = {
       versionTitle: "App Version",
       versionDesc: "AuraFit v1.2.0 - Premium Edition",
       designedFor: "Designed for Excellence",
+      author: "Lead Developer: Boban Blagojević",
     },
     pwa: {
       promptTitle: "Install AuraFit",
@@ -385,6 +386,7 @@ const translations = {
       versionTitle: "Verzija aplikacije",
       versionDesc: "AuraFit v1.2.0 - Premium Edition",
       designedFor: "Dizajnirano za izvrsnost",
+      author: "Glavni programer: Boban Blagojević",
     },
     pwa: {
       promptTitle: "Instaliraj AuraFit",

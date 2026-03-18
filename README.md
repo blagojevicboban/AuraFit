@@ -71,5 +71,11 @@ A modern, high-tech fitness application UI built with React, Vite, and Tailwind 
 
 ---
 
+## 👨‍💻 Author
+
+**Boban Blagojević** – Lead Developer & Designer
+
+---
+
 > [!TIP]
 > This project is a UI prototype focused on high-end aesthetics and user experience. It uses Framer Motion for all transitions as defined in Phase 7 of the implementation plan.

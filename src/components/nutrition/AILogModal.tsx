@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sparkles, Loader2, Apple, Flame, Trophy, Info, Camera, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { X, Sparkles, Loader2, Apple, Flame, Trophy, Info, Camera, Image as ImageIcon, Trash2, Mic, MicOff } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { askAuraFitAI } from '../../lib/gemini';
 import { Button } from '../ui/Button';
@@ -26,6 +26,7 @@ interface NutritionResult {
 export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { currentUser } = useAuth();
   const [description, setDescription] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,6 +46,59 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
         setImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const toggleListen = async () => {
+    // @ts-ignore
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setError(language === 'sr' ? 'Vaš pretraživač ne podržava diktiranje.' : 'Your browser does not support dictation.');
+      return;
+    }
+
+    // Explicit check for microphone permission
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // If we get here, microphone is accessible. We can stop it immediately after check.
+      stream.getTracks().forEach(track => track.stop());
+    } catch (err: any) {
+      console.error('Microphone access denied', err);
+      setError(language === 'sr' ? 'Pristup mikrofonu je odbijen ili mikrofon nije povezan.' : 'Microphone access denied or not connected.');
+      return;
+    }
+
+    if (isListening) {
+      setIsListening(false);
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.lang = language === 'sr' ? 'sr-RS' : 'en-US';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onend = () => setIsListening(false);
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+        if (event.error === 'not-allowed') {
+          setError(language === 'sr' ? 'Dozvola za mikrofon nije data.' : 'Microphone permission not granted.');
+        } else {
+          setError(language === 'sr' ? 'Greška pri prepoznavanju glasa.' : 'Voice recognition error.');
+        }
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setDescription(prev => (prev.trim() ? `${prev.trim()} ${transcript}` : transcript));
+      };
+
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error('Speech recognition start failed', err);
+        setIsListening(false);
+      }
     }
   };
 
@@ -171,8 +225,22 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
                       placeholder={language === 'sr' ? "Npr: Tri kuvana jaja, šolja jogurta..." : "e.g. Three boiled eggs, a cup of yogurt..."}
                       className="w-full h-32 bg-zinc-800/50 border border-white/10 rounded-3xl p-5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#afa3ff]/50 transition-all resize-none text-lg"
                     />
-                    <div className="absolute bottom-4 right-4 text-zinc-600">
-                      <Apple size={20} />
+                    <div className="absolute bottom-4 right-4 flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={toggleListen}
+                        className={`p-2.5 rounded-2xl transition-all ${
+                          isListening 
+                            ? 'bg-rose-500 text-white animate-pulse shadow-lg shadow-rose-500/30' 
+                            : 'bg-zinc-800 text-zinc-400 hover:text-[#afa3ff] hover:bg-zinc-700'
+                        }`}
+                        title={isListening ? "Stop listening" : "Start dictation"}
+                      >
+                        {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                      </button>
+                      <div className="text-zinc-600">
+                        <Apple size={20} />
+                      </div>
                     </div>
                   </div>
                   
