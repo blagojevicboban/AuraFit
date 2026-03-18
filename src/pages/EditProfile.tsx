@@ -10,12 +10,46 @@ import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import BottomNav from '../components/BottomNav';
+import { db } from '../lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
 
 const EditProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { userData } = useAuth();
+  const { userData, currentUser } = useAuth();
   const { t, language } = useLanguage();
+  const [isSaving, setIsSaving] = React.useState(false);
+  
+  // Form state
+  const [formData, setFormData] = React.useState({
+    displayName: userData?.displayName || '',
+    weight: userData?.weight || '',
+    height: userData?.height || '',
+    age: userData?.age || '',
+    mobile: (userData as any)?.mobile || '',
+    dob: (userData as any)?.dob || (userData as any)?.birthday || ''
+  });
 
+  const handleSave = async () => {
+    if (!currentUser) return;
+    setIsSaving(true);
+    try {
+      const userRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userRef, {
+        displayName: formData.displayName,
+        weight: Number(formData.weight) || userData?.weight,
+        height: Number(formData.height) || userData?.height,
+        age: Number(formData.age) || userData?.age,
+        mobile: formData.mobile,
+        dob: formData.dob
+      });
+      navigate('/profile');
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans flex flex-col pb-24 transition-colors duration-300">
       
@@ -50,20 +84,20 @@ const EditProfile: React.FC = () => {
             <p className="text-[#1c1c1c] text-xs font-bold mt-1 uppercase tracking-widest">{userData?.role}</p>
 
             {/* Stats Card (Floating) */}
-            <div className="mt-8 bg-white/90 dark:bg-[#afa3ff]/90 backdrop-blur-md rounded-2xl w-full flex items-center justify-around py-4 border border-white/20 shadow-lg translate-y-4">
+            <div className="mt-8 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-2xl w-full flex items-center justify-around py-4 border border-white/20 shadow-lg translate-y-4">
                 <div className="text-center">
-                    <div className="text-[#1c1c1c] font-black text-lg">-- Kg</div>
-                    <div className="text-[#1c1c1c]/60 text-[10px] font-bold uppercase tracking-wider">{t('profile.weight')}</div>
+                    <div className="text-zinc-900 dark:text-white font-black text-lg">{userData?.weight || '--'} <span className="text-[10px] text-zinc-400">kg</span></div>
+                    <div className="text-zinc-500 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-wider">{t('profile.weight')}</div>
                 </div>
-                <div className="w-[1px] h-8 bg-[#1c1c1c]/20" />
+                <div className="w-[1px] h-8 bg-zinc-200 dark:bg-white/10" />
                 <div className="text-center">
-                    <div className="text-[#1c1c1c] font-black text-lg">--</div>
-                    <div className="text-[#1c1c1c]/60 text-[10px] font-bold uppercase tracking-wider">{t('profile.age')}</div>
+                    <div className="text-zinc-900 dark:text-white font-black text-lg">{userData?.age || '--'}</div>
+                    <div className="text-zinc-500 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-wider">{t('profile.age')}</div>
                 </div>
-                <div className="w-[1px] h-8 bg-[#1c1c1c]/20" />
+                <div className="w-[1px] h-8 bg-zinc-200 dark:bg-white/10" />
                 <div className="text-center">
-                    <div className="text-[#1c1c1c] font-black text-lg">-- CM</div>
-                    <div className="text-[#1c1c1c]/60 text-[10px] font-bold uppercase tracking-wider">{t('profile.height')}</div>
+                    <div className="text-zinc-900 dark:text-white font-black text-lg">{userData?.height || '--'} <span className="text-[10px] text-zinc-400">cm</span></div>
+                    <div className="text-zinc-500 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-wider">{t('profile.height')}</div>
                 </div>
             </div>
         </div>
@@ -73,46 +107,54 @@ const EditProfile: React.FC = () => {
       <div className="flex-grow pt-14 px-6 space-y-6">
         <Input 
             label={t('profile.fullName')} 
-            defaultValue={userData?.displayName || ''} 
+            value={formData.displayName}
+            onChange={(e) => setFormData({...formData, displayName: e.target.value})}
             placeholder={t('profile.fullNamePlaceholder')}
         />
         <Input 
             label={t('profile.email')} 
-            defaultValue={userData?.email || ''} 
+            value={userData?.email || ''} 
             placeholder={t('profile.emailPlaceholder') || "example@example.com"}
             type="email"
             disabled
         />
         <Input 
             label={t('profile.mobile')} 
-            defaultValue="" 
+            value={formData.mobile}
+            onChange={(e) => setFormData({...formData, mobile: e.target.value})}
             placeholder={t('profile.mobilePlaceholder')}
         />
         <Input 
             label={t('profile.dob')} 
-            defaultValue="" 
+            value={formData.dob}
+            onChange={(e) => setFormData({...formData, dob: e.target.value})}
             placeholder={t('profile.dobPlaceholder')}
         />
         <div className="flex gap-4">
             <Input 
                 label={t('profile.weight')} 
-                defaultValue="" 
+                value={formData.weight}
+                onChange={(e) => setFormData({...formData, weight: e.target.value})}
                 placeholder="-- Kg"
                 className="flex-1"
+                type="number"
             />
             <Input 
                 label={t('profile.height')} 
-                defaultValue="" 
+                value={formData.height}
+                onChange={(e) => setFormData({...formData, height: e.target.value})}
                 placeholder="-- CM"
                 className="flex-1"
+                type="number"
             />
         </div>
 
         <Button 
             className="w-full mt-4 bg-emerald-500 dark:bg-[#d6ff3e] text-white dark:text-[#1c1c1c] border-none hover:opacity-90 transition-opacity"
-            onClick={() => navigate('/profile')}
+            onClick={handleSave}
+            disabled={isSaving}
         >
-            {t('profile.update')}
+            {isSaving ? <Loader2 className="animate-spin" /> : t('profile.update')}
         </Button>
       </div>
 
