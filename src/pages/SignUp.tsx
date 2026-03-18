@@ -8,8 +8,6 @@ import { useAuth } from '../contexts/AuthContext';
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
-const SignUp: React.FC = () => {
-  const navigate = useNavigate();
   const { signUp, signIn } = useAuth();
   
   // State
