@@ -43,8 +43,15 @@ export default function Landing() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn(loginRole);
+      const { isNewUser } = await signIn(loginRole);
       setShowLoginModal(false);
+      if (isNewUser) {
+        navigate('/setup');
+      } else {
+        if (loginRole === 'admin') navigate('/app/admin');
+        else if (loginRole === 'coach') navigate('/app/coach');
+        else navigate('/home');
+      }
     } catch (error: any) {
       if (error?.code !== 'auth/popup-closed-by-user') {
         console.error("Login failed", error);
@@ -91,10 +98,10 @@ export default function Landing() {
           <div className="flex items-center gap-4">
             <LanguageToggle />
             <ThemeToggle />
-            <button onClick={() => handleSignIn('admin')} className="hidden md:block text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
+            <button onClick={() => handleSignIn('admin')} className="hidden md:block text-xs font-medium text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer">
               {t('landing.admin')}
             </button>
-            <button onClick={() => handleSignIn('client')} className="hidden sm:block text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
+            <button onClick={() => handleSignIn('client')} className="hidden sm:block text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer">
               {t('landing.login')}
             </button>
             <button
@@ -127,8 +134,8 @@ export default function Landing() {
             </span>
           </h1>
           
-          <p className="text-xl sm:text-2xl text-zinc-500 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-            {t('landing.heroDesc').split('AI inteligenciju').map((part: string, i: number) => i === 0 ? part : <><span key={i} className="text-zinc-900 dark:text-white font-medium">AI inteligenciju</span>{part}</>)}
+          <p className="text-xl sm:text-2xl text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+            {t('landing.heroDesc').split('AI inteligenciju').map((part: string, i: number) => i === 0 ? part : <><span key={i} className="text-zinc-950 dark:text-white font-medium">AI inteligenciju</span>{part}</>)}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6 justify-center">
@@ -166,7 +173,7 @@ export default function Landing() {
                 <feature.icon className={`w-8 h-8 text-${feature.color}-400`} />
               </div>
               <h3 className="text-2xl font-display font-bold mb-4">{feature.title}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed font-light">
+              <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-light">
                 {feature.desc}
               </p>
             </motion.div>
@@ -279,6 +286,12 @@ export default function Landing() {
                   )}
                 </button>
               </form>
+
+              <div className="mt-8 text-center px-2">
+                <p className="text-zinc-500 text-sm font-medium">
+                  Don't have an account? <Link to="/signup" className="text-emerald-500 dark:text-[#d6ff3e] font-black hover:underline uppercase tracking-tighter ml-1">Sign up</Link>
+                </p>
+              </div>
             </motion.div>
           </div>
         )}

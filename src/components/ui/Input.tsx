@@ -19,7 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label 
             htmlFor={inputId} 
-            className={twMerge("text-zinc-400 font-semibold text-sm ml-1 uppercase tracking-widest", labelClassName)}
+            className={twMerge("text-zinc-600 dark:text-zinc-400 font-bold text-[10px] ml-1 uppercase tracking-widest", labelClassName)}
           >
             {label}
           </label>
@@ -30,7 +30,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             className={twMerge(
               clsx(
-                "w-full bg-white/5 border border-white/10 text-white placeholder:text-zinc-600 px-5 py-3.5 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#d6ff3e]/50 text-lg transition-all",
+                "w-full bg-zinc-100 border-zinc-200 text-zinc-950 dark:bg-white/5 dark:border-white/10 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 px-5 py-3.5 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#afa3ff]/50 dark:focus:ring-[#d6ff3e]/50 text-lg transition-all border",
                 icon && "pl-12",
                 error && "border-rose-500 focus:ring-rose-500",
                 className
@@ -39,7 +39,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {icon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400">
               {icon}
             </div>
           )}

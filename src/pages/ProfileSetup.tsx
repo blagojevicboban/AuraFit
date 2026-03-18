@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, ArrowRight, Activity, Weight, Ruler, Target } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -11,6 +12,7 @@ const ProfileSetup: React.FC = () => {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
   const { currentUser, userData } = useAuth();
+  const { t } = useLanguage();
 
   // Form State
   const [gender, setGender] = useState<'Male' | 'Female' | null>(null);
@@ -20,6 +22,37 @@ const ProfileSetup: React.FC = () => {
   const [goal, setGoal] = useState<string>('');
   const [activityLevel, setActivityLevel] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  // Initialize data from userData if available
+  useEffect(() => {
+    if (userData) {
+      if (userData.gender) setGender(userData.gender);
+      if (userData.weight) setWeight(userData.weight);
+      if (userData.height) setHeight(userData.height);
+      
+      // Calculate age from birthday if provided by Google
+      // Note: birthday is usually in YYYY-MM-DD or MM/DD/YYYY format in Google profile
+      const rawBirthday = (userData as any).birthday;
+      if (rawBirthday) {
+        try {
+          const birthDate = new Date(rawBirthday);
+          const today = new Date();
+          let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            calculatedAge--;
+          }
+          if (calculatedAge > 10 && calculatedAge < 100) {
+            setAge(calculatedAge);
+          }
+        } catch (e) {
+          console.error("Error parsing birthday:", e);
+        }
+      } else if ((userData as any).age) {
+        setAge((userData as any).age);
+      }
+    }
+  }, [userData]);
 
   const handleNext = async () => {
     if (step < 6) {
@@ -59,22 +92,22 @@ const ProfileSetup: React.FC = () => {
       case 1:
         return (
           <div className="flex flex-col h-full justify-center gap-8">
-            <h2 className="text-4xl font-extrabold text-center mb-4">Tell Us About<br/>Yourself!</h2>
+            <h2 className="text-4xl font-extrabold text-center mb-4 whitespace-pre-line">{t('setup.title1')}</h2>
             <p className="text-center text-zinc-400 max-w-xs mx-auto mb-8">
-              To give you a better experience we need to know your gender.
+              {t('setup.desc1')}
             </p>
             <div className="flex flex-col gap-4">
               <button 
                 onClick={() => setGender('Male')}
                 className={`w-full py-6 rounded-[2rem] text-xl font-bold transition-all ${gender === 'Male' ? 'bg-[#d6ff3e] text-[#1c1c1c] shadow-[0_0_20px_rgba(214,255,62,0.3)]' : 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
               >
-                Male
+                {t('setup.male')}
               </button>
               <button 
                 onClick={() => setGender('Female')}
                 className={`w-full py-6 rounded-[2rem] text-xl font-bold transition-all ${gender === 'Female' ? 'bg-[#d6ff3e] text-[#1c1c1c] shadow-[0_0_20px_rgba(214,255,62,0.3)]' : 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
               >
-                Female
+                {t('setup.female')}
               </button>
             </div>
           </div>
@@ -82,9 +115,9 @@ const ProfileSetup: React.FC = () => {
       case 2:
         return (
           <div className="flex flex-col h-full justify-center gap-8">
-            <h2 className="text-4xl font-extrabold text-center mb-4">How Old Are You?</h2>
+            <h2 className="text-4xl font-extrabold text-center mb-4">{t('setup.title2')}</h2>
             <p className="text-center text-zinc-400 max-w-xs mx-auto mb-8">
-              This helps us create your personalized plan.
+              {t('setup.desc2')}
             </p>
             <div className="flex flex-col items-center justify-center gap-8 py-10">
               <div className="text-6xl font-black text-[#d6ff3e]">{age}</div>
@@ -101,15 +134,14 @@ const ProfileSetup: React.FC = () => {
       case 3:
         return (
           <div className="flex flex-col h-full justify-center gap-8">
-            <h2 className="text-4xl font-extrabold text-center mb-4">What's Your Weight?</h2>
+            <h2 className="text-4xl font-extrabold text-center mb-4">{t('setup.title3')}</h2>
             <p className="text-center text-zinc-400 max-w-xs mx-auto mb-8">
-              You can always change this later.
+              {t('setup.desc3')}
             </p>
             <div className="flex justify-center items-end gap-2 py-10">
               <div className="text-6xl font-black text-[#d6ff3e]">{weight}</div>
               <div className="text-xl font-bold text-zinc-500 pb-2">kg</div>
             </div>
-            {/* Range slider or custom scroll picker could go here */}
             <input 
                 type="range" 
                 min="40" max="200" 
@@ -122,9 +154,9 @@ const ProfileSetup: React.FC = () => {
       case 4:
         return (
           <div className="flex flex-col h-full justify-center gap-8">
-            <h2 className="text-4xl font-extrabold text-center mb-4">What's Your Height?</h2>
+            <h2 className="text-4xl font-extrabold text-center mb-4">{t('setup.title4')}</h2>
             <p className="text-center text-zinc-400 max-w-xs mx-auto mb-8">
-              This helps us calculate your BMI.
+              {t('setup.desc4')}
             </p>
             <div className="flex justify-center items-end gap-2 py-10">
               <div className="text-6xl font-black text-[#d6ff3e]">{height}</div>
@@ -140,42 +172,53 @@ const ProfileSetup: React.FC = () => {
           </div>
         );
       case 5:
-        const goals = ['Weight Loss', 'Muscle Gain', 'Shape Body', 'Others'];
+        const goals = [
+          { id: 'loss', label: t('setup.goal1') },
+          { id: 'gain', label: t('setup.goal2') },
+          { id: 'shape', label: t('setup.goal3') },
+          { id: 'other', label: t('setup.goal4') }
+        ];
         return (
           <div className="flex flex-col h-full justify-center gap-8">
-            <h2 className="text-4xl font-extrabold text-center mb-4">What's Your Goal?</h2>
+            <h2 className="text-4xl font-extrabold text-center mb-4">{t('setup.title5')}</h2>
             <p className="text-center text-zinc-400 max-w-xs mx-auto mb-8">
-              This helps us create your personalized plan.
+              {t('setup.desc5')}
             </p>
             <div className="flex flex-col gap-3">
               {goals.map((g) => (
                 <button 
-                  key={g}
-                  onClick={() => setGoal(g)}
-                  className={`w-full py-5 rounded-[1.5rem] text-lg font-bold transition-all ${goal === g ? 'bg-[#d6ff3e] text-[#1c1c1c]' : 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
+                  key={g.id}
+                  onClick={() => setGoal(g.id)}
+                  className={`w-full py-5 rounded-[1.5rem] text-lg font-bold transition-all ${goal === g.id ? 'bg-[#d6ff3e] text-[#1c1c1c]' : 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
                 >
-                  {g}
+                  {g.label}
                 </button>
               ))}
             </div>
           </div>
         );
       case 6:
-        const activities = ['Rookie', 'Beginner', 'Intermediate', 'Advance', 'True Beast'];
+        const activities = [
+          { id: 'rookie', label: t('common.rookie') },
+          { id: 'beginner', label: t('common.beginner') },
+          { id: 'intermediate', label: t('common.intermediate') },
+          { id: 'advance', label: t('common.advance') },
+          { id: 'beast', label: t('common.beast') }
+        ];
         return (
           <div className="flex flex-col h-full justify-center gap-8">
-            <h2 className="text-4xl font-extrabold text-center mb-4">Physical Activity Level</h2>
+            <h2 className="text-4xl font-extrabold text-center mb-4">{t('setup.title6')}</h2>
             <p className="text-center text-zinc-400 max-w-xs mx-auto mb-8">
-              Choose your regular activity level so we can provide the best plan.
+              {t('setup.desc6')}
             </p>
             <div className="flex flex-col gap-3">
               {activities.map((a) => (
                 <button 
-                  key={a}
-                  onClick={() => setActivityLevel(a)}
-                  className={`w-full py-5 rounded-[1.5rem] text-lg font-bold transition-all ${activityLevel === a ? 'bg-[#d6ff3e] text-[#1c1c1c]' : 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
+                  key={a.id}
+                  onClick={() => setActivityLevel(a.id)}
+                  className={`w-full py-5 rounded-[1.5rem] text-lg font-bold transition-all ${activityLevel === a.id ? 'bg-[#d6ff3e] text-[#1c1c1c]' : 'bg-zinc-800 text-white hover:bg-zinc-700'}`}
                 >
-                  {a}
+                  {a.label}
                 </button>
               ))}
             </div>
@@ -190,7 +233,9 @@ const ProfileSetup: React.FC = () => {
     <div className="min-h-screen bg-[#1c1c1c] text-white flex flex-col font-sans px-6 py-12">
       {/* Progress Header */}
       <div className="flex flex-col gap-6 mb-8">
-        <h1 className="text-[#d6ff3e] text-2xl font-bold uppercase tracking-wider text-center">Step {step} of 6</h1>
+        <h1 className="text-[#d6ff3e] text-2xl font-bold uppercase tracking-wider text-center">
+            {t('setup.stepTitle').replace('{{step}}', step.toString())}
+        </h1>
         <div className="flex gap-2 w-full justify-center">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div 
@@ -225,18 +270,23 @@ const ProfileSetup: React.FC = () => {
             onClick={() => setStep(step - 1)}
             className="text-zinc-400 hover:text-white"
           >
-            Back
+            {t('setup.back')}
           </Button>
         ) : <div />}
         
         <div className="flex gap-4 items-center">
-          <button className="text-white/50 font-bold hover:text-white transition-colors">Skip</button>
+          <button 
+            onClick={() => navigate('/home')}
+            className="text-white/50 font-bold hover:text-white transition-colors"
+          >
+            {t('setup.skip')}
+          </button>
           <Button 
             onClick={handleNext}
             isLoading={loading}
             className="rounded-full shadow-[0_0_20px_rgba(214,255,62,0.3)] gap-2"
           >
-            {step === 6 ? 'Finish' : 'Continue'} <ArrowRight className="w-5 h-5" />
+            {step === 6 ? t('setup.finish') : t('setup.continue')} <ArrowRight className="w-5 h-5" />
           </Button>
         </div>
       </div>

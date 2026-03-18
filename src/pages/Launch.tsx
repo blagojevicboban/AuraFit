@@ -50,13 +50,13 @@ const Launch: React.FC = () => {
           <div className="relative w-32 h-32 border-4 border-[#d6ff3e] rounded-[2rem] flex items-center justify-center rotate-45">
             <div className="w-16 h-16 border-t-4 border-l-4 border-[#d6ff3e] absolute -top-1 -left-1" />
             <div className="w-12 h-12 bg-[#d6ff3e] rounded-lg -rotate-45 flex items-center justify-center shadow-[0_0_20px_rgba(214,255,62,0.5)]">
-               <span className="text-[#1c1c1c] font-black text-3xl">F</span>
+               <span className="text-[#1c1c1c] font-black text-3xl">A</span>
             </div>
           </div>
         </div>
         
         <h1 className="text-5xl font-extrabold tracking-[0.2em] uppercase italic">
-          FitBody
+          AuraFit
         </h1>
         <motion.div 
           initial={{ w: 0, opacity: 0 }}

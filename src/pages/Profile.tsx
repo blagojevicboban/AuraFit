@@ -29,7 +29,7 @@ const Profile: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#1c1c1c] text-zinc-900 dark:text-white font-sans flex flex-col pb-24 transition-colors duration-300">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans flex flex-col pb-24 transition-colors duration-300">
       
       {/* ── Header Area ── */}
       <div className="bg-[#afa3ff] pt-12 pb-6 px-6 rounded-b-[3rem] relative z-10 shadow-lg">
@@ -97,11 +97,11 @@ const Profile: React.FC = () => {
                         item.danger ? 'text-red-500' : 'text-[#afa3ff] dark:group-hover:text-[#1c1c1c]'
                     }`} />
                 </div>
-                <span className={`text-lg font-bold group-hover:text-emerald-500 dark:group-hover:text-[#d6ff3e] transition-colors ${item.danger ? 'text-red-500' : 'text-zinc-600 dark:text-zinc-200'}`}>
+                <span className={`text-lg font-bold group-hover:text-emerald-500 dark:group-hover:text-[#d6ff3e] transition-colors ${item.danger ? 'text-red-500' : 'text-zinc-800 dark:text-zinc-200'}`}>
                     {item.label}
                 </span>
             </div>
-            <ChevronRight size={20} className="text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 dark:group-hover:text-[#d6ff3e] transition-colors" />
+            <ChevronRight size={20} className="text-zinc-500 dark:text-zinc-500 group-hover:text-emerald-500 dark:group-hover:text-[#d6ff3e] transition-colors" />
           </motion.div>
         ))}
       </div>

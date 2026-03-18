@@ -45,7 +45,7 @@ const HomeDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#1c1c1c] text-zinc-900 dark:text-white font-sans flex flex-col overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#1c1c1c] text-zinc-950 dark:text-white font-sans flex flex-col overflow-x-hidden transition-colors duration-300">
       
       {/* ── Notification Prompt ── */}
       <AnimatePresence>
@@ -93,17 +93,17 @@ const HomeDashboard: React.FC = () => {
             <h1 className="text-3xl font-extrabold" style={{ color: '#afa3ff' }}>
               {t('home.welcome').replace('{{name}}', userData?.displayName || 'Champ')}
             </h1>
-            <p className="text-zinc-600 dark:text-zinc-400 text-sm mt-1">{t('home.challengeLimits')}</p>
+            <p className="text-zinc-700 dark:text-zinc-400 text-sm mt-1">{t('home.challengeLimits')}</p>
           </div>
           <div className="flex gap-4 pt-1">
-            <button className="text-zinc-600 dark:text-white hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
-            <button className="text-zinc-600 dark:text-white hover:text-[#d6ff3e] transition-colors relative">
+            <button className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
+            <button className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors relative">
               <Bell size={22} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#d6ff3e] rounded-full" />
             </button>
             <button 
               onClick={() => navigate('/profile')}
-              className="text-zinc-600 dark:text-white hover:text-[#d6ff3e] transition-colors"
+              className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors"
             >
               <User size={22} />
             </button>

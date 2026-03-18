@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, signInWithGoogle, signInWithEmail, logOut, handleFirestoreError, OperationType, requestForToken, onMessageListener } from '../lib/firebase';
+import { auth, db, signInWithGoogle, signInWithEmail, logOut, handleFirestoreError, OperationType, requestForToken, onMessageListener, googleProvider } from '../lib/firebase';
 
 interface UserData {
   uid: string;
@@ -16,7 +16,7 @@ interface AuthContextType {
   currentUser: User | null;
   userData: UserData | null;
   loading: boolean;
-  signIn: (role: 'client' | 'coach' | 'admin', forceSelect?: boolean) => Promise<void>;
+  signIn: (role: 'client' | 'coach' | 'admin', forceSelect?: boolean) => Promise<{ isNewUser: boolean }>;
   signUp: (email: string, pass: string, displayName: string, role: 'client' | 'coach') => Promise<void>;
   passwordSignIn: (username: string, pass: string, role: 'client' | 'coach') => Promise<void>;
   adminSignIn: (username: string, pass: string) => Promise<void>;
@@ -67,8 +67,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (role: 'client' | 'coach' | 'admin', forceSelect = false) => {
     try {
-      const user = await signInWithGoogle(forceSelect);
+      if (forceSelect) {
+        googleProvider.setCustomParameters({ prompt: 'select_account' });
+      } else {
+        googleProvider.setCustomParameters({});
+      }
       
+      const { signInWithPopup, getAdditionalUserInfo } = await import('firebase/auth');
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const additionalInfo = getAdditionalUserInfo(result);
+      const isNewUser = additionalInfo?.isNewUser || false;
+
       // Persist last used google account for UX
       localStorage.setItem('aura_last_google_user', JSON.stringify({
         displayName: user.displayName,
@@ -87,7 +97,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!userDoc?.exists()) {
         // Create new user profile
-        // Bootstrap admin check
         const isBootstrapAdmin = user.email === 'ai4vetschools@gmail.com';
         const finalRole = isBootstrapAdmin ? 'admin' : role;
 
@@ -98,7 +107,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           photoURL: user.photoURL || '',
           role: finalRole,
           createdAt: serverTimestamp(),
+          setupCompleted: false
         };
+        
+        // Attempt to extract birthdate if available (rare but good practice)
+        if ((additionalInfo?.profile as any)?.birthday) {
+           newUserData.birthday = (additionalInfo.profile as any).birthday;
+        }
+
         try {
           await setDoc(userDocRef, newUserData);
         } catch (error) {
@@ -108,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         const data = userDoc.data() as UserData;
         
-        // Update profile picture if it changed or was missing
+        // Update profile picture if it changed
         if (user.photoURL && data.photoURL !== user.photoURL) {
           data.photoURL = user.photoURL;
           await setDoc(userDocRef, { photoURL: user.photoURL }, { merge: true });
@@ -121,6 +137,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         setUserData(data);
       }
+
+      return { isNewUser };
     } catch (error: any) {
       if (error?.code !== 'auth/popup-closed-by-user') {
         console.error("Error signing in", error);

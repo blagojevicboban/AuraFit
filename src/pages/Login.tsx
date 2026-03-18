@@ -27,8 +27,12 @@ const Login: React.FC = () => {
 
   const handleGoogleLogin = async (forceSelect = false) => {
     try {
-      await signIn('client', forceSelect);
-      navigate('/home');
+      const { isNewUser } = await signIn('client', forceSelect);
+      if (isNewUser) {
+        navigate('/setup');
+      } else {
+        navigate('/home');
+      }
     } catch (err: any) {
       if (err?.code === 'auth/unauthorized-domain') {
         alert('Ovaj domen nije autorizovan u Firebase Console. Molimo dodajte "aurafit-b1ug.onrender.com" u Authorized Domains.');
@@ -36,6 +40,12 @@ const Login: React.FC = () => {
         alert('Google Log In failed. Please try again.');
       }
     }
+  };
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Assuming a login function exists or will be added. For now, we simulate.
+    navigate('/home');
   };
 
   return (

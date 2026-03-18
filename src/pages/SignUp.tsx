@@ -53,7 +53,7 @@ const SignUp: React.FC = () => {
     setLoading(true);
     try {
       await signUp(email, password, name, 'client');
-      navigate('/profile-setup');
+      navigate('/setup');
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {
@@ -63,8 +63,12 @@ const SignUp: React.FC = () => {
 
   const handleGoogleSignUp = async (forceSelect = false) => {
     try {
-      await signIn('client', forceSelect);
-      navigate('/profile-setup');
+      const { isNewUser } = await signIn('client', forceSelect);
+      if (isNewUser) {
+        navigate('/setup');
+      } else {
+        navigate('/home');
+      }
     } catch (err: any) {
       if (err?.code === 'auth/unauthorized-domain') {
         setError('Ovaj domen nije autorizovan u Firebase Console. Dodajte ga u Authorized Domains.');
