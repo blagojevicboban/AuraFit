@@ -4,11 +4,14 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Activity, Brain, Users, Sparkles, Sun, Moon, Shield, X, User } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import { ThemeToggle } from "../components/ui/ThemeToggle";
+import { LanguageToggle } from "../components/ui/LanguageToggle";
 
 export default function Landing() {
   const { signIn, passwordSignIn, adminSignIn, userData } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -86,18 +89,19 @@ export default function Landing() {
             <span className="text-2xl font-display font-bold tracking-tight">Aura Fit</span>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageToggle />
             <ThemeToggle />
             <button onClick={() => handleSignIn('admin')} className="hidden md:block text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
-              Admin
+              {t('landing.admin')}
             </button>
             <button onClick={() => handleSignIn('client')} className="hidden sm:block text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
-              Prijava
+              {t('landing.login')}
             </button>
             <button
               onClick={() => handleSignIn('coach')}
               className="text-xs sm:text-sm font-bold bg-zinc-900/5 dark:bg-white/10 text-zinc-900 dark:text-white px-6 py-2.5 rounded-full hover:bg-zinc-900/10 dark:hover:bg-white/20 transition-all border border-zinc-200 dark:border-white/10 cursor-pointer backdrop-blur-md"
             >
-              PORTAL ZA TRENERE
+              {t('landing.coachPortal')}
             </button>
           </div>
         </div>
@@ -113,19 +117,18 @@ export default function Landing() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 text-xs sm:text-sm font-bold mb-8 border border-emerald-500/20 backdrop-blur-sm uppercase tracking-widest">
             <Sparkles className="w-4 h-4" />
-            Budućnost fitnesa je ovde
+            {t('landing.futureOfFitness')}
           </div>
           
           <h1 className="text-6xl sm:text-8xl md:text-9xl font-display font-black tracking-tighter mb-8 leading-[0.9] text-gradient">
-            TVOJ TRENING. <br />
+            {t('landing.yourWorkout')} <br />
             <span className="text-transparent bg-clip-text brand-gradient">
-              TVOJA AURA.
+              {t('landing.yourAura')}
             </span>
           </h1>
           
           <p className="text-xl sm:text-2xl text-zinc-500 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-            Hibridna platforma koja spaja <span className="text-zinc-900 dark:text-white font-medium">AI inteligenciju</span> sa stručnošću vrhunskih trenera. 
-            Rezultati koji se vide, podrška koja se oseća.
+            {t('landing.heroDesc').split('AI inteligenciju').map((part: string, i: number) => i === 0 ? part : <><span key={i} className="text-zinc-900 dark:text-white font-medium">AI inteligenciju</span>{part}</>)}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6 justify-center">
@@ -133,14 +136,14 @@ export default function Landing() {
               onClick={() => handleSignIn('client')}
               className="w-full sm:w-auto flex items-center justify-center gap-3 brand-gradient text-zinc-950 px-10 py-5 rounded-full font-black text-lg hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-[0_0_40px_rgba(16,185,129,0.2)]"
             >
-              ZAPOČNI TRANSFORMACIJU
+              {t('landing.startTransformation')}
               <ArrowRight className="w-6 h-6" />
             </button>
             <button
               onClick={() => handleSignIn('coach')}
               className="w-full sm:w-auto flex items-center justify-center gap-3 bg-zinc-100 dark:bg-zinc-900/50 text-zinc-900 dark:text-white px-10 py-5 rounded-full font-bold text-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/10 backdrop-blur-sm cursor-pointer"
             >
-              POSTANI MENTOR
+              {t('landing.becomeMentor')}
             </button>
           </div>
         </motion.div>
@@ -148,9 +151,9 @@ export default function Landing() {
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mt-40">
           {[
-            { icon: Brain, title: "AI Nutricionista", desc: "Samo opiši obrok, AI radi ostalo. Precizno praćenje bez zamornog kucanja.", color: "emerald" },
-            { icon: Activity, title: "Smart Workout", desc: "Inteligentno praćenje progresa. Aplikacija zna kada si spreman za veći izazov.", color: "cyan" },
-            { icon: Users, title: "Elite Coaching", desc: "Direktna veza sa mentorom. Personalizovani planovi i video feedback.", color: "indigo" }
+            { icon: Brain, title: t('landing.aiNutrient'), desc: t('landing.aiNutrientDesc'), color: "emerald" },
+            { icon: Activity, title: t('landing.smartWorkout'), desc: t('landing.smartWorkoutDesc'), color: "cyan" },
+            { icon: Users, title: t('landing.eliteCoaching'), desc: t('landing.eliteCoachingDesc'), color: "indigo" }
           ].map((feature, i) => (
             <motion.div
               key={i}

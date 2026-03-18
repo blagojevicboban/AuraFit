@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../contexts/AuthContext';
 
 // Placeholder matching the aesthetic of Onboarding 2-A -> 2-D
 const onboardingSteps = [
@@ -26,6 +27,15 @@ const onboardingSteps = [
 const Onboarding: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
+  const { userData, loading } = useAuth();
+
+  React.useEffect(() => {
+    if (!loading && userData) {
+      if (userData.role === 'admin') navigate('/app/admin');
+      else if (userData.role === 'coach') navigate('/app/coach');
+      else navigate('/app/client');
+    }
+  }, [userData, loading, navigate]);
 
   const handleNext = () => {
     if (currentStep < onboardingSteps.length - 1) {

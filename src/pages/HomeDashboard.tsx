@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // ─────────────────────────────────────────────
 // Data
@@ -26,6 +27,7 @@ const articles = [
 const HomeDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { initNotifications, userData } = useAuth();
+  const { t } = useLanguage();
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
@@ -69,13 +71,13 @@ const HomeDashboard: React.FC = () => {
                   <Bell className="text-[#1c1c1c]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-[#1c1c1c] font-black text-lg leading-tight mb-1">Stay Notified!</h3>
-                  <p className="text-[#1c1c1c]/70 text-sm font-medium mb-4">Get real-time updates on your workouts and nutrition plans.</p>
+                  <h3 className="text-[#1c1c1c] font-black text-lg leading-tight mb-1">{t('home.stayNotified')}</h3>
+                  <p className="text-[#1c1c1c]/70 text-sm font-medium mb-4">{t('home.notificationDesc')}</p>
                   <button 
                     onClick={handleEnableNotifications}
                     className="w-full py-3 bg-[#1c1c1c] text-[#d6ff3e] rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-black transition-colors"
                   >
-                    Enable Notifications
+                    {t('home.enableNotifications')}
                   </button>
                 </div>
               </div>
@@ -89,9 +91,9 @@ const HomeDashboard: React.FC = () => {
         <div className="flex items-start justify-between mb-1">
           <div>
             <h1 className="text-3xl font-extrabold" style={{ color: '#afa3ff' }}>
-              Hi, Madison 👋
+              {t('home.welcome').replace('{{name}}', userData?.displayName || 'Champ')}
             </h1>
-            <p className="text-zinc-400 text-sm mt-1">It's Time To Challenge Your Limits.</p>
+            <p className="text-zinc-600 dark:text-zinc-400 text-sm mt-1">{t('home.challengeLimits')}</p>
           </div>
           <div className="flex gap-4 pt-1">
             <button className="text-zinc-600 dark:text-white hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
@@ -113,10 +115,10 @@ const HomeDashboard: React.FC = () => {
       <div className="px-6 py-4">
         <div className="flex items-center justify-around">
           {[
-            { icon: Dumbbell, label: 'Workout', path: '/workouts' },
-            { icon: BarChart2, label: 'Progress\nTracking', path: '/progress' },
-            { icon: Apple, label: 'Nutrition', path: '/nutrition' },
-            { icon: Users, label: 'Community', path: '/community' },
+            { icon: Dumbbell, label: t('home.workout'), path: '/workouts' },
+            { icon: BarChart2, label: t('home.progressTracking').replace('\n', ' '), path: '/progress' },
+            { icon: Apple, label: t('nav.nutrition'), path: '/nutrition' },
+            { icon: Users, label: t('nav.community'), path: '/community' },
           ].map(({ icon: Icon, label, path }, i) => (
             <React.Fragment key={label}>
               <button
@@ -140,9 +142,9 @@ const HomeDashboard: React.FC = () => {
         {/* ── Recommendations ── */}
         <section className="px-6 pt-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-extrabold" style={{ color: '#d6ff3e' }}>Recommendations</h2>
+            <h2 className="text-2xl font-extrabold" style={{ color: '#d6ff3e' }}>{t('home.recommendations')}</h2>
             <button className="text-[#afa3ff] text-sm font-bold flex items-center gap-1">
-              See All <ChevronRight size={16} />
+              {t('common.seeAll')} <ChevronRight size={16} />
             </button>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -193,9 +195,9 @@ const HomeDashboard: React.FC = () => {
               alt="Challenge" 
             />
             <div className="relative z-20 p-6">
-              <p className="text-zinc-300 text-xs font-bold uppercase tracking-widest mb-1">Weekly Challenge</p>
+              <p className="text-zinc-300 text-xs font-bold uppercase tracking-widest mb-1">{t('home.weeklyChallenge')}</p>
               <h3 className="text-3xl font-black text-[#d6ff3e] leading-tight mb-1">
-                Weekly<br/>Challenge
+                {t('home.weeklyChallenge').split(' ').map((word: string, i: number) => <React.Fragment key={i}>{word}{i === 0 && <br/>}</React.Fragment>)}
               </h3>
               <p className="text-white text-sm font-medium">Plank With Hip Twist</p>
             </div>
@@ -205,9 +207,9 @@ const HomeDashboard: React.FC = () => {
         {/* ── Articles & Tips ── */}
         <section className="px-6 pt-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white">Articles &amp; Tips</h2>
+            <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white">{t('home.articlesTips')}</h2>
             <button className="text-[#afa3ff] text-sm font-bold flex items-center gap-1">
-              See All <ChevronRight size={16} />
+              {t('common.seeAll')} <ChevronRight size={16} />
             </button>
           </div>
           <div className="grid grid-cols-2 gap-4">

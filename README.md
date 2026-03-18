@@ -13,6 +13,8 @@ A modern, high-tech fitness application UI built with React, Vite, and Tailwind 
 - **📈 Progress Tracking**: Visual representation of activity history with animated charts.
 - **👥 Community & Profile**: Discussion forums, fitness challenges, and detailed user settings.
 - **🎨 Cinematic 3D Assets**: High-fidelity renders replacing all placeholders for a premium feel.
+- **🌓 Dark/Light Mode**: Full theme customization with smooth transitions and persistent state.
+- **🌐 Multi-language Support**: Comprehensive English and Serbian translations with a sleek language switcher.
 - **📱 PWA Support**: Installable on mobile devices for a native-like experience.
 - **🔔 Push Notifications**: Real-time updates via Firebase Cloud Messaging.
 - **🔒 Database & Security**: Firestore schema aligned with UI features and strict security rules.

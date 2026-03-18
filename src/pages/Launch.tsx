@@ -2,17 +2,30 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 
+import { useAuth } from '../contexts/AuthContext';
+
 const Launch: React.FC = () => {
   const navigate = useNavigate();
+  const { userData, loading } = useAuth();
 
   useEffect(() => {
-    // Automatically navigate to onboarding after 3 seconds
+    // Wait for auth to initialize before determining next step
+    if (loading) return;
+
     const timer = setTimeout(() => {
-      navigate('/onboarding');
-    }, 3000);
+      if (userData) {
+        // Already logged in, go to dashboard
+        if (userData.role === 'admin') navigate('/app/admin');
+        else if (userData.role === 'coach') navigate('/app/coach');
+        else navigate('/app/client');
+      } else {
+        // Not logged in, show onboarding
+        navigate('/onboarding');
+      }
+    }, 2800); // Slightly shorter than the loader animation for smoothness
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, userData, loading]);
 
   return (
     <div className="min-h-screen bg-[#1c1c1c] text-[#d6ff3e] flex flex-col items-center justify-center relative overflow-hidden">

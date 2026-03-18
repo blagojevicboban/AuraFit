@@ -8,7 +8,10 @@ import { AnimatePresence } from "motion/react";
 import PageTransition from "./components/PageTransition";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import { PWAProvider } from "./contexts/PWAContext";
 import Layout from "./components/Layout";
+import { InstallPrompt } from "./components/ui/InstallPrompt";
 import Landing from "./pages/Landing";
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientWorkouts from "./pages/ClientWorkouts";
@@ -78,6 +81,7 @@ function AppContent() {
           <Route path="admin/users" element={<AdminUsers />} />
         </Route>
       </Routes>
+      <InstallPrompt />
     </AnimatePresence>
   );
 }
@@ -86,11 +90,15 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <AuthProvider>
-          <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
-        </AuthProvider>
+        <LanguageProvider>
+          <PWAProvider>
+            <AuthProvider>
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
+            </AuthProvider>
+          </PWAProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
