@@ -5,8 +5,22 @@ import { ChevronLeft, Chrome, Facebook, Fingerprint } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 
+import { useAuth } from '../contexts/AuthContext';
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signIn('client');
+      navigate('/home');
+    } catch (err: any) {
+      if (err?.code !== 'auth/popup-closed-by-user') {
+        alert('Google Log In failed. Please try again.');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#1c1c1c] text-white flex flex-col font-sans">
@@ -63,13 +77,22 @@ const Login: React.FC = () => {
         <div className="flex flex-col items-center gap-4">
           <span className="text-zinc-500 text-sm">or sign up with</span>
           <div className="flex gap-4">
-            <button className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md">
+            <button 
+              onClick={handleGoogleLogin}
+              className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+            >
               <Chrome size={28} />
             </button>
-            <button className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md">
+            <button 
+              onClick={() => alert('Facebook Log In is coming soon!')}
+              className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+            >
               <Facebook size={28} />
             </button>
-            <button className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md">
+            <button 
+              onClick={() => alert('Biometric login will be enabled in the settings.')}
+              className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+            >
               <Fingerprint size={28} />
             </button>
           </div>
