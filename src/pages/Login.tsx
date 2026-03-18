@@ -30,7 +30,9 @@ const Login: React.FC = () => {
       await signIn('client', forceSelect);
       navigate('/home');
     } catch (err: any) {
-      if (err?.code !== 'auth/popup-closed-by-user') {
+      if (err?.code === 'auth/unauthorized-domain') {
+        alert('Ovaj domen nije autorizovan u Firebase Console. Molimo dodajte "aurafit-b1ug.onrender.com" u Authorized Domains.');
+      } else if (err?.code !== 'auth/popup-closed-by-user') {
         alert('Google Log In failed. Please try again.');
       }
     }

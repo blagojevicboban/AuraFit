@@ -66,7 +66,9 @@ const SignUp: React.FC = () => {
       await signIn('client', forceSelect);
       navigate('/profile-setup');
     } catch (err: any) {
-      if (err?.code !== 'auth/popup-closed-by-user') {
+      if (err?.code === 'auth/unauthorized-domain') {
+        setError('Ovaj domen nije autorizovan u Firebase Console. Dodajte ga u Authorized Domains.');
+      } else if (err?.code !== 'auth/popup-closed-by-user') {
         setError('Google Sign Up failed. Please try again.');
       }
     }
