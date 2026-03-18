@@ -10,6 +10,12 @@ interface UserData {
   photoURL?: string;
   role: 'client' | 'coach' | 'admin';
   coachId?: string;
+  age?: number;
+  weight?: number;
+  height?: number;
+  gender?: 'Male' | 'Female';
+  goal?: string;
+  setupCompleted?: boolean;
 }
 
 interface AuthContextType {

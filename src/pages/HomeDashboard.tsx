@@ -28,6 +28,19 @@ const HomeDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { initNotifications, userData } = useAuth();
   const { t } = useLanguage();
+
+  const [favRecs, setFavRecs] = useState<number[]>([]);
+  const [favArticles, setFavArticles] = useState<number[]>([]);
+
+  const toggleFavRec = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setFavRecs(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const toggleFavArt = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setFavArticles(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
@@ -96,7 +109,12 @@ const HomeDashboard: React.FC = () => {
             <p className="text-zinc-700 dark:text-zinc-400 text-sm mt-1">{t('home.challengeLimits')}</p>
           </div>
           <div className="flex gap-4 pt-1">
-            <button className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
+            <button 
+              onClick={() => alert("Search coming soon!")}
+              className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors"
+            >
+              <Search size={22} />
+            </button>
             <button 
               onClick={() => navigate('/settings/notifications')}
               className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors relative"
@@ -166,12 +184,21 @@ const HomeDashboard: React.FC = () => {
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 {/* Favorite star */}
-                <button className="absolute top-3 right-3 text-yellow-400">
-                  <Star size={16} fill="currentColor" />
+                <button 
+                  onClick={(e) => toggleFavRec(e, item.id)}
+                  className={`absolute top-3 right-3 transition-colors ${favRecs.includes(item.id) ? 'text-yellow-400' : 'text-zinc-400'}`}
+                >
+                  <Star size={16} fill={favRecs.includes(item.id) ? 'currentColor' : 'none'} />
                 </button>
                 {/* Play button */}
-                <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#afa3ff] flex items-center justify-center shadow-lg">
-                  <Play size={16} className="text-white ml-0.5" fill="currentColor" />
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/workout-player/${item.id}`);
+                  }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#afa3ff] flex items-center justify-center shadow-lg hover:bg-[#d6ff3e] text-white hover:text-[#1c1c1c] transition-all"
+                >
+                  <Play size={16} className="ml-0.5" fill="currentColor" />
                 </button>
                 {/* Info */}
                 <div className="absolute bottom-3 left-3 right-3">
@@ -235,8 +262,11 @@ const HomeDashboard: React.FC = () => {
               >
                 <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-20">{item.icon}</div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <button className="absolute top-3 right-3 text-yellow-400">
-                  <Star size={16} fill="currentColor" />
+                <button 
+                  onClick={(e) => toggleFavArt(e, item.id)}
+                  className={`absolute top-3 right-3 transition-colors ${favArticles.includes(item.id) ? 'text-yellow-400' : 'text-zinc-400'}`}
+                >
+                  <Star size={16} fill={favArticles.includes(item.id) ? 'currentColor' : 'none'} />
                 </button>
                 <div className="absolute bottom-3 left-3 right-3">
                   <p className="font-bold text-sm text-white leading-tight">{item.title}</p>
