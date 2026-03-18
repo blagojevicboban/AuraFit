@@ -6,6 +6,7 @@ import {
   Home, BookOpen, Apple, Headphones, ChevronLeft
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import TopHeader from '../components/TopHeader';
 
 const forumCategories = [
   { title: 'Strength Training Techniques', sub: 'Discussion on training methods', time: 'Today 17:05' },
@@ -28,29 +29,9 @@ const Community: React.FC = () => {
     <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col pb-24">
       
       {/* ── Header ── */}
-      <div className="px-6 pt-12 pb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => navigate(-1)}
-              className="text-[#d6ff3e] hover:text-white transition-colors"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <h1 className="text-2xl font-extrabold text-[#afa3ff]">Community</h1>
-          </div>
-          <div className="flex gap-4">
-            <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
-            <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><Bell size={22} /></button>
-            <button 
-                onClick={() => navigate('/profile')}
-                className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"
-            >
-                <User size={22} />
-            </button>
-          </div>
-        </div>
+      <TopHeader title="Community" backPath="-1" />
 
+      <div className="px-6">
         {/* ── Tabs ── */}
         <div className="flex bg-[#2d2d2d] rounded-full p-1 mb-6 relative">
           <motion.div 
@@ -93,7 +74,7 @@ const Community: React.FC = () => {
                       <div className="flex-1 pr-4">
                         <div className="flex items-center justify-between mb-1">
                           <h4 className="text-[#1c1c1c] font-black text-sm leading-tight uppercase tracking-tight">{forum.title}</h4>
-                          <span className="text-[#1c1c1c]/60 text-[10px] whitespace-nowrap">See All</span>
+                          <button className="text-[#1c1c1c]/60 text-[10px] whitespace-nowrap hover:text-[#1c1c1c] transition-colors font-bold uppercase tracking-widest">See All</button>
                         </div>
                         <p className="text-[#1c1c1c]/70 text-[11px] leading-snug">{forum.sub}</p>
                       </div>

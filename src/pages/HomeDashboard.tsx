@@ -97,7 +97,10 @@ const HomeDashboard: React.FC = () => {
           </div>
           <div className="flex gap-4 pt-1">
             <button className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
-            <button className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors relative">
+            <button 
+              onClick={() => navigate('/settings/notifications')}
+              className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors relative"
+            >
               <Bell size={22} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#d6ff3e] rounded-full" />
             </button>
@@ -120,7 +123,7 @@ const HomeDashboard: React.FC = () => {
             { icon: Apple, label: t('nav.nutrition'), path: '/nutrition' },
             { icon: Users, label: t('nav.community'), path: '/community' },
           ].map(({ icon: Icon, label, path }, i) => (
-            <React.Fragment key={label}>
+            <React.Fragment key={path}>
               <button
                 onClick={() => navigate(path)}
                 className="flex flex-col items-center gap-1.5 group"
@@ -143,7 +146,10 @@ const HomeDashboard: React.FC = () => {
         <section className="px-6 pt-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-extrabold" style={{ color: '#d6ff3e' }}>{t('home.recommendations')}</h2>
-            <button className="text-[#afa3ff] text-sm font-bold flex items-center gap-1">
+            <button 
+              onClick={() => navigate('/workouts')}
+              className="text-[#afa3ff] text-sm font-bold flex items-center gap-1 hover:text-[#d6ff3e] transition-colors"
+            >
               {t('common.seeAll')} <ChevronRight size={16} />
             </button>
           </div>
@@ -184,22 +190,26 @@ const HomeDashboard: React.FC = () => {
         <section className="px-6 pt-6">
           <motion.div
             whileHover={{ scale: 1.01 }}
-            className="rounded-3xl overflow-hidden bg-[#afa3ff] relative cursor-pointer"
-            style={{ minHeight: 160 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate('/routine')}
+            className="rounded-[2.5rem] overflow-hidden bg-[#afa3ff] relative cursor-pointer shadow-xl border border-white/20 group"
+            style={{ minHeight: 180 }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1c1c1c]/80 to-transparent z-10" />
-            {/* Image for the challenge */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1c1c1c]/90 via-[#1c1c1c]/40 to-transparent z-10" />
             <img 
               src="/assets/plank.png" 
-              className="absolute right-0 top-0 bottom-0 w-full h-full object-cover opacity-80" 
+              className="absolute right-0 top-0 bottom-0 w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-700" 
               alt="Challenge" 
             />
-            <div className="relative z-20 p-6">
-              <p className="text-zinc-300 text-xs font-bold uppercase tracking-widest mb-1">{t('home.weeklyChallenge')}</p>
-              <h3 className="text-3xl font-black text-[#d6ff3e] leading-tight mb-1">
-                {t('home.weeklyChallenge').split(' ').map((word: string, i: number) => <React.Fragment key={i}>{word}{i === 0 && <br/>}</React.Fragment>)}
+            <div className="relative z-20 p-8">
+              <p className="text-[#d6ff3e] text-[10px] font-black uppercase tracking-[0.2em] mb-2">{t('home.weeklyChallenge')}</p>
+              <h3 className="text-3xl font-black text-white leading-tight mb-2">
+                Plank With<br/>Hip Twist
               </h3>
-              <p className="text-white text-sm font-medium">Plank With Hip Twist</p>
+              <div className="flex items-center gap-3">
+                 <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">5 Min</span>
+                 <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">Hard</span>
+              </div>
             </div>
           </motion.div>
         </section>
@@ -208,7 +218,10 @@ const HomeDashboard: React.FC = () => {
         <section className="px-6 pt-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white">{t('home.articlesTips')}</h2>
-            <button className="text-[#afa3ff] text-sm font-bold flex items-center gap-1">
+            <button 
+              onClick={() => navigate('/community')}
+              className="text-[#afa3ff] text-sm font-bold flex items-center gap-1 hover:text-[#d6ff3e] transition-colors"
+            >
               {t('common.seeAll')} <ChevronRight size={16} />
             </button>
           </div>

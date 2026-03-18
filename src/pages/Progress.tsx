@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useAuth } from '../contexts/AuthContext';
+import TopHeader from '../components/TopHeader';
 import { db } from '../lib/firebase';
 import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 
@@ -66,24 +67,9 @@ const Progress: React.FC = () => {
     <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col pb-24">
       
       {/* ── Header ── */}
-      <div className="px-6 pt-12 pb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => navigate('/home')}
-              className="text-[#d6ff3e] hover:text-white transition-colors"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <h1 className="text-2xl font-extrabold text-[#afa3ff]">Progress Tracking</h1>
-          </div>
-          <div className="flex gap-4">
-            <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
-            <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><Bell size={22} /></button>
-            <button className="text-[#afa3ff] hover:text-[#d6ff3e] transition-colors"><User size={22} /></button>
-          </div>
-        </div>
+      <TopHeader title="Progress Tracking" />
 
+      <div className="px-6 mb-6">
         {/* ── Tabs (Workout / Charts) ── */}
         <div className="flex bg-[#2d2d2d] rounded-full p-1 mb-6 relative">
           {/* Animated Background Pill */}
@@ -108,7 +94,7 @@ const Progress: React.FC = () => {
         </div>
 
         <p className="text-[#d6ff3e] font-semibold text-sm mb-1">My Progress</p>
-        <h2 className="text-3xl font-extrabold text-[#d6ff3e] mb-6">January 12th</h2>
+        <h2 className="text-3xl font-extrabold text-[#d6ff3e]">January 12th</h2>
       </div>
 
       {/* ── Content ── */}

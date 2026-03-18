@@ -135,7 +135,14 @@ export default function Landing() {
           </h1>
           
           <p className="text-xl sm:text-2xl text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-            {t('landing.heroDesc').split(t('landing.aiIntelligence')).map((part: string, i: number) => i === 0 ? part : <><span key={i} className="text-zinc-950 dark:text-white font-medium">{t('landing.aiIntelligence')}</span>{part}</>)}
+            {t('landing.heroDesc').split(t('landing.aiIntelligence')).map((part: string, i: number) => 
+              i === 0 ? <React.Fragment key={i}>{part}</React.Fragment> : (
+                <React.Fragment key={i}>
+                  <span className="text-zinc-950 dark:text-white font-medium">{t('landing.aiIntelligence')}</span>
+                  {part}
+                </React.Fragment>
+              )
+            )}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6 justify-center">

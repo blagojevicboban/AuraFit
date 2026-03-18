@@ -9,6 +9,7 @@ import BottomNav from '../components/BottomNav';
 import { AILogModal } from '../components/nutrition/AILogModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import TopHeader from '../components/TopHeader';
 import { db } from '../lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 
@@ -119,24 +120,9 @@ const Nutrition: React.FC = () => {
         </div>
       </div>
 
-      <div className="px-6 pt-4 pb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => navigate('/home')}
-              className="text-emerald-500 dark:text-[#d6ff3e] hover:text-emerald-600 dark:hover:text-white transition-colors"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <h1 className="text-2xl font-extrabold text-[#afa3ff]">{t('nutrition.title')}</h1>
-          </div>
-          <div className="flex gap-4">
-            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
-            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><Bell size={22} /></button>
-            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><User size={22} /></button>
-          </div>
-        </div>
+      <TopHeader title={t('nutrition.title')} />
 
+      <div className="px-6 pb-4">
         {/* ── Tabs (Meal Plans / Meal Ideas) ── */}
         <div className="flex bg-zinc-200 dark:bg-[#2d2d2d] rounded-full p-1 mb-6 relative transition-colors">
           <motion.div 
@@ -225,7 +211,13 @@ const Nutrition: React.FC = () => {
                          <Star size={16} fill="currentColor" />
                        </button>
 
-                       <button className="absolute right-3 top-[100px] w-8 h-8 rounded-full bg-emerald-500 dark:bg-[#afa3ff] flex items-center justify-center z-20 shadow-lg text-white">
+                       <button 
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           navigate('/meal-plan');
+                         }}
+                         className="absolute right-3 top-[100px] w-8 h-8 rounded-full bg-emerald-500 dark:bg-[#afa3ff] flex items-center justify-center z-20 shadow-lg text-white hover:scale-110 active:scale-95 transition-all"
+                       >
                          <Play size={14} fill="currentColor" />
                        </button>
 

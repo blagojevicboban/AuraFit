@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
+import TopHeader from '../components/TopHeader';
 
 // ─────────────────────────────────────────────
 // Data (Matching UI Kit)
@@ -51,30 +52,24 @@ const Workouts: React.FC = () => {
     ]
   };
 
+  const [favorites, setFavorites] = useState<number[]>([1, 2, 3, 4]); // Pre-fill with existing ones
+
+  const toggleFavorite = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setFavorites(prev => 
+      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+    );
+  };
+
   const currentWorkouts = workoutsData[activeCategory] || [];
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans flex flex-col pb-24 transition-colors duration-300">
       
       {/* ── Header ── */}
-      <div className="px-6 pt-12 pb-4 bg-white dark:bg-zinc-900 rounded-b-[2rem] shadow-lg relative z-10 transition-colors">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => navigate('/home')}
-              className="text-[#10b981] hover:text-emerald-600 transition-colors"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <h1 className="text-3xl font-black text-[#afa3ff] dark:text-[#afa3ff] tracking-tight">{t('workouts.title')}</h1>
-          </div>
-          <div className="flex gap-4">
-            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><Search size={22} /></button>
-            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><Bell size={22} /></button>
-            <button className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"><User size={22} /></button>
-          </div>
-        </div>
+      <TopHeader title={t('workouts.title')} className="bg-white dark:bg-zinc-900 rounded-b-[2rem] shadow-lg sticky top-0 z-30" />
 
+      <div className="px-6 pt-4">
         {/* ── Category Tabs ── */}
         <div className="flex gap-2 bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-full overflow-x-auto no-scrollbar">
           {categories.map(cat => (
@@ -138,8 +133,11 @@ const Workouts: React.FC = () => {
                     </span>
                   )}
 
-                  <button className={`absolute top-4 ${workout.height === 'h-48' ? 'right-4' : 'right-4'} ${workout.isFavorite ? 'text-yellow-500' : 'text-zinc-300 dark:text-zinc-500'}`}>
-                    <Star size={20} fill={workout.isFavorite ? 'currentColor' : 'none'} />
+                  <button 
+                    onClick={(e) => toggleFavorite(e, workout.id)}
+                    className={`absolute top-4 right-4 ${favorites.includes(workout.id) ? 'text-yellow-500' : 'text-zinc-300 dark:text-zinc-500'}`}
+                  >
+                    <Star size={20} fill={favorites.includes(workout.id) ? 'currentColor' : 'none'} />
                   </button>
 
                   <h3 className={`font-extrabold text-zinc-900 dark:text-white mb-2 ${workout.height === 'h-48' ? 'text-2xl w-2/3' : 'text-xl max-w-[60%]'}`}>

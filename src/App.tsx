@@ -46,43 +46,45 @@ function AppContent() {
   const location = useLocation();
   
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location}>
-        {/* Full-screen routes */}
-        <Route path="/" element={<PageTransition><Launch /></PageTransition>} />
-        <Route path="/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
-        <Route path="/setup" element={<PageTransition><ProfileSetup /></PageTransition>} />
-        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-        <Route path="/signup" element={<PageTransition><SignUp /></PageTransition>} />
-        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
-        <Route path="/home" element={<PageTransition><HomeDashboard /></PageTransition>} />
-        <Route path="/workouts" element={<PageTransition><Workouts /></PageTransition>} />
-        <Route path="/routine" element={<PageTransition><RoutineDetail /></PageTransition>} />
-        <Route path="/create-routine" element={<PageTransition><CreateRoutine /></PageTransition>} />
-        <Route path="/progress" element={<PageTransition><Progress /></PageTransition>} />
-        <Route path="/nutrition" element={<PageTransition><Nutrition /></PageTransition>} />
-        <Route path="/meal-plan" element={<PageTransition><MealPlanList /></PageTransition>} />
-        <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
-        <Route path="/profile/edit" element={<PageTransition><EditProfile /></PageTransition>} />
-        <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
-        <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
-        <Route path="/settings/notifications" element={<PageTransition><NotificationSettings /></PageTransition>} />
-        <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
-        <Route path="/workout-player/:id" element={<PageTransition><WorkoutPlayer /></PageTransition>} />
+    <>
+      <AnimatePresence mode="wait">
+        <Routes location={location}>
+          {/* ... routes ... */}
+          <Route path="/" element={<PageTransition><Launch /></PageTransition>} />
+          <Route path="/onboarding" element={<PageTransition><Onboarding /></PageTransition>} />
+          <Route path="/setup" element={<PageTransition><ProfileSetup /></PageTransition>} />
+          <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/signup" element={<PageTransition><SignUp /></PageTransition>} />
+          <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+          <Route path="/home" element={<PageTransition><HomeDashboard /></PageTransition>} />
+          <Route path="/workouts" element={<PageTransition><Workouts /></PageTransition>} />
+          <Route path="/routine" element={<PageTransition><RoutineDetail /></PageTransition>} />
+          <Route path="/create-routine" element={<PageTransition><CreateRoutine /></PageTransition>} />
+          <Route path="/progress" element={<PageTransition><Progress /></PageTransition>} />
+          <Route path="/nutrition" element={<PageTransition><Nutrition /></PageTransition>} />
+          <Route path="/meal-plan" element={<PageTransition><MealPlanList /></PageTransition>} />
+          <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+          <Route path="/profile/edit" element={<PageTransition><EditProfile /></PageTransition>} />
+          <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+          <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+          <Route path="/settings/notifications" element={<PageTransition><NotificationSettings /></PageTransition>} />
+          <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
+          <Route path="/workout-player/:id" element={<PageTransition><WorkoutPlayer /></PageTransition>} />
 
-        {/* App routes with Layout wrapper */}
-        <Route path="/app" element={<Layout />}>
-          <Route index element={<Landing />} />
-          <Route path="client" element={<ClientDashboard />} />
-          <Route path="client/workouts" element={<ClientWorkouts />} />
-          <Route path="coach" element={<CoachDashboard />} />
-          <Route path="coach/clients" element={<CoachClients />} />
-          <Route path="admin" element={<AdminDashboard />} />
-          <Route path="admin/users" element={<AdminUsers />} />
-        </Route>
-      </Routes>
+          {/* App routes with Layout wrapper */}
+          <Route path="/app" element={<Layout />}>
+            <Route index element={<Landing />} />
+            <Route path="client" element={<ClientDashboard />} />
+            <Route path="client/workouts" element={<ClientWorkouts />} />
+            <Route path="coach" element={<CoachDashboard />} />
+            <Route path="coach/clients" element={<CoachClients />} />
+            <Route path="admin" element={<AdminDashboard />} />
+            <Route path="admin/users" element={<AdminUsers />} />
+          </Route>
+        </Routes>
+      </AnimatePresence>
       <InstallPrompt />
-    </AnimatePresence>
+    </>
   );
 }
 
