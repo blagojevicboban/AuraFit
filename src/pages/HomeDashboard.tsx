@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Search, Bell, User, Star, Dumbbell, BarChart2, Apple, Users, Play, Clock, Flame, ChevronRight, X
+  Search, Bell, User, Star, Dumbbell, BarChart2, Apple, Users, Play, Clock, Flame, ChevronRight, X, Shield
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useAuth } from '../contexts/AuthContext';
@@ -103,9 +103,20 @@ const HomeDashboard: React.FC = () => {
       <div className="px-6 pt-12 pb-4">
         <div className="flex items-start justify-between mb-1">
           <div>
-            <h1 className="text-3xl font-extrabold" style={{ color: '#afa3ff' }}>
-              {t('home.welcome').replace('{{name}}', userData?.displayName || t('common.champ'))}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-extrabold" style={{ color: '#afa3ff' }}>
+                {t('home.welcome').replace('{{name}}', userData?.displayName || t('common.champ'))}
+              </h1>
+              {userData?.role === 'admin' && (
+                <button 
+                  onClick={() => navigate('/app/admin')}
+                  className="bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-full text-[#d6ff3e] text-[8px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg"
+                >
+                  <Shield size={10} />
+                  Admin
+                </button>
+              )}
+            </div>
             <p className="text-zinc-700 dark:text-zinc-400 text-sm mt-1">{t('home.challengeLimits')}</p>
           </div>
           <div className="flex gap-4 pt-1">
@@ -175,37 +186,53 @@ const HomeDashboard: React.FC = () => {
             {recommendations(t).map((item: any) => (
               <motion.div
                 key={item.id}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className={`relative rounded-3xl overflow-hidden cursor-pointer bg-gradient-to-br ${item.bg} h-48`}
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(`/workout-player/${item.id}`)}
+                className={`group relative rounded-[2rem] overflow-hidden cursor-pointer bg-zinc-900 h-64 shadow-2xl transition-all duration-300`}
               >
-                {/* Generated image bg */}
-                <img src={item.img} className="absolute inset-0 w-full h-full object-cover opacity-60" alt={item.title} />
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                {/* Background Image with Zoom on Hover */}
+                <img 
+                  src={item.img} 
+                  className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-110 transition-transform duration-700" 
+                  alt={item.title} 
+                />
+                
+                {/* Advanced Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80" />
+                
+                {/* Level Badge (Glass) */}
+                <div className="absolute top-3 left-3 px-2.5 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-full z-20 shadow-xl">
+                  <span className="text-[8px] font-black text-[#d6ff3e] uppercase tracking-widest">
+                    {item.id === 1 ? 'Intermediate' : 'Beginner'}
+                  </span>
+                </div>
+
                 {/* Favorite star */}
                 <button 
                   onClick={(e) => toggleFavRec(e, item.id)}
-                  className={`absolute top-3 right-3 transition-colors ${favRecs.includes(item.id) ? 'text-yellow-400' : 'text-zinc-400'}`}
+                  className={`absolute top-3 right-3 z-30 transition-all hover:scale-125 ${favRecs.includes(item.id) ? 'text-yellow-400' : 'text-zinc-400'}`}
                 >
-                  <Star size={16} fill={favRecs.includes(item.id) ? 'currentColor' : 'none'} />
+                  <Star size={18} fill={favRecs.includes(item.id) ? 'currentColor' : 'none'} />
                 </button>
-                {/* Play button */}
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/workout-player/${item.id}`);
-                  }}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#afa3ff] flex items-center justify-center shadow-lg hover:bg-[#d6ff3e] text-white hover:text-[#1c1c1c] transition-all"
-                >
-                  <Play size={16} className="ml-0.5" fill="currentColor" />
-                </button>
-                {/* Info */}
-                <div className="absolute bottom-3 left-3 right-3">
-                  <p className="font-bold text-sm text-white mb-1.5 leading-tight">{item.title}</p>
-                  <div className="flex items-center gap-3 text-[10px] text-zinc-300">
-                    <span className="flex items-center gap-1"><Clock size={10} />{item.duration} {t('common.minutes')}</span>
-                    <span className="flex items-center gap-1"><Flame size={10} />{item.kcal} {t('common.kcal')}</span>
+
+                {/* Play button (Glass Style) */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-2xl group-hover:bg-[#afa3ff] group-hover:border-[#afa3ff] transition-all duration-500 z-20">
+                  <Play size={20} className="text-white group-hover:text-black ml-1" fill="currentColor" />
+                </div>
+
+                {/* Information (Glass Panel) */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 pt-10 bg-gradient-to-t from-black to-transparent z-10">
+                  <h3 className="font-black text-lg text-white mb-2 leading-tight tracking-tight">{item.title}</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 backdrop-blur-md rounded-lg border border-white/5">
+                      <Clock size={10} className="text-[#afa3ff]" />
+                      <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-wider">{item.duration}m</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 backdrop-blur-md rounded-lg border border-white/5">
+                      <Flame size={10} className="text-[#d6ff3e]" />
+                      <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-wider">{item.kcal}kcal</span>
+                    </div>
                   </div>
                 </div>
               </motion.div>
