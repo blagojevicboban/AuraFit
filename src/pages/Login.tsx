@@ -7,13 +7,27 @@ import { Input } from '../components/ui/Input';
 
 import { useAuth } from '../contexts/AuthContext';
 
+import GoogleAccountCard from '../components/auth/GoogleAccountCard';
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { signIn } = useAuth();
+  const [lastUser, setLastUser] = React.useState<any>(null);
 
-  const handleGoogleLogin = async () => {
+  React.useEffect(() => {
+    const saved = localStorage.getItem('aura_last_google_user');
+    if (saved) {
+      try {
+        setLastUser(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse last user", e);
+      }
+    }
+  }, []);
+
+  const handleGoogleLogin = async (forceSelect = false) => {
     try {
-      await signIn('client');
+      await signIn('client', forceSelect);
       navigate('/home');
     } catch (err: any) {
       if (err?.code !== 'auth/popup-closed-by-user') {
@@ -74,28 +88,42 @@ const Login: React.FC = () => {
           Log In
         </Button>
 
-        <div className="flex flex-col items-center gap-4">
-          <span className="text-zinc-500 text-sm">or sign up with</span>
-          <div className="flex gap-4">
-            <button 
-              onClick={handleGoogleLogin}
-              className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
-            >
-              <Chrome size={28} />
-            </button>
-            <button 
-              onClick={() => alert('Facebook Log In is coming soon!')}
-              className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
-            >
-              <Facebook size={28} />
-            </button>
-            <button 
-              onClick={() => alert('Biometric login will be enabled in the settings.')}
-              className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
-            >
-              <Fingerprint size={28} />
-            </button>
-          </div>
+        <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+          {lastUser ? (
+            <GoogleAccountCard 
+              user={lastUser} 
+              onContinue={() => handleGoogleLogin(false)}
+              onSwitch={() => handleGoogleLogin(true)}
+            />
+          ) : (
+            <>
+              <div className="flex items-center gap-4 w-full">
+                <div className="h-[1px] bg-zinc-800 flex-grow" />
+                <span className="text-zinc-500 text-sm">or log in with</span>
+                <div className="h-[1px] bg-zinc-800 flex-grow" />
+              </div>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => handleGoogleLogin(false)}
+                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+                >
+                  <Chrome size={28} />
+                </button>
+                <button 
+                  onClick={() => alert('Facebook Log In is coming soon!')}
+                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+                >
+                  <Facebook size={28} />
+                </button>
+                <button 
+                  onClick={() => alert('Biometric login will be enabled in the settings.')}
+                  className="bg-white p-3 rounded-full text-[#1c1c1c] hover:bg-zinc-200 transition-colors shadow-md"
+                >
+                  <Fingerprint size={28} />
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="mt-4">

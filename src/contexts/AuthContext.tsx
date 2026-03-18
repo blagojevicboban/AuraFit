@@ -15,7 +15,7 @@ interface AuthContextType {
   currentUser: User | null;
   userData: UserData | null;
   loading: boolean;
-  signIn: (role: 'client' | 'coach' | 'admin') => Promise<void>;
+  signIn: (role: 'client' | 'coach' | 'admin', forceSelect?: boolean) => Promise<void>;
   signUp: (email: string, pass: string, displayName: string, role: 'client' | 'coach') => Promise<void>;
   passwordSignIn: (username: string, pass: string, role: 'client' | 'coach') => Promise<void>;
   adminSignIn: (username: string, pass: string) => Promise<void>;
@@ -64,10 +64,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, []);
 
-  const signIn = async (role: 'client' | 'coach' | 'admin') => {
+  const signIn = async (role: 'client' | 'coach' | 'admin', forceSelect = false) => {
     try {
-      const user = await signInWithGoogle();
+      const user = await signInWithGoogle(forceSelect);
       
+      // Persist last used google account for UX
+      localStorage.setItem('aura_last_google_user', JSON.stringify({
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL
+      }));
+
       // Check if user exists in Firestore
       const userDocRef = doc(db, 'users', user.uid);
       let userDoc;

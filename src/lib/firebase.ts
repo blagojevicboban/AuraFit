@@ -74,8 +74,13 @@ async function testConnection() {
 }
 testConnection();
 
-export const signInWithGoogle = async () => {
+export const signInWithGoogle = async (forceSelect = false) => {
   try {
+    if (forceSelect) {
+      googleProvider.setCustomParameters({ prompt: 'select_account' });
+    } else {
+      googleProvider.setCustomParameters({});
+    }
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error: any) {
