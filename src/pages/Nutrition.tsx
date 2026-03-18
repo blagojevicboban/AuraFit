@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, Bell, User, Star, Clock, Flame, Play,
-  Home, BookOpen, Headphones, ChevronLeft, Apple
+  Home, BookOpen, Headphones, ChevronLeft, Apple, Plus, Sparkles
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import { AILogModal } from '../components/nutrition/AILogModal';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '../lib/firebase';
+import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 
 // ─────────────────────────────────────────────
 // Data (Matching UI Kit)
@@ -29,13 +33,95 @@ const mealIdeas = [
 
 const Nutrition: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Meal Plans'); // Meal Plans or Meal Ideas
+  const { currentUser } = useAuth();
+  const [activeTab, setActiveTab] = useState('Meal Plans');
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [dailyTotals, setDailyTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+  // Fetch today's meals
+  React.useEffect(() => {
+    if (!currentUser) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const q = query(
+      collection(db, 'users', currentUser.uid, 'meals'),
+      where('timestamp', '>=', Timestamp.fromDate(today))
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const totals = snapshot.docs.reduce((acc, doc) => {
+        const data = doc.data();
+        return {
+          calories: acc.calories + (data.calories || 0),
+          protein: acc.protein + (data.protein || 0),
+          carbs: acc.carbs + (data.carbs || 0),
+          fat: acc.fat + (data.fat || 0),
+        };
+      }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+      setDailyTotals(totals);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  const macroGoals = {
+    calories: 2400,
+    protein: 160,
+    carbs: 280,
+    fat: 70
+  };
 
   return (
     <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col pb-24">
       
       {/* ── Header ── */}
-      <div className="px-6 pt-12 pb-4">
+      {/* ── Daily Tracker ── */}
+      <div className="px-6 mb-6">
+        <div className="bg-zinc-900 border border-white/5 rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#d6ff3e]/10 blur-3xl rounded-full" />
+          
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Calories Left</p>
+              <h2 className="text-4xl font-black text-white">
+                {Math.max(0, macroGoals.calories - dailyTotals.calories)}
+                <span className="text-sm text-zinc-600 ml-2 font-bold uppercase tracking-widest">kcal</span>
+              </h2>
+            </div>
+            <div className="text-right">
+              <p className="text-[#d6ff3e] text-xs font-black italic">
+                {Math.round((dailyTotals.calories / macroGoals.calories) * 100)}% Consumed
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { label: 'Protein', current: dailyTotals.protein, goal: macroGoals.protein, color: 'bg-[#afa3ff]' },
+              { label: 'Carbs', current: dailyTotals.carbs, goal: macroGoals.carbs, color: 'bg-[#d6ff3e]' },
+              { label: 'Fat', current: dailyTotals.fat, goal: macroGoals.fat, color: 'bg-zinc-100' },
+            ].map((macro) => (
+              <div key={macro.label} className="space-y-2">
+                <div className="flex justify-between items-center px-1">
+                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{macro.label}</span>
+                  <span className="text-[10px] font-bold text-white">{macro.current}g</span>
+                </div>
+                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, (macro.current / macro.goal) * 100)}%` }}
+                    className={`h-full ${macro.color} rounded-full`}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="px-6 pt-4 pb-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <button 
@@ -228,6 +314,26 @@ const Nutrition: React.FC = () => {
 
       <BottomNav />
 
+      {/* Floating Action Button for AI Log */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsLogModalOpen(true)}
+        className="fixed bottom-28 right-6 w-16 h-16 bg-[#d6ff3e] rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(214,255,62,0.4)] z-50 group"
+      >
+        <Sparkles size={28} className="text-[#1c1c1c] group-hover:animate-pulse" />
+        <div className="absolute -top-12 right-0 bg-[#afa3ff] text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+          AI QUICK LOG
+        </div>
+      </motion.button>
+
+      <AILogModal 
+        isOpen={isLogModalOpen} 
+        onClose={() => setIsLogModalOpen(false)}
+        onSuccess={() => {
+          // You could add a toast here
+        }}
+      />
     </div>
   );
 };

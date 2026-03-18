@@ -35,6 +35,7 @@ import Community from "./pages/Community";
 import Settings from "./pages/Settings";
 import NotificationSettings from "./pages/NotificationSettings";
 import Help from "./pages/Help";
+import WorkoutPlayer from "./pages/WorkoutPlayer";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -64,6 +65,7 @@ function AppContent() {
         <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
         <Route path="/settings/notifications" element={<PageTransition><NotificationSettings /></PageTransition>} />
         <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
+        <Route path="/workout-player/:id" element={<PageTransition><WorkoutPlayer /></PageTransition>} />
 
         {/* App routes with Layout wrapper */}
         <Route path="/app" element={<Layout />}>

@@ -93,7 +93,7 @@ const SignUp: React.FC = () => {
             placeholder="John Doe"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="bg-zinc-900/50 border-white/5"
+            className="bg-zinc-900/50"
             icon={<UserIcon size={20} />}
           />
 
@@ -103,7 +103,7 @@ const SignUp: React.FC = () => {
             placeholder="example@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-zinc-900/50 border-white/5"
+            className="bg-zinc-900/50"
             icon={<Mail size={20} />}
           />
 
@@ -113,7 +113,7 @@ const SignUp: React.FC = () => {
             placeholder="**************"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-zinc-900/50 border-white/5"
+            className="bg-zinc-900/50"
             icon={<Lock size={20} />}
           />
 
@@ -123,7 +123,7 @@ const SignUp: React.FC = () => {
             placeholder="**************"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="bg-zinc-900/50 border-white/5"
+            className="bg-zinc-900/50"
             icon={<Lock size={20} />}
           />
 

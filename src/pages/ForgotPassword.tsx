@@ -29,11 +29,13 @@ const ForgotPassword: React.FC = () => {
       </div>
 
       {/* Inputs Section (Purple Card) */}
-      <div className="bg-[#afa3ff] px-8 py-10 flex flex-col gap-6">
+      <div className="bg-[#afa3ff] px-8 py-10 flex flex-col gap-6 rounded-3xl mx-6 shadow-xl">
         <Input 
           label="Enter your email address"
+          labelClassName="text-[#1c1c1c]/60"
           type="email" 
           placeholder="example@example.com"
+          className="bg-white/20 border-white/30 text-[#1c1c1c] placeholder:text-[#1c1c1c]/40"
         />
       </div>
 

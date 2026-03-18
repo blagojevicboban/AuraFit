@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -6,6 +6,9 @@ import {
   Home, BookOpen, Headphones, ChevronLeft
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '../lib/firebase';
+import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 
 // ─────────────────────────────────────────────
 // Data (Matching UI Kit)
@@ -17,11 +20,7 @@ const chartData = [
   { label: 'Apr', value: 45 },
 ];
 
-const historyData = [
-  { day: 'Thu', date: '14', steps: '3,679', duration: '1hr40m' },
-  { day: 'Wen', date: '20', steps: '5,789', duration: '1hr20m' },
-  { day: 'Sat', date: '22', steps: '1,859', duration: '1hr10m' },
-];
+// Static historical fallback if needed, but we use dynamic data now
 
 const workoutMetrics = [
   { muscle: 'Chest', volume: 85, color: '#afa3ff' },
@@ -32,7 +31,36 @@ const workoutMetrics = [
 
 const Progress: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('Charts'); // Workout or Charts
+  const [workoutLogs, setWorkoutLogs] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const q = query(
+      collection(db, 'users', currentUser.uid, 'workout_logs'),
+      orderBy('timestamp', 'desc'),
+      limit(10)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setWorkoutLogs(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // Transform logs for charts
+  const historyData = workoutLogs.map(log => {
+    const date = log.timestamp?.toDate() || new Date();
+    return {
+      day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+      date: date.getDate().toString(),
+      steps: log.totalVolume.toLocaleString() + ' kg', // Reusing the steps field for volume
+      duration: `${log.durationMinutes}m`
+    };
+  });
 
   return (
     <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col pb-24">
@@ -194,8 +222,11 @@ const Progress: React.FC = () => {
                 <div className="bg-[#afa3ff] rounded-3xl p-6 relative overflow-hidden">
                   <div className="relative z-10">
                     <h3 className="text-[#1c1c1c] font-black text-xl mb-1">Total Volume</h3>
-                    <p className="text-[#1c1c1c]/70 text-sm font-bold mb-4">You've reached 85% of your weekly goal!</p>
-                    <div className="text-4xl font-black text-[#1c1c1c]">12,450 <span className="text-sm font-bold opacity-60">kg</span></div>
+                    <p className="text-[#1c1c1c]/70 text-sm font-bold mb-4">Tracking your gains!</p>
+                    <div className="text-4xl font-black text-[#1c1c1c]">
+                      {workoutLogs.reduce((acc, log) => acc + (log.totalVolume || 0), 0).toLocaleString()} 
+                      <span className="text-sm font-bold opacity-60 ml-2">kg</span>
+                    </div>
                   </div>
                   <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-white/10 rounded-full blur-3xl" />
                 </div>

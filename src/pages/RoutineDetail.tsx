@@ -101,7 +101,7 @@ const RoutineDetail: React.FC = () => {
                   transition={{ delay: (rIndex * 0.1) + (eIndex * 0.05) }}
                   // Interactive white pill card
                   className="bg-white rounded-[2rem] p-3 flex items-center justify-between shadow-md cursor-pointer hover:scale-[1.02] transition-transform"
-                  onClick={() => navigate('/routine')} // Navigate to actual exercise player eventually
+                  onClick={() => navigate(`/workout-player/${routineData.title.toLowerCase().replace(/\s+/g, '-')}`)}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-14 h-14 rounded-full ${exercise.color} flex items-center justify-center`}>

@@ -1,0 +1,211 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Sparkles, Loader2, Apple, Flame, Trophy, Info } from 'lucide-react';
+import { askAuraFitAI } from '../../lib/gemini';
+import { Button } from '../ui/Button';
+import { useAuth } from '../../contexts/AuthContext';
+import { db } from '../../lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+interface AILogModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+interface NutritionResult {
+  mealName: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  advice: string;
+}
+
+export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { currentUser } = useAuth();
+  const [description, setDescription] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [result, setResult] = useState<NutritionResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleAIDetection = async () => {
+    if (!description.trim()) return;
+    
+    setIsParsing(true);
+    setError(null);
+    try {
+      const prompt = `Analiziraj ovaj obrok: "${description}". Vrati JSON sa sledećim poljima: mealName (naslov obroka), calories (broj), protein (broj u gramima), carbs (broj u gramima), fat (broj u gramima), advice (kratak savet od 10 reči). Vrati SAMO čist JSON.`;
+      
+      const responseText = await askAuraFitAI(prompt, false, true);
+      const parsed = JSON.parse(responseText || '{}');
+      
+      if (parsed.calories) {
+        setResult(parsed as NutritionResult);
+      } else {
+        throw new Error('Nisam uspeo da prepoznam nutritivne vrednosti. Pokušaj drugačije.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Greška pri analizi. Proveri unos ili internet vezu.');
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!result || !currentUser) return;
+
+    setIsSaving(true);
+    try {
+      await addDoc(collection(db, 'users', currentUser.uid, 'meals'), {
+        ...result,
+        description,
+        timestamp: serverTimestamp()
+      });
+      onSuccess();
+      onClose();
+      // Reset state
+      setDescription('');
+      setResult(null);
+    } catch (err) {
+      console.error(err);
+      setError('Greška pri čuvanju obroka.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            className="relative w-full max-w-lg bg-zinc-900 border border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl"
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-800/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#d6ff3e] flex items-center justify-center">
+                  <Sparkles size={20} className="text-[#1c1c1c]" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-white leading-tight">AI Nutrition Log</h2>
+                  <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Powered by Gemini</p>
+                </div>
+              </div>
+              <button 
+                onClick={onClose}
+                className="text-zinc-400 hover:text-white p-2 rounded-full hover:bg-white/5 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-8 space-y-6">
+              {!result ? (
+                <div className="space-y-4">
+                  <label className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1">Šta ste jeli?</label>
+                  <div className="relative">
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Npr: Tri kuvana jaja, šolja jogurta i jedna zelena jabuka..."
+                      className="w-full h-32 bg-zinc-800/50 border border-white/10 rounded-3xl p-5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#afa3ff]/50 transition-all resize-none text-lg"
+                    />
+                    <div className="absolute bottom-4 right-4 text-zinc-600">
+                      <Apple size={20} />
+                    </div>
+                  </div>
+                  
+                  {error && (
+                    <p className="text-rose-500 text-sm font-bold flex items-center gap-2 px-2 animate-pulse">
+                      <Info size={16} /> {error}
+                    </p>
+                  )}
+
+                  <Button
+                    fullWidth
+                    size="xl"
+                    onClick={handleAIDetection}
+                    disabled={isParsing || !description.trim()}
+                    className="bg-[#afa3ff] text-white rounded-2xl hover:bg-[#9d8fff] shadow-xl"
+                  >
+                    {isParsing ? (
+                      <Loader2 className="animate-spin mr-2" />
+                    ) : (
+                      <Sparkles className="mr-2" size={20} />
+                    )}
+                    Analiziraj Obrok
+                  </Button>
+                </div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="space-y-6"
+                >
+                  {/* Results Display */}
+                  <div className="bg-[#afa3ff]/10 border border-[#afa3ff]/20 rounded-3xl p-6 text-center">
+                    <p className="text-[#afa3ff] text-sm font-black uppercase tracking-widest mb-1">{result.mealName}</p>
+                    <div className="text-5xl font-black text-[#d6ff3e] mb-2">{result.calories} <span className="text-sm opacity-60">kcal</span></div>
+                    <div className="flex justify-around mt-6 pb-4 border-b border-white/5">
+                      <div className="text-center">
+                        <div className="text-lg font-black text-white">{result.protein}g</div>
+                        <div className="text-[10px] text-zinc-500 uppercase font-bold">Prot</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-black text-white">{result.carbs}g</div>
+                        <div className="text-[10px] text-zinc-500 uppercase font-bold">Carbs</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-black text-white">{result.fat}g</div>
+                        <div className="text-[10px] text-zinc-500 uppercase font-bold">Fat</div>
+                      </div>
+                    </div>
+                    <p className="text-zinc-400 text-xs font-medium italic mt-4 px-4 leading-relaxed">
+                      "{result.advice}"
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button
+                      fullWidth
+                      variant="outline"
+                      onClick={() => setResult(null)}
+                      disabled={isSaving}
+                      className="border-zinc-700 text-zinc-400 rounded-2xl"
+                    >
+                      Poništi
+                    </Button>
+                    <Button
+                      fullWidth
+                      onClick={handleSave}
+                      isLoading={isSaving}
+                      className="bg-[#d6ff3e] text-[#1c1c1c] rounded-2xl font-black shadow-xl"
+                    >
+                      <Trophy className="mr-2" size={18} />
+                      Loguj Obrok
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
