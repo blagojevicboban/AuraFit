@@ -56,8 +56,8 @@ export default function Layout() {
   ];
 
   const adminLinks = [
-    { to: "/admin", icon: LayoutDashboard, label: t('nav.dashboard') },
-    { to: "/admin/users", icon: Users, label: t('nav.users') },
+    { to: "/app/admin", icon: LayoutDashboard, label: t('nav.dashboard') },
+    { to: "/app/admin/users", icon: Users, label: t('nav.users') },
   ];
 
   const links = userData.role === 'admin' ? adminLinks : userData.role === 'coach' ? coachLinks : clientLinks;
