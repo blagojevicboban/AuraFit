@@ -12,8 +12,8 @@ import { useLanguage } from '../contexts/LanguageContext';
 // Data
 // ─────────────────────────────────────────────
 const recommendations = [
-  { id: 1, title: 'Squat Exercise', duration: '12 Minutes', kcal: '120 Kcal', bg: 'from-zinc-700 to-zinc-900', img: '/assets/squat.png' },
-  { id: 2, title: 'Full Body Stretching', duration: '12 Minutes', kcal: '120 Kcal', bg: 'from-zinc-600 to-zinc-800', img: '/assets/stretching.png' },
+  { id: 1, title: 'Squat', duration: '12', kcal: '120', bg: 'from-zinc-700 to-zinc-900', img: '/assets/squat.png' },
+  { id: 2, title: 'Stretching', duration: '12', kcal: '120', bg: 'from-zinc-600 to-zinc-800', img: '/assets/stretching.png' },
 ];
 
 const articles = [
@@ -171,8 +171,8 @@ const HomeDashboard: React.FC = () => {
                 <div className="absolute bottom-3 left-3 right-3">
                   <p className="font-bold text-sm text-white mb-1.5 leading-tight">{item.title}</p>
                   <div className="flex items-center gap-3 text-[10px] text-zinc-300">
-                    <span className="flex items-center gap-1"><Clock size={10} />{item.duration}</span>
-                    <span className="flex items-center gap-1"><Flame size={10} />{item.kcal}</span>
+                    <span className="flex items-center gap-1"><Clock size={10} />{item.duration} {t('common.minutes')}</span>
+                    <span className="flex items-center gap-1"><Flame size={10} />{item.kcal} {t('common.kcal')}</span>
                   </div>
                 </div>
               </motion.div>

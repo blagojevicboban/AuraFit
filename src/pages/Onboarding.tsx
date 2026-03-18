@@ -4,30 +4,31 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
-
-// Placeholder matching the aesthetic of Onboarding 2-A -> 2-D
-const onboardingSteps = [
-  {
-    title: "Find the right\nworkout for what\nyou need",
-    subtitle: "We have something suitable for everyone.",
-    image: "/assets/onboarding-1.png"
-  },
-  {
-    title: "Make suitable\nworkouts and\ngreat results",
-    subtitle: "Customized plans to help you reach your goals faster.",
-    image: "/assets/onboarding-2.png"
-  },
-  {
-    title: "Let's do a\nworkout and live\nhealthy with us",
-    subtitle: "Join our community and transform your lifestyle.",
-    image: "/assets/onboarding-3.png"
-  }
-];
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Onboarding: React.FC = () => {
+  const { t } = useLanguage();
+  const { userData, loading } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
-  const { userData, loading } = useAuth();
+
+  const onboardingSteps = [
+    {
+      title: t('onboarding.step1Title'),
+      subtitle: t('onboarding.step1Sub'),
+      image: "/assets/onboarding-1.png"
+    },
+    {
+      title: t('onboarding.step2Title'),
+      subtitle: t('onboarding.step2Sub'),
+      image: "/assets/onboarding-2.png"
+    },
+    {
+      title: t('onboarding.step3Title'),
+      subtitle: t('onboarding.step3Sub'),
+      image: "/assets/onboarding-3.png"
+    }
+  ];
 
   React.useEffect(() => {
     if (!loading && userData) {
@@ -73,7 +74,7 @@ const Onboarding: React.FC = () => {
               onClick={() => navigate('/login')}
               className="absolute top-12 right-8 text-white/70 font-bold tracking-wider hover:text-white transition-colors"
             >
-              Skip
+              {t('onboarding.skip')}
             </button>
           </div>
 

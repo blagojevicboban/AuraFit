@@ -9,11 +9,12 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import BottomNav from '../components/BottomNav';
 
 const EditProfile: React.FC = () => {
   const navigate = useNavigate();
   const { userData } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#1c1c1c] text-zinc-900 dark:text-white font-sans flex flex-col pb-24 transition-colors duration-300">
@@ -73,19 +74,19 @@ const EditProfile: React.FC = () => {
         <Input 
             label={t('profile.fullName')} 
             defaultValue={userData?.displayName || ''} 
-            placeholder="Enter your name"
+            placeholder={language === 'sr' ? "Unesite ime" : "Enter your name"}
         />
         <Input 
             label={t('profile.email')} 
             defaultValue={userData?.email || ''} 
-            placeholder="Enter your email"
+            placeholder={language === 'sr' ? "Unesite email" : "Enter your email"}
             type="email"
             disabled
         />
         <Input 
             label={t('profile.mobile')} 
             defaultValue="" 
-            placeholder="Enter mobile number"
+            placeholder={language === 'sr' ? "Unesite broj telefona" : "Enter mobile number"}
         />
         <Input 
             label={t('profile.dob')} 
@@ -115,25 +116,7 @@ const EditProfile: React.FC = () => {
         </Button>
       </div>
 
-      {/* ── Fixed Bottom Navigation ── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 px-6 py-4 flex items-center justify-around z-50">
-        {[
-          { icon: Home, label: 'Home', active: false, path: '/home' },
-          { icon: BookOpen, label: 'Workouts', active: false, path: '/workouts' },
-          { icon: Apple, label: 'Nutrition', active: false, path: '/nutrition' },
-          { icon: User, label: 'Profile', active: true, path: '/profile' },
-        ].map(({ icon: Icon, label, active, path }) => (
-          <button
-            key={label}
-            onClick={() => navigate(path)}
-            className={`flex flex-col items-center gap-1 ${active ? 'text-[#afa3ff]' : 'text-zinc-500 hover:text-white'} transition-colors`}
-          >
-            <Icon size={24} strokeWidth={active ? 2.5 : 1.5} />
-            <span className="text-[10px] font-bold">{label}</span>
-          </button>
-        ))}
-      </div>
-
+      <BottomNav />
     </div>
   );
 };

@@ -21,6 +21,7 @@ const translations = {
       seeAll: "See All",
       minutes: "Minutes",
       kcal: "Kcal",
+      help: "Help",
     },
     nav: {
       dashboard: "Dashboard",
@@ -77,6 +78,15 @@ const translations = {
       admin: "Admin",
       login: "Login",
       coachPortal: "COACH PORTAL",
+      welcomeBack: "Welcome back to Aura Fit.",
+      continueWithGoogle: "CONTINUE WITH GOOGLE",
+      or: "or",
+      username: "Username",
+      password: "Password",
+      accessAccount: "ACCESS ACCOUNT",
+      adminLogin: "Admin Access",
+      coachLogin: "Coach Portal",
+      clientLogin: "Client Login",
     },
     help: {
       title: "Help & Support",
@@ -109,6 +119,15 @@ const translations = {
       logMeal: "Log Meal",
       cancel: "Cancel",
       tooLarge: "Image is too large (max 5MB)",
+    },
+    onboarding: {
+      skip: "Skip",
+      step1Title: "Find the right\nworkout for what\nyou need",
+      step1Sub: "We have something suitable for everyone.",
+      step2Title: "Make suitable\nworkouts and\ngreat results",
+      step2Sub: "Customized plans to help you reach your goals faster.",
+      step3Title: "Let's do a\nworkout and live\nhealthy with us",
+      step3Sub: "Join our community and transform your lifestyle.",
     }
   },
   sr: {
@@ -123,6 +142,7 @@ const translations = {
       seeAll: "Vidi sve",
       minutes: "minuta",
       kcal: "Kcal",
+      help: "Pomoć",
     },
     nav: {
       dashboard: "Kontrolna tabla",
@@ -179,6 +199,15 @@ const translations = {
       admin: "Admin",
       login: "Prijava",
       coachPortal: "PORTAL ZA TRENERE",
+      welcomeBack: "Dobrodošli nazad u Aura Fit.",
+      continueWithGoogle: "NASTAVI SA GOOGLE-OM",
+      or: "ili",
+      username: "Korisničko ime",
+      password: "Lozinka",
+      accessAccount: "PRISTUPI NALOGU",
+      adminLogin: "Admin pristup",
+      coachLogin: "Portal za trenere",
+      clientLogin: "Prijava klijenta",
     },
     help: {
       title: "Pomoć i podrška",
@@ -211,6 +240,15 @@ const translations = {
       logMeal: "Loguj Obrok",
       cancel: "Poništi",
       tooLarge: "Slika je prevelika (maksimum 5MB)",
+    },
+    onboarding: {
+      skip: "Preskoči",
+      step1Title: "Pronađi pravi\ntrening za svoje\npotrebe",
+      step1Sub: "Imamo nešto pogodno za svakoga.",
+      step2Title: "Napravi adekvatne\ntreninge i\nsjajne rezultate",
+      step2Sub: "Prilagođeni planovi koji vam pomažu da brže stignete do cilja.",
+      step3Title: "Hajde da treniramo\ni živimo zdravo\nzajedno",
+      step3Sub: "Pridruži se našoj zajednici i transformiši svoj životni stil.",
     }
   }
 };
