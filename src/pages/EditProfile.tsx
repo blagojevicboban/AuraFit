@@ -7,9 +7,13 @@ import {
 } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const EditProfile: React.FC = () => {
   const navigate = useNavigate();
+  const { userData } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col pb-24">
@@ -63,46 +67,47 @@ const EditProfile: React.FC = () => {
       {/* ── Edit Form ── */}
       <div className="flex-grow pt-14 px-6 space-y-6">
         <Input 
-            label="Full name" 
-            defaultValue="Madison Smith" 
+            label={t('profile.fullName')} 
+            defaultValue={userData?.displayName || ''} 
             placeholder="Enter your name"
         />
         <Input 
-            label="Email" 
-            defaultValue="madisons@example.com" 
+            label={t('profile.email')} 
+            defaultValue={userData?.email || ''} 
             placeholder="Enter your email"
             type="email"
+            disabled
         />
         <Input 
-            label="Mobile Number" 
-            defaultValue="+123 567 89000" 
+            label={t('profile.mobile')} 
+            defaultValue="" 
             placeholder="Enter mobile number"
         />
         <Input 
-            label="Date of birth" 
-            defaultValue="01 / 04 / 199X" 
+            label={t('profile.dob')} 
+            defaultValue="" 
             placeholder="DD / MM / YYYY"
         />
         <div className="flex gap-4">
             <Input 
-                label="Weight" 
-                defaultValue="75 Kg" 
-                placeholder="75 Kg"
+                label={t('profile.weight')} 
+                defaultValue="" 
+                placeholder="-- Kg"
                 className="flex-1"
             />
             <Input 
-                label="Height" 
-                defaultValue="1.65 CM" 
-                placeholder="1.65 CM"
+                label={t('profile.height')} 
+                defaultValue="" 
+                placeholder="-- CM"
                 className="flex-1"
             />
         </div>
 
         <Button 
-            className="w-full mt-4 bg-[#d6ff3e] text-[#1c1c1c] border-none hover:bg-white"
+            className="w-full mt-4 bg-emerald-500 dark:bg-[#d6ff3e] text-white dark:text-[#1c1c1c] border-none hover:opacity-90 transition-opacity"
             onClick={() => navigate('/profile')}
         >
-            Update Profile
+            {t('profile.update')}
         </Button>
       </div>
 

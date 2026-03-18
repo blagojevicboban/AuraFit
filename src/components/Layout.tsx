@@ -176,8 +176,12 @@ export default function Layout() {
 
         <div className="p-6 border-t border-zinc-200 dark:border-white/5 m-4 bg-white dark:bg-white/5 rounded-[2rem] shadow-sm dark:shadow-none transition-colors duration-300">
           <div className="flex items-center gap-3 mb-6 px-2">
-            <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center text-zinc-500 border border-zinc-200 dark:border-white/5">
-              <User className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center text-zinc-500 border border-zinc-200 dark:border-white/5 overflow-hidden">
+              {userData.photoURL ? (
+                <img src={userData.photoURL} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5" />
+              )}
             </div>
             <div className="overflow-hidden flex-1">
               <p className="text-sm font-bold truncate">{userData.displayName}</p>

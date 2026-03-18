@@ -7,6 +7,7 @@ interface UserData {
   uid: string;
   email: string;
   displayName: string;
+  photoURL?: string;
   role: 'client' | 'coach' | 'admin';
   coachId?: string;
 }
@@ -94,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           uid: user.uid,
           email: user.email || '',
           displayName: user.displayName || 'Korisnik',
+          photoURL: user.photoURL || '',
           role: finalRole,
           createdAt: serverTimestamp(),
         };
@@ -105,6 +107,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserData(newUserData);
       } else {
         const data = userDoc.data() as UserData;
+        
+        // Update profile picture if it changed or was missing
+        if (user.photoURL && data.photoURL !== user.photoURL) {
+          data.photoURL = user.photoURL;
+          await setDoc(userDocRef, { photoURL: user.photoURL }, { merge: true });
+        }
+
         // Force admin role for bootstrap email
         if (user.email === 'ai4vetschools@gmail.com' && data.role !== 'admin') {
           data.role = 'admin';
