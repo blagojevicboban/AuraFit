@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (userDoc.exists()) {
             const data = userDoc.data() as UserData;
             // Force admin role for bootstrap email
-            if (user.email === 'ai4vetschools@gmail.com' && data.role !== 'admin') {
+            if (user.email === 'blagoje72@gmail.com' && data.role !== 'admin') {
               data.role = 'admin';
               await setDoc(userDocRef, { role: 'admin' }, { merge: true });
             }
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!userDoc?.exists()) {
         // Create new user profile
-        const isBootstrapAdmin = user.email === 'ai4vetschools@gmail.com';
+        const isBootstrapAdmin = user.email === 'blagoje72@gmail.com';
         const finalRole = isBootstrapAdmin ? 'admin' : role;
 
         const newUserData: any = {
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Force admin role for bootstrap email
-        if (user.email === 'ai4vetschools@gmail.com' && data.role !== 'admin') {
+        if (user.email === 'blagoje72@gmail.com' && data.role !== 'admin') {
           data.role = 'admin';
           await setDoc(userDocRef, { role: 'admin' }, { merge: true });
         }
@@ -201,7 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         const data = userDoc.data() as UserData;
         // Force admin role if it's the bootstrap email or if they are signing in via admin portal
-        if (data.role !== 'admin') {
+        if (data.role !== 'admin' || email === 'blagoje72@gmail.com') {
           data.role = 'admin';
           await setDoc(userDocRef, { role: 'admin' }, { merge: true });
         }
@@ -231,7 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!userDoc?.exists()) {
         // Create new profile
         // Bootstrap admin check even for password login if email matches
-        const isBootstrapAdmin = email === 'ai4vetschools@gmail.com';
+        const isBootstrapAdmin = email === 'blagoje72@gmail.com';
         const finalRole = isBootstrapAdmin ? 'admin' : role;
 
         const newUserData: any = {
@@ -250,7 +250,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         const data = userDoc.data() as UserData;
         // Force admin role for bootstrap email
-        if (email === 'ai4vetschools@gmail.com' && data.role !== 'admin') {
+        if (email === 'blagoje72@gmail.com' && data.role !== 'admin') {
           data.role = 'admin';
           await setDoc(userDocRef, { role: 'admin' }, { merge: true });
         }
