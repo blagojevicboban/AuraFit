@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sparkles, Loader2, Apple, Flame, Trophy, Info } from 'lucide-react';
+import { X, Sparkles, Loader2, Apple, Flame, Trophy, Info, Camera, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { askAuraFitAI } from '../../lib/gemini';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
@@ -25,30 +26,47 @@ interface NutritionResult {
 export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { currentUser } = useAuth();
   const [description, setDescription] = useState('');
+  const [image, setImage] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [result, setResult] = useState<NutritionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t, language } = useLanguage();
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError(t('nutrition.tooLarge'));
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleAIDetection = async () => {
-    if (!description.trim()) return;
+    if (!description.trim() && !image) return;
     
     setIsParsing(true);
     setError(null);
     try {
-      const prompt = `Analiziraj ovaj obrok: "${description}". Vrati JSON sa sledećim poljima: mealName (naslov obroka), calories (broj), protein (broj u gramima), carbs (broj u gramima), fat (broj u gramima), advice (kratak savet od 10 reči). Vrati SAMO čist JSON.`;
+      const prompt = `Analiziraj ovaj obrok${description ? `: "${description}"` : ' na slici'}. Vrati JSON sa sledećim poljima: mealName (naslov obroka), calories (broj), protein (broj u gramima), carbs (broj u gramima), fat (broj u gramima), advice (kratak savet od 10 reči). Vrati SAMO čist JSON.`;
       
-      const responseText = await askAuraFitAI(prompt, false, true);
+      const responseText = await askAuraFitAI(prompt, false, true, image || undefined);
       const parsed = JSON.parse(responseText || '{}');
       
       if (parsed.calories) {
         setResult(parsed as NutritionResult);
       } else {
-        throw new Error('Nisam uspeo da prepoznam nutritivne vrednosti. Pokušaj drugačije.');
+        throw new Error('Detection failed');
       }
     } catch (err) {
       console.error(err);
-      setError('Greška pri analizi. Proveri unos ili internet vezu.');
+      setError(language === 'sr' ? 'Greška pri analizi. Proveri unos ili internet vezu.' : 'Analysis error. Check input or connection.');
     } finally {
       setIsParsing(false);
     }
@@ -68,10 +86,11 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
       onClose();
       // Reset state
       setDescription('');
+      setImage(null);
       setResult(null);
     } catch (err) {
       console.error(err);
-      setError('Greška pri čuvanju obroka.');
+      setError(language === 'sr' ? 'Greška pri čuvanju obroka.' : 'Error saving meal.');
     } finally {
       setIsSaving(false);
     }
@@ -102,7 +121,7 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
                   <Sparkles size={20} className="text-[#1c1c1c]" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white leading-tight">AI Nutrition Log</h2>
+                  <h2 className="text-xl font-black text-white leading-tight">{t('nutrition.logTitle')}</h2>
                   <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Powered by Gemini</p>
                 </div>
               </div>
@@ -117,12 +136,39 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
             <div className="p-8 space-y-6">
               {!result ? (
                 <div className="space-y-4">
-                  <label className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1">Šta ste jeli?</label>
+                  <label className="text-zinc-400 text-xs font-bold uppercase tracking-widest ml-1">{t('nutrition.whatDidYouEat')}</label>
+                  
+                  {/* Image Picker */}
+                  {!image ? (
+                    <div className="flex gap-4">
+                      <label className="flex-1 h-32 bg-zinc-800/50 border border-white/10 border-dashed rounded-3xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-zinc-800 transition-colors text-zinc-500 hover:text-white group">
+                        <Camera size={24} className="group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">{t('nutrition.takePhoto')}</span>
+                        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageChange} />
+                      </label>
+                      <label className="flex-1 h-32 bg-zinc-800/50 border border-white/10 border-dashed rounded-3xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-zinc-800 transition-colors text-zinc-500 hover:text-white group">
+                        <ImageIcon size={24} className="group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">{t('nutrition.chooseImage')}</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="relative h-48 rounded-3xl overflow-hidden border border-white/10 bg-zinc-800">
+                      <img src={image} alt="Meal preview" className="w-full h-full object-cover" />
+                      <button 
+                        onClick={() => setImage(null)}
+                        className="absolute top-3 right-3 p-2 bg-black/50 text-white rounded-full backdrop-blur-md hover:bg-rose-500 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
+
                   <div className="relative">
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Npr: Tri kuvana jaja, šolja jogurta i jedna zelena jabuka..."
+                      placeholder={language === 'sr' ? "Npr: Tri kuvana jaja, šolja jogurta..." : "e.g. Three boiled eggs, a cup of yogurt..."}
                       className="w-full h-32 bg-zinc-800/50 border border-white/10 rounded-3xl p-5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#afa3ff]/50 transition-all resize-none text-lg"
                     />
                     <div className="absolute bottom-4 right-4 text-zinc-600">
@@ -140,7 +186,7 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
                     fullWidth
                     size="xl"
                     onClick={handleAIDetection}
-                    disabled={isParsing || !description.trim()}
+                    disabled={isParsing || (!description.trim() && !image)}
                     className="bg-[#afa3ff] text-white rounded-2xl hover:bg-[#9d8fff] shadow-xl"
                   >
                     {isParsing ? (
@@ -148,7 +194,7 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
                     ) : (
                       <Sparkles className="mr-2" size={20} />
                     )}
-                    Analiziraj Obrok
+                    {t('nutrition.analyze')}
                   </Button>
                 </div>
               ) : (
@@ -164,15 +210,15 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
                     <div className="flex justify-around mt-6 pb-4 border-b border-white/5">
                       <div className="text-center">
                         <div className="text-lg font-black text-white">{result.protein}g</div>
-                        <div className="text-[10px] text-zinc-500 uppercase font-bold">Prot</div>
+                        <div className="text-[10px] text-zinc-500 uppercase font-bold">{t('nutrition.protein')}</div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-black text-white">{result.carbs}g</div>
-                        <div className="text-[10px] text-zinc-500 uppercase font-bold">Carbs</div>
+                        <div className="text-[10px] text-zinc-500 uppercase font-bold">{t('nutrition.carbs')}</div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-black text-white">{result.fat}g</div>
-                        <div className="text-[10px] text-zinc-500 uppercase font-bold">Fat</div>
+                        <div className="text-[10px] text-zinc-500 uppercase font-bold">{t('nutrition.fat')}</div>
                       </div>
                     </div>
                     <p className="text-zinc-400 text-xs font-medium italic mt-4 px-4 leading-relaxed">
@@ -188,7 +234,7 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
                       disabled={isSaving}
                       className="border-zinc-700 text-zinc-400 rounded-2xl"
                     >
-                      Poništi
+                      {t('nutrition.cancel')}
                     </Button>
                     <Button
                       fullWidth
@@ -197,7 +243,7 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
                       className="bg-[#d6ff3e] text-[#1c1c1c] rounded-2xl font-black shadow-xl"
                     >
                       <Trophy className="mr-2" size={18} />
-                      Loguj Obrok
+                      {t('nutrition.logMeal')}
                     </Button>
                   </div>
                 </motion.div>

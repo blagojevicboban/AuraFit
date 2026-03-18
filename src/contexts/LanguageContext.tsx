@@ -95,6 +95,20 @@ const translations = {
       promptDesc: "Install our app for a faster and smoother premium fitness experience. Access all features directly from your home screen.",
       installButton: "Install App",
       cancelButton: "Later",
+    },
+    nutrition: {
+      logTitle: "AI Nutrition Log",
+      whatDidYouEat: "What did you eat?",
+      takePhoto: "Take Photo",
+      chooseImage: "Choose Image",
+      analyze: "Analyze Meal",
+      serving: "serving",
+      protein: "Protein",
+      carbs: "Carbs",
+      fat: "Fat",
+      logMeal: "Log Meal",
+      cancel: "Cancel",
+      tooLarge: "Image is too large (max 5MB)",
     }
   },
   sr: {
@@ -183,6 +197,20 @@ const translations = {
       promptDesc: "Instalirajte aplikaciju za brže i lakše vrhunsko fitnes iskustvo. Pristupite svim funkcijama direktno sa početnog ekrana.",
       installButton: "Instaliraj",
       cancelButton: "Kasnije",
+    },
+    nutrition: {
+      logTitle: "AI Nutrition Log",
+      whatDidYouEat: "Šta ste jeli?",
+      takePhoto: "Slikaj hranu",
+      chooseImage: "Izaberi sliku",
+      analyze: "Analiziraj Obrok",
+      serving: "porcija",
+      protein: "Proteini",
+      carbs: "Ugljeni hidrati",
+      fat: "Masti",
+      logMeal: "Loguj Obrok",
+      cancel: "Poništi",
+      tooLarge: "Slika je prevelika (maksimum 5MB)",
     }
   }
 };
