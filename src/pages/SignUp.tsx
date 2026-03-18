@@ -1,14 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ChevronLeft, Chrome, Facebook, Fingerprint, Mail, Lock, User as UserIcon } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useAuth } from '../contexts/AuthContext';
+import GoogleAccountCard from '../components/auth/GoogleAccountCard';
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
   const { signUp, signIn } = useAuth();
+  const [lastUser, setLastUser] = useState<any>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('aura_last_google_user');
+    if (saved) {
+      try {
+        setLastUser(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse last user", e);
+      }
+    }
+  }, []);
   
   // State
   const [name, setName] = useState('');
@@ -48,9 +61,9 @@ const SignUp: React.FC = () => {
     }
   };
 
-  const handleGoogleSignUp = async () => {
+  const handleGoogleSignUp = async (forceSelect = false) => {
     try {
-      await signIn('client');
+      await signIn('client', forceSelect);
       navigate('/profile-setup');
     } catch (err: any) {
       if (err?.code !== 'auth/popup-closed-by-user') {
@@ -167,37 +180,47 @@ const SignUp: React.FC = () => {
                 </p>
             </div>
 
-            <div className="flex flex-col items-center gap-4 w-full">
-              <div className="flex items-center gap-4 w-full">
-                <div className="h-[1px] bg-zinc-800 flex-grow" />
-                <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">or sign up with</span>
-                <div className="h-[1px] bg-zinc-800 flex-grow" />
-              </div>
-              
-              <div className="flex gap-4">
-                <button 
-                  type="button"
-                  onClick={handleGoogleSignUp}
-                  className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white hover:bg-zinc-800 hover:border-[#afa3ff]/50 transition-all shadow-lg active:scale-95"
-                >
-                  <Chrome size={24} />
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => alert('Facebook Sign Up is coming soon!')}
-                  className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white hover:bg-zinc-800 hover:border-[#afa3ff]/50 transition-all shadow-lg active:scale-95"
-                >
-                  <Facebook size={24} />
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => alert('Biometric login will be enabled in the settings.')}
-                  className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white hover:bg-zinc-800 hover:border-[#afa3ff]/50 transition-all shadow-lg active:scale-95"
-                >
-                  <Fingerprint size={24} />
-                </button>
-              </div>
-            </div>
+          <div className="flex flex-col items-center gap-4 w-full">
+            {lastUser ? (
+              <GoogleAccountCard 
+                user={lastUser} 
+                onContinue={() => handleGoogleSignUp(false)}
+                onSwitch={() => handleGoogleSignUp(true)}
+              />
+            ) : (
+              <>
+                <div className="flex items-center gap-4 w-full">
+                  <div className="h-[1px] bg-zinc-800 flex-grow" />
+                  <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">or sign up with</span>
+                  <div className="h-[1px] bg-zinc-800 flex-grow" />
+                </div>
+                
+                <div className="flex gap-4">
+                  <button 
+                    type="button"
+                    onClick={() => handleGoogleSignUp(false)}
+                    className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white hover:bg-zinc-800 hover:border-[#afa3ff]/50 transition-all shadow-lg active:scale-95"
+                  >
+                    <Chrome size={24} />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => alert('Facebook Sign Up is coming soon!')}
+                    className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white hover:bg-zinc-800 hover:border-[#afa3ff]/50 transition-all shadow-lg active:scale-95"
+                  >
+                    <Facebook size={24} />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => alert('Biometric login will be enabled in the settings.')}
+                    className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-white hover:bg-zinc-800 hover:border-[#afa3ff]/50 transition-all shadow-lg active:scale-95"
+                  >
+                    <Fingerprint size={24} />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
 
           <div className="mt-4 mb-10">
             <p className="text-zinc-500 text-sm font-medium">
