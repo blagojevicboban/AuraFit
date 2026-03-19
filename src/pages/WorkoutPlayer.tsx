@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -47,6 +48,7 @@ const WorkoutPlayer: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [workoutItems, setWorkoutItems] = useState<Exercise[]>([]);
@@ -154,24 +156,24 @@ const WorkoutPlayer: React.FC = () => {
         >
           <Trophy size={64} className="text-[#1c1c1c]" />
         </motion.div>
-        <h1 className="text-4xl font-black mb-2 uppercase italic tracking-tighter">Workout Finished!</h1>
-        <p className="text-zinc-500 mb-8 font-bold tracking-widest uppercase text-sm">You've crushed it today</p>
+        <h1 className="text-4xl font-black mb-2 uppercase italic tracking-tighter">{t('player.finished')}</h1>
+        <p className="text-zinc-500 mb-8 font-bold tracking-widest uppercase text-sm">{t('player.crushed')}</p>
         
         <div className="grid grid-cols-2 gap-4 w-full max-w-xs mb-10">
           <div className="bg-zinc-900 border border-white/5 p-4 rounded-3xl">
             <Clock className="text-[#afa3ff] mx-auto mb-2" size={20} />
             <div className="text-xl font-black">{Math.floor((Date.now() - sessionStartTime) / 60000)}m</div>
-            <div className="text-[10px] text-zinc-600 font-bold uppercase">Duration</div>
+            <div className="text-[10px] text-zinc-600 font-bold uppercase">{t('progress.duration')}</div>
           </div>
           <div className="bg-zinc-900 border border-white/5 p-4 rounded-3xl">
             <Flame className="text-[#d6ff3e] mx-auto mb-2" size={20} />
             <div className="text-xl font-black">450</div>
-            <div className="text-[10px] text-zinc-600 font-bold uppercase">Est. Burn</div>
+            <div className="text-[10px] text-zinc-600 font-bold uppercase">{t('player.estBurn')}</div>
           </div>
         </div>
 
         <Button fullWidth size="xl" onClick={() => navigate('/home')} className="rounded-3xl">
-          Back to Dashboard
+          {t('common.backToAdmin').replace('BACK TO ADMIN', 'Back to Home')}
         </Button>
       </div>
     );
@@ -188,10 +190,12 @@ const WorkoutPlayer: React.FC = () => {
         </button>
         <div className="text-center">
           <h1 className="text-sm font-black uppercase tracking-[0.3em] text-[#d6ff3e]">{routineData.title}</h1>
-          <p className="text-[10px] text-zinc-500 font-bold">EXERCISE {currentExerciseIndex + 1} OF {workoutItems.length}</p>
+          <p className="text-[10px] text-zinc-500 font-bold uppercase">
+             {t('player.exerciseOf', { current: (currentExerciseIndex + 1).toString(), total: workoutItems.length.toString() })}
+          </p>
         </div>
         <button className="text-rose-500 font-black text-xs uppercase tracking-widest" onClick={handleFinishWorkout}>
-          Finish
+          {t('player.finish')}
         </button>
       </div>
 
@@ -220,10 +224,10 @@ const WorkoutPlayer: React.FC = () => {
       <div className="flex-grow px-6 overflow-y-auto no-scrollbar pb-32">
         <div className="space-y-4">
           <div className="grid grid-cols-4 px-4 text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">
-            <span>Set</span>
-            <span>Weight (kg)</span>
-            <span>Reps</span>
-            <span className="text-right">Done</span>
+            <span>{t('player.set')}</span>
+            <span>{t('player.weight')}</span>
+            <span>{t('player.reps')}</span>
+            <span className="text-right">{t('player.done')}</span>
           </div>
 
           <AnimatePresence mode="popLayout">
@@ -272,7 +276,7 @@ const WorkoutPlayer: React.FC = () => {
             onClick={handleAddSet}
             className="w-full py-4 border-2 border-dashed border-white/5 rounded-3xl text-zinc-600 flex items-center justify-center gap-2 font-bold hover:border-[#afa3ff]/30 hover:text-[#afa3ff] transition-all"
           >
-            <Plus size={20} /> ADD SET
+            <Plus size={20} /> {t('player.addSet')}
           </button>
         </div>
       </div>
@@ -287,13 +291,13 @@ const WorkoutPlayer: React.FC = () => {
             className="fixed bottom-0 left-0 right-0 h-40 bg-[#afa3ff] rounded-t-[3rem] z-[100] p-8 flex flex-col items-center justify-center shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
           >
             <div className="absolute top-4 w-12 h-1.5 bg-white/20 rounded-full" />
-            <h3 className="text-[#1c1c1c] font-black text-sm uppercase tracking-widest mb-1">Rest Timer</h3>
+            <h3 className="text-[#1c1c1c] font-black text-sm uppercase tracking-widest mb-1">{t('player.restTimer')}</h3>
             <div className="text-5xl font-black text-[#1c1c1c] italic">00:{restTime < 10 ? `0${restTime}` : restTime}</div>
             <button 
               onClick={() => setIsResting(false)}
               className="mt-2 text-[#1c1c1c]/60 font-bold text-xs hover:underline"
             >
-              SKIP REST
+              {t('player.skipRest')}
             </button>
           </motion.div>
         )}
@@ -306,7 +310,7 @@ const WorkoutPlayer: React.FC = () => {
           disabled={currentExerciseIndex === 0}
           className="flex-1 py-5 bg-zinc-900 border border-white/5 rounded-3xl text-zinc-500 font-black disabled:opacity-20 flex items-center justify-center gap-2"
         >
-          <ChevronLeft size={20} /> PREV
+          <ChevronLeft size={20} /> {t('player.prev')}
         </button>
         <button 
           onClick={() => {
@@ -318,7 +322,7 @@ const WorkoutPlayer: React.FC = () => {
           }}
           className="flex-1 py-5 bg-[#afa3ff] text-white rounded-3xl font-black shadow-xl flex items-center justify-center gap-2"
         >
-          {currentExerciseIndex === workoutItems.length - 1 ? 'FINISH' : 'NEXT'} <ChevronRight size={20} />
+          {currentExerciseIndex === workoutItems.length - 1 ? t('player.finish') : t('player.next')} <ChevronRight size={20} />
         </button>
       </div>
     </div>

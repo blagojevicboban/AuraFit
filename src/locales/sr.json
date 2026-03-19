@@ -194,6 +194,22 @@
     "back": "Nazad",
     "continue": "Nastavi"
   },
+  "player": {
+    "finished": "Trening završen!",
+    "crushed": "Razvalio si danas!",
+    "estBurn": "Procena potrošnje",
+    "exerciseOf": "Vežba {{current}} od {{total}}",
+    "finish": "Završi",
+    "addSet": "DODAJ SERIJU",
+    "restTimer": "Tajmer za odmor",
+    "skipRest": "PRESKOČI ODMOR",
+    "prev": "NAZAD",
+    "next": "DALJE",
+    "set": "Serija",
+    "weight": "Težina (kg)",
+    "reps": "Ponavljanja",
+    "done": "Gotovo"
+  },
   "workouts": {
     "title": "Treninzi",
     "beginner": "Početnik",

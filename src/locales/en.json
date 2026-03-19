@@ -194,6 +194,22 @@
     "back": "Back",
     "continue": "Continue"
   },
+  "player": {
+    "finished": "Workout Finished!",
+    "crushed": "You've crushed it today",
+    "estBurn": "Est. Burn",
+    "exerciseOf": "Exercise {{current}} of {{total}}",
+    "finish": "Finish",
+    "addSet": "ADD SET",
+    "restTimer": "Rest Timer",
+    "skipRest": "SKIP REST",
+    "prev": "PREV",
+    "next": "NEXT",
+    "set": "Set",
+    "weight": "Weight (kg)",
+    "reps": "Reps",
+    "done": "Done"
+  },
   "workouts": {
     "title": "Workouts",
     "beginner": "Beginner",
