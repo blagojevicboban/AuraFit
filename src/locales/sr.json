@@ -148,7 +148,11 @@
     "versionTitle": "Verzija aplikacije",
     "versionDesc": "AuraFit v1.2.0 - Premium Edition",
     "designedFor": "Dizajnirano za izvrsnost",
-    "author": "Glavni programer: Boban Blagojević"
+    "author": "Glavni programer: Boban Blagojević",
+    "docsTitle": "Tehnička dokumentacija",
+    "docsDesc": "Za programere: Pogledajte DOCUMENTATION.md u korenu za API rute i detalje arhitekture.",
+    "securityTitle": "Sigurnost podataka",
+    "securityDesc": "Vaši podaci su kriptovani putem SSL protokola i bezbedno uskladišteni na Google Cloudu (Firebase) uz stroga pravila pristupa."
   },
   "pwa": {
     "promptTitle": "Instaliraj AuraFit",

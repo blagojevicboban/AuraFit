@@ -148,7 +148,11 @@
     "versionTitle": "App Version",
     "versionDesc": "AuraFit v1.2.0 - Premium Edition",
     "designedFor": "Designed for Excellence",
-    "author": "Lead Developer: Boban Blagojević"
+    "author": "Lead Developer: Boban Blagojević",
+    "docsTitle": "Technical Documentation",
+    "docsDesc": "For developers: See DOCUMENTATION.md in the root for API endpoints and architecture details.",
+    "securityTitle": "Data Safety",
+    "securityDesc": "Your data is encrypted via SSL and stored securely in Google Cloud (Firebase) with strict access rules."
   },
   "pwa": {
     "promptTitle": "Install AuraFit",

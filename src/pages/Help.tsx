@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ChevronLeft, Info, Smartphone, Bell, LifeBuoy } from 'lucide-react';
+import { ChevronLeft, Info, Smartphone, Bell, LifeBuoy, ShieldCheck, FileText } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
@@ -22,6 +22,16 @@ const Help: React.FC = () => {
       icon: Bell,
       title: t('help.notifyTitle'),
       desc: t('help.notifyDesc')
+    },
+    {
+      icon: ShieldCheck,
+      title: t('help.securityTitle'),
+      desc: t('help.securityDesc')
+    },
+    {
+      icon: FileText,
+      title: t('help.docsTitle'),
+      desc: t('help.docsDesc')
     },
     {
       icon: LifeBuoy,
