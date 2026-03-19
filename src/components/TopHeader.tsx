@@ -9,6 +9,8 @@ interface TopHeaderProps {
   title: string;
   showBack?: boolean;
   backPath?: string | number;
+  searchPath?: string;
+  onSearch?: () => void;
   className?: string;
 }
 
@@ -16,6 +18,8 @@ const TopHeader: React.FC<TopHeaderProps> = ({
   title, 
   showBack = true, 
   backPath = -1,
+  searchPath = '/food-categories',
+  onSearch,
   className = ''
 }) => {
   const navigate = useNavigate();
@@ -56,6 +60,7 @@ const TopHeader: React.FC<TopHeaderProps> = ({
           </button>
         )}
         <button 
+          onClick={onSearch || (() => navigate(searchPath))}
           className="text-zinc-400 hover:text-zinc-600 dark:text-[#afa3ff] dark:hover:text-[#d6ff3e] transition-colors"
           title="Search"
         >

@@ -216,6 +216,11 @@
     "recommended": "Preporučeno",
     "recipesForYou": "Recepti za vas",
     "discoverIdeas": "Otkrijte ideje",
+    "discoverDesc": "Istražite različite kategorije obroka",
+    "avocadoToast": "Tost sa avokadom",
+    "proteinBowl": "Proteinska činija",
+    "berrySmoothie": "Smuti od bobica",
+    "grilledChicken": "Piletina na žaru",
     "aiQuickLog": "AI BRZI UNOS",
     "breakfast": "Doručak",
     "lunch": "Ručak",
@@ -247,6 +252,15 @@
       "notFound": "Proizvod nije pronađen",
       "tryAgain": "Pokušaj ponovo",
       "enterManually": "Ručni unos"
+    },
+    "categories": {
+      "title": "Kategorije hrane",
+      "searchPlaceholder": "Pretraži bilo koju hranu...",
+      "browse": "Pregledajte po kategoriji",
+      "found": "Pronađeno {{count}} stavki",
+      "noResults": "Nema rezultata.",
+      "error": "Greška pri učitavanju. Proverite mrežu.",
+      "logSuccess": "Logovano!"
     }
   }
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, Bell, User, Star, Clock, Flame, Play,
-  Home, BookOpen, Headphones, ChevronLeft, Apple, Plus, Sparkles, Barcode
+  Home, BookOpen, Headphones, ChevronLeft, Apple, Plus, Sparkles, Barcode, Loader2
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { AILogModal } from '../components/nutrition/AILogModal';
@@ -12,7 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import TopHeader from '../components/TopHeader';
 import { db } from '../lib/firebase';
-import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, getDocs, limit } from 'firebase/firestore';
 
 const Nutrition: React.FC = () => {
   const navigate = useNavigate();
@@ -22,22 +22,15 @@ const Nutrition: React.FC = () => {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isBarcodeOpen, setIsBarcodeOpen] = useState(false);
   const [dailyTotals, setDailyTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0 });
-
-  const recommendedRecipes = [
-    { id: 1, title: 'Fruit Smoothie', time: `12 ${t('common.minutes')}`, kcal: '120 Cal', isFavorite: true, image: '/assets/breakfast.png' },
-    { id: 2, title: 'Salads With Quinoa', time: `12 ${t('common.minutes')}`, kcal: '120 Cal', isFavorite: true, image: '/assets/nutrition-hero.png' },
-  ];
-
-  const recipesForYou = [
-    { id: 3, title: 'Delights With\nGreek Yogurt', time: `6 ${t('common.minutes')}`, kcal: '200 Cal', isFavorite: true, image: '/assets/breakfast.png' },
-    { id: 4, title: 'Baked Salmon', time: `30 ${t('common.minutes')}`, kcal: '350 Cal', isFavorite: true, image: '/assets/nutrition-hero.png' },
-  ];
+  const [recommendedRecipes, setRecommendedRecipes] = useState<any[]>([]);
+  const [recipesForYou, setRecipesForYou] = useState<any[]>([]);
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
 
   const mealIdeas = [
-    { id: 5, title: 'Avocado Toast', image: '/assets/breakfast.png', tags: [t('nutrition.breakfast'), 'Vegan'] },
-    { id: 6, title: 'Protein Bowl', image: '/assets/stretching.png', tags: [t('nutrition.lunch'), 'High Protein'] },
-    { id: 7, title: 'Berry Smoothie', image: '/assets/cycling.png', tags: [t('nutrition.snack'), 'Low Cal'] },
-    { id: 8, title: 'Grilled Chicken', image: '/assets/squat.png', tags: [t('nutrition.dinner'), 'Keto'] },
+    { id: 5, title: t('nutrition.avocadoToast'), image: '/assets/breakfast.png', tags: [t('nutrition.breakfast'), 'Vegan'], query: 'avocado toast' },
+    { id: 6, title: t('nutrition.proteinBowl'), image: '/assets/stretching.png', tags: [t('nutrition.lunch'), 'High Protein'], query: 'protein bowl' },
+    { id: 7, title: t('nutrition.berrySmoothie'), image: '/assets/cycling.png', tags: [t('nutrition.snack'), 'Low Cal'], query: 'berry smoothie' },
+    { id: 8, title: t('nutrition.grilledChicken'), image: '/assets/squat.png', tags: [t('nutrition.dinner'), 'Keto'], query: 'grilled chicken' },
   ];
 
   // Fetch today's meals
@@ -66,6 +59,49 @@ const Nutrition: React.FC = () => {
     });
 
     return () => unsubscribe();
+  }, [currentUser]);
+
+  // Hybrid fetch: Recommended from Firebase, Discovery from FatSecret
+  React.useEffect(() => {
+    const fetchRecipesData = async () => {
+      setIsLoadingRecipes(true);
+      try {
+        // 1. Fetch RECOMMENDED from Firebase 'recipes'
+        const fbQuery = query(collection(db, 'recipes'), limit(6));
+        const fbSnapshot = await getDocs(fbQuery);
+        const fbRecipes = fbSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            recipe_id: doc.id,
+            recipe_name: data.title || data.recipe_name || 'Recipe',
+            recipe_image: data.image || data.recipe_image || '/assets/breakfast.png',
+            recipe_description: data.description || data.recipe_description || '',
+            ...data
+          };
+        });
+
+        if (fbRecipes.length > 0) {
+          setRecommendedRecipes(fbRecipes);
+        } else {
+          // Fallback to FS for recommended
+          const res1 = await fetch('/api/fatsecret/recipes?type=Breakfast&max_calories=400');
+          const data1 = await res1.json();
+          const items = data1?.recipes?.recipe || [];
+          setRecommendedRecipes(Array.isArray(items) ? items.slice(0, 4) : [items]);
+        }
+
+        // 2. Fetch "For You" from FatSecret
+        const res2 = await fetch('/api/fatsecret/recipes?max_calories=600');
+        const data2 = await res2.json();
+        const forYouItems = data2?.recipes?.recipe || [];
+        setRecipesForYou(Array.isArray(forYouItems) ? forYouItems.slice(0, 4) : [forYouItems]);
+      } catch (e) {
+        console.error("Hybrid recipes fetch error:", e);
+      } finally {
+        setIsLoadingRecipes(false);
+      }
+    };
+    fetchRecipesData();
   }, [currentUser]);
 
   const macroGoals = {
@@ -195,10 +231,16 @@ const Nutrition: React.FC = () => {
               {/* ── Recommended (Horizontal Scroll) ── */}
               <div className="pl-6 mb-8">
                 <h2 className="text-emerald-500 dark:text-[#d6ff3e] text-xl font-extrabold mb-4">{t('nutrition.recommended')}</h2>
-                <div className="flex gap-4 overflow-x-auto pb-4 pr-6 no-scrollbar">
-                  {recommendedRecipes.map((recipe, i) => (
+                <div className="flex gap-4 overflow-x-auto pb-4 pr-6 no-scrollbar min-h-[160px]">
+                  {isLoadingRecipes ? (
+                    <div className="flex items-center justify-center w-full py-10">
+                      <Loader2 className="animate-spin text-emerald-500" size={24} />
+                    </div>
+                  ) : recommendedRecipes.length === 0 ? (
+                    <p className="text-zinc-500 text-xs italic px-2">No recipes found.</p>
+                  ) : recommendedRecipes.map((recipe, i) => (
                     <motion.div 
-                      key={recipe.id}
+                      key={recipe.recipe_id}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.1 }}
@@ -206,7 +248,7 @@ const Nutrition: React.FC = () => {
                     >
                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
                        <div className="h-40 bg-zinc-700 flex items-center justify-center overflow-hidden">
-                         <img src={recipe.image} className="w-full h-full object-cover opacity-80" alt={recipe.title} />
+                         <img src={recipe.recipe_image} className="w-full h-full object-cover opacity-80" alt={recipe.recipe_name} />
                        </div>
                        
                        <button className="absolute top-3 right-3 text-white z-20">
@@ -224,10 +266,11 @@ const Nutrition: React.FC = () => {
                        </button>
 
                        <div className="absolute bottom-3 left-3 right-3 z-20">
-                         <h3 className="text-white dark:text-[#d6ff3e] font-semibold text-sm mb-1.5 truncate">{recipe.title}</h3>
+                         <h3 className="text-white dark:text-[#d6ff3e] font-semibold text-sm mb-1.5 truncate">{recipe.recipe_name}</h3>
                          <div className="flex items-center gap-3 text-[10px] font-medium text-zinc-300">
-                           <span className="flex items-center gap-1"><Clock size={10} className="text-[#afa3ff]"/>{recipe.time}</span>
-                           <span className="flex items-center gap-1"><Flame size={10} className="text-[#afa3ff]"/>{recipe.kcal}</span>
+                           <span className="flex items-center gap-1 line-clamp-1 truncate max-w-[150px]">
+                             {recipe.recipe_description}
+                           </span>
                          </div>
                        </div>
                     </motion.div>
@@ -239,25 +282,30 @@ const Nutrition: React.FC = () => {
               <div className="px-6">
                 <h2 className="text-emerald-500 dark:text-[#d6ff3e] text-xl font-extrabold mb-4">{t('nutrition.recipesForYou')}</h2>
                 <div className="flex flex-col gap-4">
-                  {recipesForYou.map((recipe, i) => (
+                  {isLoadingRecipes ? (
+                    <div className="flex flex-col gap-4">
+                      {[1, 2].map(i => (
+                        <div key={i} className="h-28 bg-zinc-200 dark:bg-zinc-800 rounded-3xl animate-pulse" />
+                      ))}
+                    </div>
+                  ) : recipesForYou.map((recipe, i) => (
                     <motion.div 
-                      key={recipe.id}
+                      key={recipe.recipe_id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + (i * 0.1) }}
                       className="bg-white dark:bg-zinc-800 rounded-3xl overflow-hidden flex shadow-lg h-[120px] cursor-pointer border border-zinc-100 dark:border-none"
                     >
                        <div className="flex-1 p-5 flex flex-col justify-center">
-                         <h3 className="text-zinc-900 dark:text-white font-bold text-base leading-tight mb-2 whitespace-pre-line">
-                           {recipe.title}
+                         <h3 className="text-zinc-900 dark:text-white font-bold text-base leading-tight mb-2 whitespace-pre-line truncate max-w-[200px]">
+                           {recipe.recipe_name}
                          </h3>
-                         <div className="flex items-center gap-4 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                           <span className="flex items-center gap-1.5"><Clock size={12} className="text-zinc-700 dark:text-white"/>{recipe.time}</span>
-                           <span className="flex items-center gap-1.5"><Flame size={12} className="text-zinc-700 dark:text-white"/>{recipe.kcal}</span>
+                         <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-500 dark:text-zinc-400">
+                           <span className="flex items-center gap-1.5 line-clamp-2 italic">{recipe.recipe_description}</span>
                          </div>
                        </div>
                        <div className="w-2/5 bg-zinc-800 relative flex items-center justify-center overflow-hidden">
-                          <img src={recipe.image} className="w-full h-full object-cover opacity-60 dark:opacity-60" alt={recipe.title} />
+                          <img src={recipe.recipe_image} className="w-full h-full object-cover opacity-60 dark:opacity-60" alt={recipe.recipe_name} />
                           <button className="absolute top-3 right-3 text-white drop-shadow-md">
                             <Star size={16} fill="currentColor" />
                           </button>
@@ -279,15 +327,23 @@ const Nutrition: React.FC = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05 }}
+                    onClick={() => navigate('/food-categories', { state: { search: idea.query } })}
                     className="aspect-square bg-zinc-100 dark:bg-zinc-800 rounded-3xl relative overflow-hidden group cursor-pointer border border-zinc-100 dark:border-none"
                   >
                     <img src={idea.image} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" alt={idea.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     <div className="absolute bottom-3 left-3 right-3">
-                      <p className="text-white font-bold text-xs mb-1">{idea.title}</p>
-                      <div className="flex gap-1">
+                      <p className="text-white font-bold text-[10px] mb-1 leading-tight">{idea.title}</p>
+                      <div className="flex flex-wrap gap-1">
                         {idea.tags.map(tag => (
-                          <span key={tag} className="text-[8px] bg-emerald-500/20 dark:bg-[#d6ff3e]/20 text-white dark:text-[#d6ff3e] px-1.5 py-0.5 rounded-full font-bold">
+                          <span 
+                            key={tag} 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/food-categories', { state: { search: tag.toLowerCase() } });
+                            }}
+                            className="text-[7px] bg-emerald-500/20 dark:bg-[#d6ff3e]/20 text-white dark:text-[#d6ff3e] px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter"
+                          >
                             {tag}
                           </span>
                         ))}
@@ -313,7 +369,7 @@ const Nutrition: React.FC = () => {
           className="w-14 h-14 bg-zinc-800 border border-white/10 rounded-full flex items-center justify-center shadow-xl group relative"
         >
           <Apple size={20} className="text-emerald-400" />
-          <div className="absolute -top-10 right-0 bg-zinc-700 text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+          <div className="absolute top-1/2 -translate-y-1/2 right-full mr-3 bg-zinc-700 text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-lg">
             Browse Categories
           </div>
         </motion.button>
@@ -326,7 +382,7 @@ const Nutrition: React.FC = () => {
           className="w-14 h-14 bg-zinc-800 border border-white/10 rounded-full flex items-center justify-center shadow-xl group relative"
         >
           <Barcode size={22} className="text-[#d6ff3e]" />
-          <div className="absolute -top-10 right-0 bg-zinc-700 text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+          <div className="absolute top-1/2 -translate-y-1/2 right-full mr-3 bg-zinc-700 text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-lg">
             Scan Barcode
           </div>
         </motion.button>
@@ -339,7 +395,7 @@ const Nutrition: React.FC = () => {
           className="w-16 h-16 bg-emerald-500 dark:bg-[#d6ff3e] rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(16,185,129,0.4)] group relative"
         >
           <Sparkles size={28} className="text-white dark:text-[#1c1c1c] group-hover:animate-pulse" />
-          <div className="absolute -top-12 right-0 bg-[#afa3ff] text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+          <div className="absolute top-1/2 -translate-y-1/2 right-full mr-3 bg-[#afa3ff] text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-lg">
             {t('nutrition.aiQuickLog')}
           </div>
         </motion.button>

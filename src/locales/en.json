@@ -216,6 +216,11 @@
     "recommended": "Recommended",
     "recipesForYou": "Recipes For You",
     "discoverIdeas": "Discover Ideas",
+    "discoverDesc": "Explore Various Meal Categories",
+    "avocadoToast": "Avocado Toast",
+    "proteinBowl": "Protein Bowl",
+    "berrySmoothie": "Berry Smoothie",
+    "grilledChicken": "Grilled Chicken",
     "aiQuickLog": "AI QUICK LOG",
     "breakfast": "Breakfast",
     "lunch": "Lunch",
@@ -247,6 +252,15 @@
       "notFound": "Product Not Found",
       "tryAgain": "Try Again",
       "enterManually": "Enter Manually"
+    },
+    "categories": {
+      "title": "Food Categories",
+      "searchPlaceholder": "Search any food...",
+      "browse": "Browse by category",
+      "found": "Found {{count}} items",
+      "noResults": "No results found.",
+      "error": "Failed to load foods. Check connection.",
+      "logSuccess": "Logged!"
     }
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronLeft, Search, Loader2, Trophy, X, Plus, Info,
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -62,11 +63,14 @@ function parseMacros(description: string): ParsedMacros {
 
 const FoodCategories: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [foods, setFoods] = useState<FoodItem[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -80,16 +84,55 @@ const FoodCategories: React.FC = () => {
     setFoods([]);
     try {
       const res = await fetch(`/api/fatsecret/search?q=${encodeURIComponent(query)}`);
-      if (!res.ok) throw new Error('API error');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'API error');
+      }
       const data = await res.json();
       const items: FoodItem[] = data?.foods?.food ?? [];
       setFoods(Array.isArray(items) ? items : [items]);
-    } catch (e) {
-      setError('Failed to load foods. Check your connection.');
+    } catch (e: any) {
+      console.error("Search error:", e);
+      setError(e.message.includes('credentials missing') ? 'FatSecret API keys missing in .env' : t('nutrition.categories.error'));
     } finally {
       setIsLoading(false);
+      setSuggestions([]);
     }
-  }, []);
+  }, [t]);
+
+  // Effect to handle search from location state
+  React.useEffect(() => {
+    if (location.state?.search) {
+      const initialQuery = location.state.search;
+      setSearchQuery(initialQuery);
+      setActiveCategory(null);
+      fetchFoods(initialQuery);
+      // Clear state so it doesn't re-trigger on back/refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, fetchFoods]);
+
+  // Autocomplete
+  React.useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchQuery.trim().length < 2) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/fatsecret/autocomplete?q=${encodeURIComponent(searchQuery)}`);
+        const data = await res.json();
+        const items = data?.suggestions?.suggestion;
+        if (Array.isArray(items)) setSuggestions(items);
+        else if (typeof items === 'string') setSuggestions([items]);
+        else setSuggestions([]);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    const timer = setTimeout(fetchSuggestions, 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleCategoryClick = (cat: typeof CATEGORIES[number]) => {
     setActiveCategory(cat.id);
@@ -143,8 +186,8 @@ const FoodCategories: React.FC = () => {
             <ChevronLeft size={22} />
           </button>
           <div>
-            <h1 className="text-xl font-black text-white">Food Categories</h1>
-            <p className="text-zinc-500 text-xs">Powered by FatSecret</p>
+            <h1 className="text-xl font-black text-white">{t('nutrition.categories.title')}</h1>
+            <p className="text-zinc-500 text-xs text-center italic">Powered by FatSecret</p>
           </div>
         </div>
 
@@ -156,15 +199,44 @@ const FoodCategories: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search any food..."
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#d6ff3e]/40 focus:ring-1 focus:ring-[#d6ff3e]/20 transition-all"
+              placeholder={t('nutrition.categories.searchPlaceholder')}
+              autoFocus
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#d6ff3e]/40 focus:ring-1 focus:ring-[#d6ff3e]/20 transition-all font-semibold"
             />
+            
+            {/* Suggestions Overlay */}
+            <AnimatePresence>
+              {suggestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scaleY: 0.95 }}
+                  animate={{ opacity: 1, scaleY: 1 }}
+                  exit={{ opacity: 0, scaleY: 0.95 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] max-h-64 overflow-y-auto origin-top"
+                >
+                  {suggestions.map((s, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery(s);
+                        fetchFoods(s);
+                        setSuggestions([]);
+                      }}
+                      className="w-full text-left px-5 py-4 hover:bg-white/5 text-zinc-300 text-sm border-b border-white/5 last:border-0 transition-colors flex items-center gap-3 active:bg-zinc-800"
+                    >
+                      <Search size={14} className="text-zinc-600" />
+                      <span className="font-semibold">{s}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           <button
             type="submit"
-            className="px-5 py-3.5 bg-[#d6ff3e] text-[#1c1c1c] font-black rounded-2xl text-sm hover:bg-[#e4ff6a] transition-colors"
+            className="px-6 py-3.5 bg-[#d6ff3e] text-[#1c1c1c] font-black rounded-2xl text-sm hover:bg-[#e4ff6a] transition-colors shadow-lg shadow-[#d6ff3e]/20 active:scale-95 transition-transform"
           >
-            Search
+            {t('common.search')}
           </button>
         </form>
       </div>
@@ -172,7 +244,7 @@ const FoodCategories: React.FC = () => {
       {/* ── Category Grid (always visible) ── */}
       {!activeCategory && foods.length === 0 && (
         <div className="px-6 pt-2">
-          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-4">Browse by category</p>
+          <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">{t('nutrition.categories.browse')}</p>
           <div className="grid grid-cols-3 gap-3">
             {CATEGORIES.map((cat, i) => (
               <motion.button
@@ -184,7 +256,7 @@ const FoodCategories: React.FC = () => {
                 className={`bg-gradient-to-br ${cat.color} border ${cat.border} rounded-3xl p-4 flex flex-col items-center gap-2 hover:scale-105 active:scale-95 transition-transform`}
               >
                 <span className="text-3xl">{cat.icon}</span>
-                <span className="text-xs font-black text-white text-center leading-tight">{cat.label}</span>
+                <span className="text-[10px] font-black text-white text-center leading-tight uppercase tracking-widest">{cat.label}</span>
               </motion.button>
             ))}
           </div>
@@ -200,9 +272,11 @@ const FoodCategories: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{activeCat.icon}</span>
-                <span className="text-base font-black text-white">{activeCat.label}</span>
+                <span className="text-base font-black text-white tracking-tight">{activeCat.label}</span>
                 {foods.length > 0 && (
-                  <span className="text-xs text-zinc-500 font-semibold">({foods.length} results)</span>
+                  <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider ml-1">
+                    ({t('nutrition.categories.found', { count: foods.length })})
+                  </span>
                 )}
               </div>
               <button
@@ -217,7 +291,11 @@ const FoodCategories: React.FC = () => {
           {/* Search results header */}
           {!activeCat && foods.length > 0 && (
             <div className="flex items-center justify-between mb-4">
-              <p className="text-zinc-400 text-sm"><span className="text-white font-bold">{foods.length}</span> results for "{searchQuery}"</p>
+              <p className="text-zinc-400 text-sm">
+                <span className="text-white font-bold tracking-tight">
+                  {t('nutrition.categories.found', { count: foods.length })}
+                </span> "{searchQuery}"
+              </p>
               <button
                 onClick={() => { setFoods([]); setSearchQuery(''); }}
                 className="text-zinc-400 hover:text-white bg-zinc-800 p-1.5 rounded-full transition-colors"
