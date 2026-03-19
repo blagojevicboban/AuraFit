@@ -52,6 +52,12 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // Set COOP header for Firebase auth popups
+  app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    next();
+  });
+
   app.use(express.json());
 
   // API routes FIRST

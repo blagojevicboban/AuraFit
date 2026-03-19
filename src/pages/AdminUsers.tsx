@@ -5,8 +5,8 @@ import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firesto
 import { db } from "../lib/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, useLocation } from "react-router-dom";
+// ...
 interface UserData {
   id: string;
   displayName: string;
@@ -19,10 +19,14 @@ export default function AdminUsers() {
   const { impersonateUser } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialRole = queryParams.get('role') || 'all';
+  
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterRole, setFilterRole] = useState<string>("all");
+  const [filterRole, setFilterRole] = useState<string>(initialRole);
   
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserData | null>(null);

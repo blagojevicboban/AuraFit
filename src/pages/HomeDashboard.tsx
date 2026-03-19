@@ -110,9 +110,9 @@ const HomeDashboard: React.FC = () => {
               {userData?.role === 'admin' && (
                 <button 
                   onClick={() => navigate('/app/admin')}
-                  className="bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-full text-[#d6ff3e] text-[8px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg"
+                  className="bg-zinc-800 border border-zinc-700 px-3 py-1 rounded-full text-[#d6ff3e] text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 shadow-lg shadow-black/20 hover:bg-zinc-700 transition-colors"
                 >
-                  <Shield size={10} />
+                  <Shield size={12} />
                   Admin
                 </button>
               )}

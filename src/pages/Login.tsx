@@ -11,8 +11,12 @@ import GoogleAccountCard from '../components/auth/GoogleAccountCard';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, passwordSignIn, adminSignIn } = useAuth();
   const [lastUser, setLastUser] = React.useState<any>(null);
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [loginLoading, setLoginLoading] = React.useState(false);
+  const [loginError, setLoginError] = React.useState("");
 
   React.useEffect(() => {
     const saved = localStorage.getItem('aura_last_google_user');
@@ -44,7 +48,29 @@ const Login: React.FC = () => {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/home');
+    if (!username || !password) return;
+    
+    setLoginLoading(true);
+    setLoginError("");
+    try {
+      // Auto-detect role based on username if it's one of the requested test accounts
+      if (username === 'admin') {
+        await adminSignIn(username, password);
+        navigate('/app/admin');
+      } else if (username === 'coach') {
+        await passwordSignIn(username, password, 'coach');
+        navigate('/app/coach');
+      } else {
+        await passwordSignIn(username, password, 'client');
+        navigate('/home');
+      }
+    } catch (err: any) {
+      console.error("Login Error:", err);
+      // Firebase standard error code check
+      setLoginError(err.code === 'auth/invalid-credential' ? "Pogrešno korisničko ime ili lozinka." : "Greška pri prijavi.");
+    } finally {
+      setLoginLoading(false);
+    }
   };
 
   return (
@@ -68,12 +94,19 @@ const Login: React.FC = () => {
       </div>
 
       {/* Inputs Section (Purple Card) */}
-      <div className="bg-[#afa3ff] px-8 py-10 flex flex-col gap-6 rounded-[2.5rem] mx-6 shadow-xl relative z-10 transition-all">
+      <form onSubmit={handleEmailLogin} className="bg-[#afa3ff] px-8 py-10 flex flex-col gap-6 rounded-[2.5rem] mx-6 shadow-xl relative z-10 transition-all">
+        {loginError && (
+          <div className="bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 p-4 rounded-[1.5rem] mb-2 text-sm font-bold text-center">
+            {loginError}
+          </div>
+        )}
         <Input 
           label="Username or email"
           labelClassName="text-[#1c1c1c]/70 font-bold"
           type="text" 
           placeholder="example@example.com"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           className="bg-white/30 border-white/40 text-[#1c1c1c] placeholder:text-[#1c1c1c]/40 font-medium"
         />
 
@@ -83,6 +116,8 @@ const Login: React.FC = () => {
             labelClassName="text-[#1c1c1c]/70 font-bold"
             type="password" 
             placeholder="**************"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="bg-white/30 border-white/40 text-[#1c1c1c] placeholder:text-[#1c1c1c]/40 font-medium"
           />
           <div className="text-right mt-2">
@@ -91,12 +126,20 @@ const Login: React.FC = () => {
             </Link>
           </div>
         </div>
-      </div>
+      </form>
 
       {/* Bottom Section */}
       <div className="px-8 pt-12 pb-10 flex flex-col items-center gap-8 bg-zinc-50 dark:bg-[#1c1c1c] flex-grow transition-colors">
-        <Button size="xl" fullWidth className="max-w-xs shadow-lg rounded-2xl">
-          Log In
+        <Button 
+          onClick={handleEmailLogin}
+          disabled={loginLoading}
+          size="xl" 
+          fullWidth 
+          className="max-w-xs shadow-lg rounded-2xl"
+        >
+          {loginLoading ? (
+            <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : "Log In"}
         </Button>
 
         <div className="flex flex-col items-center gap-4 w-full max-w-xs">

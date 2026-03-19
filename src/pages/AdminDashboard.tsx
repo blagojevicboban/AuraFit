@@ -43,7 +43,7 @@ export default function AdminDashboard() {
 
   const stats = [
     { label: t('nav.users'), value: "1,248", icon: Users, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10", border: "border-indigo-100 dark:border-indigo-500/20", to: "/app/admin/users" },
-    { label: t('admin.activeCoaches'), value: "42", icon: Activity, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20" },
+    { label: t('admin.activeCoaches'), value: "42", icon: Activity, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20", to: "/app/admin/users?role=coach" },
     { label: t('admin.newMonthlyClients'), value: "+156", icon: TrendingUp, color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-50 dark:bg-cyan-500/10", border: "border-cyan-100 dark:border-cyan-500/20" },
     { label: t('admin.reportedIssues'), value: "3", icon: ShieldAlert, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-500/10", border: "border-rose-100 dark:border-rose-500/20" },
   ];
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6 flex flex-col">
+        <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6 flex flex-col transition-all hover:scale-[1.02] hover:border-indigo-500/50 shadow-sm">
            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{t('admin.manageUsers')}</h2>
            <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 flex-grow">
              {t('admin.manageUsersDesc')}
@@ -146,6 +146,21 @@ export default function AdminDashboard() {
            >
              <Users className="w-5 h-5" />
              {t('admin.openList')}
+             <ArrowRight className="w-4 h-4 ml-2" />
+           </Link>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6 flex flex-col transition-all hover:scale-[1.02] hover:border-indigo-500/50 shadow-sm">
+           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{t('admin.manageCoaches')}</h2>
+           <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 flex-grow">
+             {t('admin.manageCoachesDesc')}
+           </p>
+           <Link 
+             to="/app/admin/users?role=coach"
+             className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black transition-all shadow-lg shadow-indigo-500/20"
+           >
+             <Activity className="w-5 h-5" />
+             {t('admin.openCoachList')}
              <ArrowRight className="w-4 h-4 ml-2" />
            </Link>
         </div>

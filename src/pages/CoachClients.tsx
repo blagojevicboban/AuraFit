@@ -1,19 +1,42 @@
-import { useState } from "react";
-import { Users, Search, Filter, MoreVertical, Mail, Activity, ChevronRight, UserPlus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, Search, Filter, MoreVertical, Mail, Activity, ChevronRight, UserPlus, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function CoachClients() {
+  const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
+  const [clients, setClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const clients = [
-    { id: 1, name: "Marko P.", goal: "Mišićna masa", status: "Aktivno", lastActive: "Danas", avatar: "M", progress: "Stagnacija" },
-    { id: 2, name: "Jelena M.", goal: "Gubitak težine", status: "Aktivno", lastActive: "Juče", avatar: "J", progress: "Odličan" },
-    { id: 3, name: "Nikola S.", goal: "Kondicija", status: "Neaktivno", lastActive: "Pre 5 dana", avatar: "N", progress: "Slab" },
-    { id: 4, name: "Ana K.", goal: "Snaga", status: "Aktivno", lastActive: "Danas", avatar: "A", progress: "Dobar" },
-  ];
+  useEffect(() => {
+    const fetchClients = async () => {
+      if (!currentUser) return;
+      setLoading(true);
+      try {
+        const q = query(collection(db, 'users'), where('coachId', '==', currentUser.uid));
+        const snap = await getDocs(q);
+        const clientsData = snap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setClients(clientsData);
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClients();
+  }, [currentUser]);
 
   const filteredClients = clients.filter(client => 
-    client.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (client.displayName || client.name || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -47,78 +70,86 @@ export default function CoachClients() {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/20 transition-colors duration-200">
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Klijent</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">Cilj</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider hidden md:table-cell">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider hidden lg:table-cell">Napredak</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider text-right">Akcije</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-zinc-800/50 transition-colors duration-200">
-              {filteredClients.map((client) => (
-                <motion.tr 
-                  key={client.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors group cursor-pointer"
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700/50 transition-colors duration-200">
-                        {client.avatar}
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-900 dark:text-white transition-colors duration-200">{client.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-zinc-500 sm:hidden mt-0.5">{client.goal}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 hidden sm:table-cell">
-                    <span className="text-sm text-slate-600 dark:text-zinc-400 transition-colors duration-200">{client.goal}</span>
-                  </td>
-                  <td className="px-6 py-4 hidden md:table-cell">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                      client.status === 'Aktivno' 
-                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' 
-                        : 'bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700'
-                    } transition-colors duration-200`}>
-                      {client.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 hidden lg:table-cell">
-                    <span className={`text-sm ${
-                      client.progress === 'Odličan' ? 'text-emerald-600 dark:text-emerald-400' :
-                      client.progress === 'Stagnacija' ? 'text-amber-600 dark:text-amber-400' :
-                      'text-rose-600 dark:text-rose-400'
-                    } transition-colors duration-200`}>
-                      {client.progress}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 text-slate-400 hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-indigo-400 transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10">
-                        <Mail className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 text-slate-400 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800">
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-              {filteredClients.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-zinc-500">
-                    Nema pronađenih klijenata za pretragu "{searchQuery}"
-                  </td>
+        <div className="overflow-x-auto min-h-[200px] relative">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <Loader2 className="animate-spin text-indigo-500" size={30} />
+              <p className="text-slate-500 dark:text-zinc-400 font-bold">Učitavanje klijenata...</p>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/20 transition-colors duration-200">
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Klijent</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">Cilj</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider hidden md:table-cell">Status</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider hidden lg:table-cell">Reg. Datum</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider text-right">Akcije</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-zinc-800/50 transition-colors duration-200">
+                {filteredClients.map((client, i) => (
+                  <motion.tr 
+                    key={client.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors group cursor-pointer"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-gradient-to-br dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700/50 transition-colors duration-200 overflow-hidden shadow-sm">
+                          {client.photoURL ? (
+                            <img src={client.photoURL} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            (client.displayName || client.name || "U")[0].toUpperCase()
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white transition-colors duration-200">{client.displayName || client.name}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-zinc-500 sm:hidden mt-0.5 uppercase tracking-wider font-bold">{client.goal || 'Bez cilja'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 hidden sm:table-cell">
+                      <span className="text-sm text-slate-600 dark:text-zinc-400 transition-colors duration-200">{client.goal || '---'}</span>
+                    </td>
+                    <td className="px-6 py-4 hidden md:table-cell">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                        client.setupCompleted 
+                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' 
+                          : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20'
+                      } transition-colors duration-200`}>
+                        {client.setupCompleted ? 'Aktivno' : 'Čeka setup'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 hidden lg:table-cell">
+                      <span className="text-sm text-slate-500 dark:text-zinc-500 tabular-nums">
+                        {client.createdAt?.toDate ? client.createdAt.toDate().toLocaleDateString() : 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button className="p-2 text-slate-400 hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-indigo-400 transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10">
+                          <Mail className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-slate-400 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800">
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+                {filteredClients.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-zinc-500">
+                      Nema pronađenih klijenata
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

@@ -29,7 +29,11 @@ const Community: React.FC = () => {
         ]);
         
         setForums(forumSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setChallenges(challengeSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        
+        // Deduplicate challenges by title to handle cases where seeding might have created duplicates
+        const allChallenges = challengeSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const uniqueChallenges = Array.from(new Map(allChallenges.map((c: any) => [c.title, c])).values());
+        setChallenges(uniqueChallenges);
       } catch (e) {
         console.error("Error fetching community data:", e);
       } finally {

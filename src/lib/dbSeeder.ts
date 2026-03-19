@@ -1,7 +1,8 @@
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 const recipes = [
+// ... (recipes remain the same but I should update them later or now)
   {
     title: 'Fruit Smoothie',
     category: 'Breakfast',
@@ -50,7 +51,7 @@ const challenges = [
     intensity: 'Low',
     duration: '20 Minutes',
     participantsCount: 850,
-    image: '/assets/yoga.png'
+    image: '/assets/stretching.png'
   },
   {
     title: '30 Day Plank',
@@ -99,23 +100,25 @@ export async function seedDatabase() {
   let count = 0;
 
   try {
+    const slugify = (text: string) => text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+
     for (const recipe of recipes) {
-      await addDoc(collection(db, 'recipes'), recipe);
+      await setDoc(doc(db, 'recipes', slugify(recipe.title)), recipe);
       count++;
     }
     for (const challenge of challenges) {
-      await addDoc(collection(db, 'challenges'), challenge);
+      await setDoc(doc(db, 'challenges', slugify(challenge.title)), challenge);
       count++;
     }
     for (const category of forumCategories) {
-      await addDoc(collection(db, 'forumCategories'), category);
+      await setDoc(doc(db, 'forumCategories', slugify(category.title)), category);
       count++;
     }
     for (const plan of mealPlans) {
-      await addDoc(collection(db, 'mealPlans'), plan);
+      await setDoc(doc(db, 'mealPlans', slugify(plan.title)), plan);
       count++;
     }
-    console.log(`Seed completed! Added ${count} documents.`);
+    console.log(`Seed completed! Added/Updated ${count} documents.`);
     return { success: true, count };
   } catch (error) {
     console.error('Seed error:', error);
