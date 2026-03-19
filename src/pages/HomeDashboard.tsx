@@ -171,6 +171,40 @@ const HomeDashboard: React.FC = () => {
       {/* ── Scrollable Content ── */}
       <div className="flex-grow overflow-y-auto pb-24 space-y-2">
 
+        {/* ── Coach Engagement Card (For clients without coach) ── */}
+        {userData?.role === 'client' && !userData?.coachId && (
+          <section className="px-6 pt-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={() => navigate('/coaches')}
+              className="relative p-8 rounded-[2.5rem] bg-gradient-to-br from-[#afa3ff] to-[#7c66ff] shadow-xl shadow-[#7c66ff]/20 overflow-hidden cursor-pointer group"
+            >
+              {/* Abstract decorations */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-110 transition-transform" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#d6ff3e]/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl" />
+              
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-[#d6ff3e]" />
+                    <span className="text-[10px] font-black text-zinc-950 uppercase tracking-[0.2em]">Pronađi mentora</span>
+                  </div>
+                  <h2 className="text-3xl font-black text-zinc-950 leading-tight">
+                    Ostvari rezultate 2x brže
+                  </h2>
+                  <p className="text-zinc-900/60 text-sm font-medium max-w-[200px]">
+                    Angažuj profesionalnog trenera za personalizovane planove.
+                  </p>
+                </div>
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#d6ff3e] text-zinc-950 group-hover:scale-110 transition-transform shadow-lg">
+                  <ChevronRight size={28} />
+                </div>
+              </div>
+            </motion.div>
+          </section>
+        )}
+
         {/* ── Recommendations ── */}
         <section className="px-6 pt-4">
           <div className="flex items-center justify-between mb-4">
