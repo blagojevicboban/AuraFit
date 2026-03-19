@@ -14,7 +14,8 @@ A modern, high-tech fitness application UI built with React, Vite, and Tailwind 
 - **👥 Community & Profile**: Discussion forums, fitness challenges, and detailed user settings.
 - **🎨 Cinematic 3D Assets**: High-fidelity renders replacing all placeholders for a premium feel.
 - **🌓 Dark/Light Mode**: Full theme customization with smooth transitions and persistent state.
-- **🌐 Multi-language Support**: Comprehensive English and Serbian translations with a sleek language switcher.
+- **🌐 Universal Localization**: Multi-language support (EN/SR) with external JSON files and variable interpolation. Easily scalable to any language.
+- **📷 Barcode Nutrition Scanner**: Scan product barcodes with live camera for instant macro logging via FatSecret API.
 - **📱 PWA Support**: Installable on mobile devices for a native-like experience.
 - **🔔 Push Notifications**: Real-time updates via Firebase Cloud Messaging.
 - **🔒 Database & Security**: Firestore schema aligned with UI features and strict security rules.
