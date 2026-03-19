@@ -15,6 +15,9 @@ export default defineConfig(({mode}) => {
         devOptions: {
           enabled: true
         },
+        workbox: {
+          maximumFileSizeToCacheInBytes: 4194304
+        },
         manifest: {
           name: 'AuraFit Premium',
           short_name: 'AuraFit',
