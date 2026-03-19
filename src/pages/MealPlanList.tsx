@@ -148,7 +148,10 @@ const MealPlanList: React.FC = () => {
       <div className="px-6 py-6 pb-2">
           <button 
             disabled={!selectedId}
-            onClick={() => navigate('/recipe', { state: { recipeId: selectedId } })}
+            onClick={() => {
+              const selectedPlan = plans.find(p => String(p.id) === String(selectedId));
+              navigate('/recipe', { state: { recipeId: selectedId, isFS: !!selectedPlan?.isFS } });
+            }}
             className="w-full bg-emerald-500 dark:bg-[#d6ff3e] text-white dark:text-[#1c1c1c] font-black py-4 rounded-full text-lg shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 uppercase tracking-tighter"
           >
             {t('mealPlans.seeRecipe')}

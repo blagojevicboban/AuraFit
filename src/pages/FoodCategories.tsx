@@ -65,7 +65,7 @@ const FoodCategories: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,7 +83,7 @@ const FoodCategories: React.FC = () => {
     setError('');
     setFoods([]);
     try {
-      const res = await fetch(`/api/fatsecret/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/fatsecret/search?q=${encodeURIComponent(query)}&lang=${language}`);
       
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
@@ -131,7 +131,7 @@ const FoodCategories: React.FC = () => {
         return;
       }
       try {
-        const res = await fetch(`/api/fatsecret/autocomplete?q=${encodeURIComponent(searchQuery)}`);
+        const res = await fetch(`/api/fatsecret/autocomplete?q=${encodeURIComponent(searchQuery)}&lang=${language}`);
         const data = await res.json();
         const items = data?.suggestions?.suggestion;
         if (Array.isArray(items)) setSuggestions(items);

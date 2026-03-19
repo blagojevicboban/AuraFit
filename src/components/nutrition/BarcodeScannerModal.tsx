@@ -32,7 +32,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   onSuccess,
 }) => {
   const { currentUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [scanState, setScanState] = useState<ScanState>('scanning');
   const [nutrition, setNutrition] = useState<NutritionData | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -56,7 +56,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
     await stopScanner();
     setScanState('loading');
     try {
-      const res = await fetch(`/api/fatsecret/barcode?barcode=${encodeURIComponent(barcode)}`);
+      const res = await fetch(`/api/fatsecret/barcode?barcode=${encodeURIComponent(barcode)}&lang=${language}`);
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Not found');

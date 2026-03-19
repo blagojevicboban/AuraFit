@@ -17,7 +17,7 @@ import { collection, query, where, onSnapshot, Timestamp, getDocs, limit } from 
 const Nutrition: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState('Meal Plans');
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isBarcodeOpen, setIsBarcodeOpen] = useState(false);
@@ -84,14 +84,14 @@ const Nutrition: React.FC = () => {
           setRecommendedRecipes(fbRecipes);
         } else {
           // Fallback to FS for recommended
-          const res1 = await fetch('/api/fatsecret/recipes?type=Breakfast&max_calories=400');
+          const res1 = await fetch(`/api/fatsecret/recipes?type=Breakfast&max_calories=400&lang=${language}`);
           const data1 = await res1.json();
           const items = data1?.recipes?.recipe || [];
           setRecommendedRecipes(Array.isArray(items) ? items.slice(0, 4) : [items]);
         }
 
         // 2. Fetch "For You" from FatSecret
-        const res2 = await fetch('/api/fatsecret/recipes?max_calories=600');
+        const res2 = await fetch(`/api/fatsecret/recipes?max_calories=600&lang=${language}`);
         const data2 = await res2.json();
         const forYouItems = data2?.recipes?.recipe || [];
         setRecipesForYou(Array.isArray(forYouItems) ? forYouItems.slice(0, 4) : [forYouItems]);
@@ -258,7 +258,7 @@ const Nutrition: React.FC = () => {
                        <button 
                          onClick={(e) => {
                            e.stopPropagation();
-                           navigate('/meal-plan');
+                           navigate('/recipe', { state: { recipeId: recipe.recipe_id, isFS: true } });
                          }}
                          className="absolute right-3 top-[100px] w-8 h-8 rounded-full bg-emerald-500 dark:bg-[#afa3ff] flex items-center justify-center z-20 shadow-lg text-white hover:scale-110 active:scale-95 transition-all"
                        >
@@ -294,6 +294,7 @@ const Nutrition: React.FC = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + (i * 0.1) }}
+                      onClick={() => navigate('/recipe', { state: { recipeId: recipe.recipe_id, isFS: true } })}
                       className="bg-white dark:bg-zinc-800 rounded-3xl overflow-hidden flex shadow-lg h-[120px] cursor-pointer border border-zinc-100 dark:border-none"
                     >
                        <div className="flex-1 p-5 flex flex-col justify-center">

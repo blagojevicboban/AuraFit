@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
-import {
+import { 
   ChevronLeft, Clock, Flame, Users, Heart, CheckCircle2, ChefHat,
-  Beef, Wheat, Droplets, Play
+  Beef, Wheat, Droplets, Play, Loader2
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Recipe data keyed by id — can be extended or fetched from Firestore later
 const recipes: Record<number, {
@@ -142,11 +143,77 @@ const recipes: Record<number, {
 const RecipeDetail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { language, t } = useLanguage();
   const [liked, setLiked] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [fsRecipe, setFsRecipe] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const recipeId = (location.state as any)?.recipeId ?? 3;
-  const recipe = recipes[recipeId] ?? recipes[3];
+  const { recipeId, isFS } = (location.state as any) ?? { recipeId: 3, isFS: false };
+
+  React.useEffect(() => {
+    if (isFS && recipeId) {
+      const fetchFsDetails = async () => {
+        setIsLoading(true);
+        try {
+          const res = await fetch(`/api/fatsecret/recipe-details?recipe_id=${recipeId}&lang=${language}`);
+          const data = await res.json();
+          const r = data?.recipe;
+          if (r) {
+            const serving = Array.isArray(r.serving_sizes?.serving) ? r.serving_sizes.serving[0] : r.serving_sizes?.serving;
+            const ingredients = Array.isArray(r.ingredients?.ingredient) ? r.ingredients.ingredient : [r.ingredients?.ingredient];
+            const directions = Array.isArray(r.directions?.direction) ? r.directions.direction : [r.directions?.direction];
+            
+            setFsRecipe({
+              name: r.recipe_name,
+              icon: '🍽️',
+              image: r.recipe_images?.recipe_image?.[0]?.recipe_image_url || r.recipe_images?.recipe_image?.recipe_image_url,
+              time: `${(r.cooking_time_min || 0) + (r.preparation_time_min || 0)} Min`,
+              kcal: `${serving?.calories || 0} Cal`,
+              servings: r.number_of_servings || '1',
+              protein: `${serving?.protein || 0}g`,
+              carbs: `${serving?.carbohydrate || 0}g`,
+              fat: `${serving?.fat || 0}g`,
+              description: r.recipe_description || '',
+              ingredients: ingredients.filter(Boolean).map((i: any) => `${i.ingredient_description}`),
+              steps: directions.filter(Boolean).map((d: any) => d.direction_description),
+              tags: Array.isArray(r.recipe_types?.recipe_type) ? r.recipe_types.recipe_type : [r.recipe_types?.recipe_type].filter(Boolean)
+            });
+          }
+        } catch (e) {
+          console.error("FS details fetch error:", e);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchFsDetails();
+    }
+  }, [recipeId, isFS, language]);
+
+  const recipe = isFS ? fsRecipe : (recipes[recipeId as number] ?? recipes[3]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#1c1c1c] flex flex-col items-center justify-center text-white p-6">
+        <Loader2 className="animate-spin text-[#d6ff3e] mb-4" size={48} />
+        <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm">Loading Recipe Details...</p>
+      </div>
+    );
+  }
+
+  if (!recipe) {
+    return (
+      <div className="min-h-screen bg-[#1c1c1c] flex flex-col items-center justify-center text-white p-6 gap-6">
+        <div className="text-center">
+            <h2 className="text-2xl font-black mb-2">Recipe Not Found</h2>
+            <p className="text-zinc-500">Sorry, we couldn't load the recipe details.</p>
+        </div>
+        <button onClick={() => navigate(-1)} className="bg-[#d6ff3e] text-[#1c1c1c] px-8 py-3 rounded-2xl font-black">
+            GO BACK
+        </button>
+      </div>
+    );
+  }
 
   const toggleStep = (index: number) => {
     setCompletedSteps(prev =>
@@ -154,7 +221,7 @@ const RecipeDetail: React.FC = () => {
     );
   };
 
-  const progress = completedSteps.length / recipe.steps.length;
+  const progress = recipe.steps?.length ? completedSteps.length / recipe.steps.length : 0;
 
   return (
     <div className="min-h-screen bg-[#1c1c1c] text-white font-sans flex flex-col pb-24">
@@ -186,9 +253,11 @@ const RecipeDetail: React.FC = () => {
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-8xl drop-shadow-2xl"
+            className={`drop-shadow-2xl ${recipe.image ? 'w-full h-48 rounded-3xl overflow-hidden' : 'text-8xl'}`}
           >
-            {recipe.icon}
+            {recipe.image ? (
+                <img src={recipe.image} className="w-full h-full object-cover" alt={recipe.name} />
+            ) : recipe.icon}
           </motion.div>
           <div>
             <h1 className="text-2xl font-black text-white mb-2 leading-tight">{recipe.name}</h1>

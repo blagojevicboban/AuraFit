@@ -73,16 +73,22 @@ async function startServer() {
 
   app.get("/api/fatsecret/search", async (req, res) => {
     try {
-      const query = req.query.q as string;
+      const { q: query, lang } = req.query;
       if (!query) return res.status(400).json({ error: "Query required" });
       
       const token = await getFatSecretToken();
       
       const searchParams = new URLSearchParams();
       searchParams.append('method', 'foods.search');
-      searchParams.append('search_expression', query);
+      searchParams.append('search_expression', query as string);
       searchParams.append('format', 'json');
       searchParams.append('max_results', '10');
+
+      // Add localization if lang is provided
+      if (lang === 'sr') {
+        searchParams.append('region', 'RS');
+        searchParams.append('language', 'sr');
+      }
 
       const response = await fetch('https://platform.fatsecret.com/rest/server.api', {
         method: 'POST',
@@ -110,16 +116,21 @@ async function startServer() {
 
   app.get("/api/fatsecret/autocomplete", async (req, res) => {
     try {
-      const query = req.query.q as string;
+      const { q: query, lang } = req.query;
       if (!query) return res.json({ suggestions: [] });
       
       const token = await getFatSecretToken();
       
       const params = new URLSearchParams();
       params.append('method', 'foods.autocomplete');
-      params.append('expression', query);
+      params.append('expression', query as string);
       params.append('format', 'json');
       params.append('max_results', '10');
+
+      if (lang === 'sr') {
+        params.append('region', 'RS');
+        params.append('language', 'sr');
+      }
 
       const response = await fetch('https://platform.fatsecret.com/rest/server.api', {
         method: 'POST',
@@ -144,7 +155,7 @@ async function startServer() {
 
   app.get("/api/fatsecret/recipes", async (req, res) => {
     try {
-      const { type, max_calories } = req.query;
+      const { type, max_calories, lang } = req.query;
       const token = await getFatSecretToken();
       
       const params = new URLSearchParams();
@@ -153,6 +164,11 @@ async function startServer() {
       if (max_calories) params.append('calories.to', String(max_calories));
       params.append('format', 'json');
       params.append('max_results', '10');
+
+      if (lang === 'sr') {
+        params.append('region', 'RS');
+        params.append('language', 'sr');
+      }
 
       const response = await fetch('https://platform.fatsecret.com/rest/server.api', {
         method: 'POST',
@@ -175,10 +191,48 @@ async function startServer() {
     }
   });
 
+  app.get("/api/fatsecret/recipe-details", async (req, res) => {
+    try {
+      const { recipe_id, lang } = req.query;
+      if (!recipe_id) return res.status(400).json({ error: "Recipe ID required" });
+
+      const token = await getFatSecretToken();
+      
+      const params = new URLSearchParams();
+      params.append('method', 'recipe.get.v2');
+      params.append('recipe_id', String(recipe_id));
+      params.append('format', 'json');
+
+      if (lang === 'sr') {
+        params.append('region', 'RS');
+        params.append('language', 'sr');
+      }
+
+      const response = await fetch('https://platform.fatsecret.com/rest/server.api', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+      });
+      
+      const data = await response.json();
+      if (data.error) {
+         console.error(`DEBUG: FatSecret Recipe Details Error: ${data.error.code} - ${data.error.message}`);
+         return res.status(data.error.code === 21 ? 403 : 400).json({ error: data.error.message, code: data.error.code });
+      }
+      res.json(data);
+    } catch (error: any) {
+      console.error("FatSecret Recipe Details Error:", error);
+      res.status(500).json({ error: error.message || "Internal Server Error" });
+    }
+  });
+
   // ── Barcode lookup ──
   app.get("/api/fatsecret/barcode", async (req, res) => {
     try {
-      const barcode = req.query.barcode as string;
+      const { barcode, lang } = req.query;
       if (!barcode) return res.status(400).json({ error: "Barcode required" });
 
       const token = await getFatSecretToken();
@@ -186,8 +240,13 @@ async function startServer() {
       // Step 1: resolve barcode → food_id
       const barcodeParams = new URLSearchParams();
       barcodeParams.append('method', 'food.find_id_for_barcode');
-      barcodeParams.append('barcode', barcode);
+      barcodeParams.append('barcode', barcode as string);
       barcodeParams.append('format', 'json');
+
+      if (lang === 'sr') {
+        barcodeParams.append('region', 'RS');
+        barcodeParams.append('language', 'sr');
+      }
 
       const barcodeRes = await fetch('https://platform.fatsecret.com/rest/server.api', {
         method: 'POST',
@@ -206,6 +265,11 @@ async function startServer() {
       foodParams.append('method', 'food.get.v3');
       foodParams.append('food_id', foodId);
       foodParams.append('format', 'json');
+
+      if (lang === 'sr') {
+        foodParams.append('region', 'RS');
+        foodParams.append('language', 'sr');
+      }
 
       const foodRes = await fetch('https://platform.fatsecret.com/rest/server.api', {
         method: 'POST',
