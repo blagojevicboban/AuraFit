@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, Bell, User, Star, Clock, Flame, Play,
-  Home, BookOpen, Headphones, ChevronLeft, Apple, Plus, Sparkles
+  Home, BookOpen, Headphones, ChevronLeft, Apple, Plus, Sparkles, Barcode
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { AILogModal } from '../components/nutrition/AILogModal';
+import { BarcodeScannerModal } from '../components/nutrition/BarcodeScannerModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import TopHeader from '../components/TopHeader';
@@ -19,6 +20,7 @@ const Nutrition: React.FC = () => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('Meal Plans');
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [isBarcodeOpen, setIsBarcodeOpen] = useState(false);
   const [dailyTotals, setDailyTotals] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0 });
 
   const recommendedRecipes = [
@@ -301,21 +303,57 @@ const Nutrition: React.FC = () => {
 
       <BottomNav />
 
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setIsLogModalOpen(true)}
-        className="fixed bottom-28 right-6 w-16 h-16 bg-emerald-500 dark:bg-[#d6ff3e] rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(16,185,129,0.4)] z-50 group"
-      >
-        <Sparkles size={28} className="text-white dark:text-[#1c1c1c] group-hover:animate-pulse" />
-        <div className="absolute -top-12 right-0 bg-[#afa3ff] text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
-          {t('nutrition.aiQuickLog')}
-        </div>
-      </motion.button>
+      {/* ── FAB Buttons ── */}
+      <div className="fixed bottom-28 right-6 flex flex-col gap-3 z-50">
+        {/* Food Categories FAB */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => navigate('/food-categories')}
+          className="w-14 h-14 bg-zinc-800 border border-white/10 rounded-full flex items-center justify-center shadow-xl group relative"
+        >
+          <Apple size={20} className="text-emerald-400" />
+          <div className="absolute -top-10 right-0 bg-zinc-700 text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+            Browse Categories
+          </div>
+        </motion.button>
+
+        {/* Barcode Scanner FAB */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsBarcodeOpen(true)}
+          className="w-14 h-14 bg-zinc-800 border border-white/10 rounded-full flex items-center justify-center shadow-xl group relative"
+        >
+          <Barcode size={22} className="text-[#d6ff3e]" />
+          <div className="absolute -top-10 right-0 bg-zinc-700 text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+            Scan Barcode
+          </div>
+        </motion.button>
+
+        {/* AI Log FAB */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsLogModalOpen(true)}
+          className="w-16 h-16 bg-emerald-500 dark:bg-[#d6ff3e] rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(16,185,129,0.4)] group relative"
+        >
+          <Sparkles size={28} className="text-white dark:text-[#1c1c1c] group-hover:animate-pulse" />
+          <div className="absolute -top-12 right-0 bg-[#afa3ff] text-white text-[10px] font-black px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
+            {t('nutrition.aiQuickLog')}
+          </div>
+        </motion.button>
+      </div>
 
       <AILogModal 
         isOpen={isLogModalOpen} 
         onClose={() => setIsLogModalOpen(false)}
+        onSuccess={() => {}}
+      />
+
+      <BarcodeScannerModal
+        isOpen={isBarcodeOpen}
+        onClose={() => setIsBarcodeOpen(false)}
         onSuccess={() => {}}
       />
     </div>

@@ -21,8 +21,8 @@ const Profile: React.FC = () => {
 
   const menuItems = [
     { icon: User, label: t('profile.editProfile'), onClick: () => navigate('/profile/edit') },
-    { icon: Heart, label: t('profile.favorite'), onClick: () => {} },
-    { icon: Lock, label: t('profile.privacy'), onClick: () => {} },
+    { icon: Heart, label: t('profile.favorite'), onClick: () => navigate('/favorites') },
+    { icon: Lock, label: t('profile.privacy'), onClick: () => navigate('/privacy') },
     { icon: Settings, label: t('profile.settings'), onClick: () => navigate('/settings') },
     { icon: HelpCircle, label: t('common.help'), onClick: () => navigate('/help') },
     { icon: LogOut, label: t('profile.logout'), onClick: handleLogout, danger: true },

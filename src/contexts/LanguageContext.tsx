@@ -1,509 +1,78 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import en from '../locales/en.json';
+import sr from '../locales/sr.json';
 
-type Language = 'en' | 'sr';
+// Initial dictionary of available languages
+const initialTranslations: Record<string, any> = { en, sr };
 
 interface LanguageContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (keyPath: string) => string;
+  language: string;
+  setLanguage: (lang: string) => void;
+  t: (keyPath: string, variables?: Record<string, string | number>) => string;
+  availableLanguages: string[];
 }
-
-const translations = {
-  en: {
-    common: {
-      profile: "Profile",
-      signOut: "Sign Out",
-      loading: "Loading Aura Fit...",
-      backToAdmin: "BACK TO ADMIN",
-      impersonatingAs: "Logged in as:",
-      search: "Search",
-      notifications: "Notifications",
-      seeAll: "See All",
-      minutes: "Minutes",
-      kcal: "Kcal",
-      help: "Help",
-      champ: "Champion",
-      squat: "Squat",
-      stretching: "Stretching",
-      client: "Client",
-      coach: "Coach",
-      admin: "Administrator",
-      unknown: "Unknown",
-      kg: "Kg",
-      cm: "Cm",
-      save: "Save",
-      cancel: "Cancel",
-      delete: "Delete",
-    },
-    nav: {
-      dashboard: "Dashboard",
-      workouts: "Workouts",
-      clients: "Clients",
-      users: "Users",
-      overview: "Overview",
-      nutrition: "Nutrition",
-      progress: "Progress",
-      community: "Community",
-      home: "Home",
-    },
-    admin: {
-      systemOverview: "System Overview & Activities",
-      manageUsers: "Manage Users",
-      manageUsersDesc: "View all user accounts, change roles (admin, coach, client) or impersonate accounts.",
-      openList: "Open User List",
-      systemDatabase: "System Database",
-      databaseDesc: "Initialize the database with test users (coach & clients), workouts and meals for testing purposes.",
-      initializeTest: "Initialize Test Data",
-      systemStatus: "System Status",
-      database: "Database",
-      storage: "Storage",
-      userAdmin: "User Administration",
-      userAdminDesc: "Overview and administration of all platform accounts",
-      searchPlaceholder: "Search by name or email...",
-      allRoles: "All Roles",
-      loadingUsers: "Loading users...",
-      user: "User",
-      role: "Role",
-      actions: "Actions",
-      impersonate: "Login as this user",
-      editRole: "Edit Role",
-      deleteUser: "Delete User",
-      confirmDelete: "Are you sure you want to delete user {{name}}? This action is irreversible.",
-      cancel: "Cancel",
-      save: "Save",
-      delete: "Delete",
-      noUsers: "No users found",
-      activeCoaches: "Active Coaches",
-      newMonthlyClients: "New Clients (Monthly)",
-      reportedIssues: "Reported Issues",
-      confirmTitle: "Database Initialization",
-      seedSuccess: "Database initialized successfully.",
-      seedError: "Error initializing database.",
-    },
-    home: {
-      welcome: "Hi, {{name}} 👋",
-      challengeLimits: "It's Time To Challenge Your Limits.",
-      stayNotified: "Stay Notified!",
-      notificationDesc: "Get real-time updates on your workouts and nutrition plans.",
-      enableNotifications: "Enable Notifications",
-      recommendations: "Recommendations",
-      weeklyChallenge: "Weekly Challenge",
-      articlesTips: "Articles & Tips",
-      workout: "Workout",
-      progressTracking: "Progress Tracking",
-    },
-    profile: {
-      myProfile: "My Profile",
-      weight: "Weight",
-      age: "Years Old",
-      height: "Height",
-      birthday: "Birthday",
-      editProfile: "Edit Profile",
-      favorite: "Favorite",
-      privacy: "Privacy Policy",
-      settings: "Settings",
-      logout: "Logout",
-      fullName: "Full name",
-      email: "Email",
-      mobile: "Mobile Number",
-      dob: "Date of birth",
-      update: "Update Profile",
-      fullNamePlaceholder: "Enter your full name",
-      mobilePlaceholder: "Enter mobile number",
-      dobPlaceholder: "DD / MM / YYYY",
-    },
-    landing: {
-      futureOfFitness: "The future of fitness is here",
-      yourWorkout: "YOUR WORKOUT.",
-      yourAura: "YOUR AURA.",
-      heroDesc: "A hybrid platform that combines AI intelligence with elite coaching expertise. Results you can see, support you can feel.",
-      startTransformation: "START TRANSFORMATION",
-      becomeMentor: "BECOME A MENTOR",
-      aiNutrient: "AI Nutritionist",
-      aiNutrientDesc: "Just describe the meal, AI does the rest. Precise tracking without tedious typing.",
-      smartWorkout: "Smart Workout",
-      smartWorkoutDesc: "Intelligent progress tracking. The app knows when you're ready for a bigger challenge.",
-      eliteCoaching: "Elite Coaching",
-      eliteCoachingDesc: "Direct connection to your mentor. Personalized plans and video feedback.",
-      admin: "Admin",
-      login: "Login",
-      coachPortal: "COACH PORTAL",
-      welcomeBack: "Welcome back to Aura Fit.",
-      continueWithGoogle: "CONTINUE WITH GOOGLE",
-      or: "or",
-      username: "Username",
-      password: "Password",
-      accessAccount: "ACCESS ACCOUNT",
-      adminLogin: "Admin Access",
-      coachLogin: "Coach Portal",
-      clientLogin: "Client Login",
-      aiIntelligence: "AI intelligence",
-      usernamePlaceholder: "e.g. nikola",
-      noAccount: "Don't have an account?",
-      signUp: "Sign up",
-      loginError: "Invalid username or password.",
-    },
-    help: {
-      title: "Help & Support",
-      pwaTitle: "PWA Installation",
-      pwaDesc: "To install AuraFit on your phone, open it in Chrome (Android) or Safari (iOS) and select 'Add to Home Screen'.",
-      notifyTitle: "Push Notifications",
-      notifyDesc: "Enable notifications in the Home Dashboard prompt to stay updated on your workout goals.",
-      supportTitle: "Support",
-      supportDesc: "If you encounter any issues, please contact our support team at support@aurafit.com.",
-      versionTitle: "App Version",
-      versionDesc: "AuraFit v1.2.0 - Premium Edition",
-      designedFor: "Designed for Excellence",
-      author: "Lead Developer: Boban Blagojević",
-    },
-    pwa: {
-      promptTitle: "Install AuraFit",
-      promptDesc: "Install our app for a faster and smoother premium fitness experience. Access all features directly from your home screen.",
-      installButton: "Install App",
-      cancelButton: "Later",
-    },
-    onboarding: {
-      skip: "Skip",
-      step1Title: "Find the right\nworkout for what\nyou need",
-      step1Sub: "We have something suitable for everyone.",
-      step2Title: "Make suitable\nworkouts and\ngreat results",
-      step2Sub: "Customized plans to help you reach your goals faster.",
-      step3Title: "Let's do a\nworkout and live\nhealthy with us",
-      step3Sub: "Join our community and transform your lifestyle.",
-    },
-    setup: {
-      stepTitle: "Step {{step}} of 6",
-      title1: "Tell Us About\nYourself!",
-      desc1: "To give you a better experience we need to know your gender.",
-      male: "Male",
-      female: "Female",
-      title2: "How Old Are You?",
-      desc2: "This helps us create your personalized plan.",
-      title3: "What's Your Weight?",
-      desc3: "You can always change this later.",
-      title4: "What's Your Height?",
-      desc4: "This helps us calculate your BMI.",
-      title5: "What's Your Goal?",
-      desc5: "This helps us create your personalized plan.",
-      goal1: "Weight Loss",
-      goal2: "Muscle Gain",
-      goal3: "Shape Body",
-      goal4: "Others",
-      title6: "Physical Activity Level",
-      desc6: "Choose your regular activity level so we can provide the best plan.",
-      finish: "Finish",
-      skip: "Skip",
-      back: "Back",
-      continue: "Continue"
-    },
-    workouts: {
-      title: "Workouts",
-      beginner: "Beginner",
-      intermediate: "Intermediate",
-      advanced: "Advanced",
-      letsGo: "Let's Go {{level}}",
-      exploreStyles: "Explore Different Workout Styles",
-      createCustom: "+ Create Custom",
-      functional: "Functional Training",
-      upperBody: "Upper Body",
-      fullStretching: "Full Body Stretching",
-      glutesAbs: "Glutes & Abs",
-      coreStrength: "Core Strength",
-      hiitExtreme: "HIIT Extreme",
-      trainingDay: "Training Of The Day",
-    },
-    nutrition: {
-      title: "Nutrition",
-      caloriesLeft: "Calories Left",
-      consumed: "Consumed",
-      mealPlans: "Meal Plans",
-      mealIdeas: "Meal Ideas",
-      recipeDay: "Recipe Of The Day",
-      recommended: "Recommended",
-      recipesForYou: "Recipes For You",
-      discoverIdeas: "Discover Ideas",
-      aiQuickLog: "AI QUICK LOG",
-      breakfast: "Breakfast",
-      lunch: "Lunch",
-      dinner: "Dinner",
-      snack: "Snack",
-      protein: "Protein",
-      carbs: "Carbs",
-      fat: "Fat",
-      logTitle: "AI Nutrition Log",
-      whatDidYouEat: "What did you eat?",
-      takePhoto: "Take Photo",
-      chooseImage: "Choose Image",
-      analyze: "Analyze Meal",
-      serving: "serving",
-      logMeal: "Log Meal",
-      cancel: "Cancel",
-      tooLarge: "Image is too large (max 5MB)",
-    }
-  },
-  sr: {
-    common: {
-      profile: "Profil",
-      signOut: "Odjavi se",
-      loading: "Učitavanje Aura Fit...",
-      backToAdmin: "NAZAD NA ADMIN PANEL",
-      impersonatingAs: "Prijavljeni ste kao:",
-      search: "Pretraga",
-      notifications: "Obaveštenja",
-      seeAll: "Vidi sve",
-      minutes: "minuta",
-      kcal: "Kcal",
-      help: "Pomoć",
-      champ: "Šampion",
-      squat: "Čučanj",
-      stretching: "Istezanje",
-      client: "Klijent",
-      coach: "Mentor",
-      admin: "Administrator",
-      unknown: "Nepoznato",
-      kg: "Kg",
-      cm: "Cm",
-      save: "Sačuvaj",
-      cancel: "Poništi",
-      delete: "Obriši",
-    },
-    nav: {
-      dashboard: "Kontrolna tabla",
-      workouts: "Treninzi",
-      clients: "Klijenti",
-      users: "Korisnici",
-      overview: "Pregled",
-      nutrition: "Ishrana",
-      progress: "Napredak",
-      community: "Zajednica",
-      home: "Početna",
-    },
-    admin: {
-      systemOverview: "Pregled sistema i aktivnosti",
-      manageUsers: "Upravljanje Korisnicima",
-      manageUsersDesc: "Pregledajte spisak svih korisnika, menjajte njihove uloge (admin, trener, klijent) ili privremeno pristupite njihovim nalozima.",
-      openList: "Otvori Listu Korisnika",
-      systemDatabase: "Sistemska Baza",
-      databaseDesc: "Inicijalizujte bazu podataka sa testnim korisnicima (trener i klijenti), treninzima i obrocima za potrebe testiranja aplikacije.",
-      initializeTest: "Inicijalizuj Test Podatke",
-      systemStatus: "Status Sistema",
-      database: "Baza Podataka",
-      storage: "Storage Service",
-      userAdmin: "Upravljanje Korisnicima",
-      userAdminDesc: "Pregled i administracija svih naloga na platformi",
-      searchPlaceholder: "Pretraži po imenu ili emailu...",
-      allRoles: "Sve uloge",
-      loadingUsers: "Učitavanje korisnika...",
-      user: "Korisnik",
-      role: "Uloga",
-      actions: "Akcije",
-      impersonate: "Prijavi se kao ovaj korisnik",
-      editRole: "Izmeni Ulogu",
-      deleteUser: "Obriši korisnika",
-      confirmDelete: "Da li ste sigurni da želite da obrišete korisnika {{name}}? Ova akcija je nepovratna.",
-      cancel: "Poništi",
-      save: "Sačuvaj",
-      delete: "Obriši",
-      noUsers: "Nema pronađenih korisnika",
-      activeCoaches: "Aktivni Mentori",
-      newMonthlyClients: "Novi Klijenti (Mesečno)",
-      reportedIssues: "Prijavljeni Problemi",
-      confirmTitle: "Inicijalizacija Baze",
-      seedSuccess: "Baza je uspešno inicijalizovana.",
-      seedError: "Greška pri inicijalizaciji baze.",
-    },
-    home: {
-      welcome: "Zdravo, {{name}} 👋",
-      challengeLimits: "Vreme je da srušiš svoje granice.",
-      stayNotified: "Ostani obavešten!",
-      notificationDesc: "Dobijaj ažuriranja o svojim treninzima i planovima ishrane u realnom vremenu.",
-      enableNotifications: "Uključi obaveštenja",
-      recommendations: "Preporuke",
-      weeklyChallenge: "Nedeljni izazov",
-      articlesTips: "Članci i saveti",
-      workout: "Trening",
-      progressTracking: "Merenje napretka",
-    },
-    profile: {
-      myProfile: "Moj Profil",
-      weight: "Težina",
-      age: "Godina",
-      height: "Visina",
-      birthday: "Rođendan",
-      editProfile: "Izmeni profil",
-      favorite: "Omiljeno",
-      privacy: "Politika privatnosti",
-      settings: "Podešavanja",
-      logout: "Odjava",
-      fullName: "Ime i prezime",
-      email: "Email",
-      mobile: "Broj telefona",
-      dob: "Datum rođenja",
-      update: "Ažuriraj profil",
-      fullNamePlaceholder: "Unesite ime i prezime",
-      mobilePlaceholder: "Unesite broj telefona",
-      dobPlaceholder: "DD / MM / GGGG",
-    },
-    landing: {
-      futureOfFitness: "Budućnost fitnesa je ovde",
-      yourWorkout: "TVOJ TRENING.",
-      yourAura: "TVOJA AURA.",
-      heroDesc: "Hibridna platforma koja spaja AI inteligenciju sa stručnošću vrhunskih trenera. Rezultati koji se vide, podrška koja se oseća.",
-      startTransformation: "ZAPOČNI TRANSFORMACIJU",
-      becomeMentor: "POSTANI MENTOR",
-      aiNutrient: "AI Nutricionista",
-      aiNutrientDesc: "Samo opiši obrok, AI radi ostalo. Precizno praćenje bez zamornog kucanja.",
-      smartWorkout: "Smart Workout",
-      smartWorkoutDesc: "Inteligentno praćenje progresa. Aplikacija zna kada si spreman za veći izazov.",
-      eliteCoaching: "Elite Coaching",
-      eliteCoachingDesc: "Direktna veza sa mentorom. Personalizovani planovi i video feedback.",
-      admin: "Admin",
-      login: "Prijava",
-      coachPortal: "PORTAL ZA TRENERE",
-      welcomeBack: "Dobrodošli nazad u Aura Fit.",
-      continueWithGoogle: "NASTAVI SA GOOGLE-OM",
-      or: "ili",
-      username: "Korisničko ime",
-      password: "Lozinka",
-      accessAccount: "PRISTUPI NALOGU",
-      adminLogin: "Admin pristup",
-      coachLogin: "Portal za trenere",
-      clientLogin: "Prijava klijenta",
-      aiIntelligence: "AI inteligenciju",
-      usernamePlaceholder: "npr. nikola",
-      noAccount: "Nemate nalog?",
-      signUp: "Registrujte se",
-      loginError: "Pogrešno korisničko ime ili lozinka.",
-    },
-    help: {
-      title: "Pomoć i podrška",
-      pwaTitle: "Instalacija aplikacije (PWA)",
-      pwaDesc: "Da biste instalirali AuraFit na svoj telefon, otvorite ga u Chrome (Android) ili Safari (iOS) pretraživaču i izaberite 'Add to Home Screen'.",
-      notifyTitle: "Obaveštenja",
-      notifyDesc: "Uključite obaveštenja na početnom ekranu kako biste dobijali informacije o svojim ciljevima.",
-      supportTitle: "Podrška",
-      supportDesc: "Ako naiđete na bilo kakve probleme, kontaktirajte naš tim za podršku na support@aurafit.com.",
-      versionTitle: "Verzija aplikacije",
-      versionDesc: "AuraFit v1.2.0 - Premium Edition",
-      designedFor: "Dizajnirano za izvrsnost",
-      author: "Glavni programer: Boban Blagojević",
-    },
-    pwa: {
-      promptTitle: "Instaliraj AuraFit",
-      promptDesc: "Instalirajte aplikaciju za brže i lakše vrhunsko fitnes iskustvo. Pristupite svim funkcijama direktno sa početnog ekrana.",
-      installButton: "Instaliraj",
-      cancelButton: "Kasnije",
-    },
-    onboarding: {
-      skip: "Preskoči",
-      step1Title: "Pronađi pravi\ntrening za svoje\npotrebe",
-      step1Sub: "Imamo nešto pogodno za svakoga.",
-      step2Title: "Napravi adekvatne\ntreninge i\nsjajne rezultate",
-      step2Sub: "Prilagođeni planovi koji vam pomažu da brže stignete do cilja.",
-      step3Title: "Hajde da treniramo\ni živimo zdravo\nzajedno",
-      step3Sub: "Pridruži se našoj zajednici i transformiši svoj životni stil.",
-    },
-    setup: {
-      stepTitle: "Korak {{step}} od 6",
-      title1: "Recite nam nešto o\nsebi!",
-      desc1: "Da bismo vam pružili bolje iskustvo, moramo znati vaš pol.",
-      male: "Muški",
-      female: "Ženski",
-      title2: "Koliko imate godina?",
-      desc2: "Ovo nam pomaže da kreiramo vaš personalizovani plan.",
-      title3: "Kolika je vaša težina?",
-      desc3: "Ovo uvek možete promeniti kasnije.",
-      title4: "Kolika je vaša visina?",
-      desc4: "Ovo nam pomaže da izračunamo vaš BMI.",
-      title5: "Koji je vaš cilj?",
-      desc5: "Ovo nam pomaže da kreiramo vaš personalizovani plan.",
-      goal1: "Gubitak težine",
-      goal2: "Dobijanje mišića",
-      goal3: "Oblikovanje tela",
-      goal4: "Ostalo",
-      title6: "Nivo fizičke aktivnosti",
-      desc6: "Izaberite svoj uobičajeni nivo aktivnosti za najbolji plan.",
-      finish: "Završi",
-      skip: "Preskoči",
-      back: "Nazad",
-      continue: "Nastavi"
-    },
-    workouts: {
-      title: "Treninzi",
-      beginner: "Početnik",
-      intermediate: "Srednji",
-      advanced: "Napredni",
-      letsGo: "Hajdemo {{level}}",
-      exploreStyles: "Istražite različite stilove treninga",
-      createCustom: "+ Kreiraj prilagođeni",
-      functional: "Funkcionalni trening",
-      upperBody: "Gornji deo tela",
-      fullStretching: "Istezanje celog tela",
-      glutesAbs: "Gluteus i trbušnjaci",
-      coreStrength: "Snaga jezgra",
-      hiitExtreme: "HIIT Extreme",
-      trainingDay: "Trening dana",
-    },
-    nutrition: {
-      title: "Ishrana",
-      caloriesLeft: "Preostalo kalorija",
-      consumed: "Potrošeno",
-      mealPlans: "Planovi obroka",
-      mealIdeas: "Ideje za obroke",
-      recipeDay: "Recept dana",
-      recommended: "Preporučeno",
-      recipesForYou: "Recepti za vas",
-      discoverIdeas: "Otkrijte ideje",
-      aiQuickLog: "AI BRZI UNOS",
-      breakfast: "Doručak",
-      lunch: "Ručak",
-      dinner: "Večera",
-      snack: "Užina",
-      protein: "Proteini",
-      carbs: "Ugljeni hidrati",
-      fat: "Masti",
-      logTitle: "AI Nutrition Log",
-      whatDidYouEat: "Šta ste jeli?",
-      takePhoto: "Slikaj hranu",
-      chooseImage: "Izaberi sliku",
-      analyze: "Analiziraj Obrok",
-      serving: "porcija",
-      logMeal: "Loguj Obrok",
-      cancel: "Poništi",
-      tooLarge: "Slika je prevelika (maksimum 5MB)",
-    }
-  }
-};
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
+  const [language, setLanguageState] = useState<string>(() => {
     const saved = localStorage.getItem('language');
-    if (saved === 'en' || saved === 'sr') return saved;
-    // Check browser language
+    if (saved && initialTranslations[saved]) return saved;
     return navigator.language.startsWith('sr') ? 'sr' : 'en';
   });
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('language', lang);
+  const [translations, setTranslations] = useState(initialTranslations);
+
+  const setLanguage = async (lang: string) => {
+    // If we don't have the translation yet, we could fetch it here
+    // For now we assume en and sr are pre-loaded
+    if (translations[lang]) {
+      setLanguageState(lang);
+      localStorage.setItem('language', lang);
+    } else {
+      console.warn(`Language ${lang} not loaded.`);
+    }
   };
 
-  const t = (keyPath: string) => {
+  /**
+   * Advanced translation function with support for:
+   * 1. Nested keys (e.g. 'home.welcome')
+   * 2. Variable interpolation (e.g. {{name}})
+   */
+  const t = (keyPath: string, variables?: Record<string, string | number>) => {
     const keys = keyPath.split('.');
-    let current: any = translations[language];
+    let current: any = translations[language] || translations['en']; // Fallback to EN
     
     for (const key of keys) {
-      if (current[key] === undefined) return keyPath;
+      if (!current || current[key] === undefined) {
+        // Fallback to English if key missing in current language
+        let fallback: any = translations['en'];
+        for (const fKey of keys) {
+          if (!fallback || fallback[fKey] === undefined) return keyPath;
+          fallback = fallback[fKey];
+        }
+        current = fallback;
+        break;
+      }
       current = current[key];
     }
     
-    return current;
+    let text = String(current);
+
+    // Dynamic variable interpolation
+    if (variables) {
+      Object.entries(variables).forEach(([key, value]) => {
+        text = text.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+      });
+    }
+
+    return text;
   };
 
+  const availableLanguages = Object.keys(translations);
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, availableLanguages }}>
       {children}
     </LanguageContext.Provider>
   );

@@ -233,7 +233,7 @@ const ProfileSetup: React.FC = () => {
       {/* Progress Header */}
       <div className="flex flex-col gap-6 mb-8">
         <h1 className="text-emerald-500 dark:text-[#d6ff3e] text-2xl font-bold uppercase tracking-wider text-center">
-            {t('setup.stepTitle').replace('{{step}}', step.toString())}
+            {t('setup.stepTitle', { step })}
         </h1>
         <div className="flex gap-2 w-full justify-center text-zinc-950 dark:text-zinc-50">
           {[1, 2, 3, 4, 5, 6].map((i) => (

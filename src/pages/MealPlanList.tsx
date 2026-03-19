@@ -95,6 +95,7 @@ const MealPlanList: React.FC = () => {
       {/* ── Action Button ── */}
       <div className="px-6 py-6 pb-28">
           <button 
+            onClick={() => navigate('/recipe', { state: { recipeId: selectedId } })}
             className="w-full bg-[#d6ff3e] text-[#1c1c1c] font-black py-4 rounded-full text-lg shadow-[0_0_20px_rgba(214,255,62,0.3)] hover:scale-[1.02] active:scale-95 transition-all"
           >
             See Recipe

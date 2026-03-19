@@ -8,26 +8,34 @@ import { cn } from '../lib/utils';
 interface TopHeaderProps {
   title: string;
   showBack?: boolean;
-  backPath?: string;
+  backPath?: string | number;
   className?: string;
 }
 
 const TopHeader: React.FC<TopHeaderProps> = ({ 
   title, 
   showBack = true, 
-  backPath = '/home',
+  backPath = -1,
   className = ''
 }) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { userData } = useAuth();
 
+  const handleBack = () => {
+    if (typeof backPath === 'number' || backPath === '-1') {
+      navigate(-1);
+    } else {
+      navigate(backPath);
+    }
+  };
+
   return (
     <div className={cn("sticky top-0 z-50 bg-[#1c1c1c]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between", className)}>
       <div className="flex items-center gap-4">
         {showBack && (
           <button 
-            onClick={() => navigate(backPath)}
+          onClick={handleBack}
             className="text-zinc-400 hover:text-white transition-colors p-1"
           >
             <ChevronLeft size={24} />

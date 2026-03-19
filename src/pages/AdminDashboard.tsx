@@ -1,15 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Users, Activity, TrendingUp, ShieldAlert, Database, Loader2, AlertTriangle, X, ArrowRight, UserPlus } from "lucide-react";
 import { seedDatabase } from "../utils/seedData";
 import { useLanguage } from "../contexts/LanguageContext";
+import { collection, query, where, getCountFromServer } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 export default function AdminDashboard() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [seedMessage, setSeedMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingApplications, setPendingApplications] = useState(0);
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const q = query(collection(db, 'coachApplications'), where('status', '==', 'pending'));
+        const snap = await getCountFromServer(q);
+        setPendingApplications(snap.data().count);
+      } catch (_) {}
+    };
+    fetchPendingCount();
+  }, []);
 
   const handleSeedDatabase = async () => {
     setShowConfirmModal(false);
@@ -120,7 +134,7 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6 flex flex-col">
            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">{t('admin.manageUsers')}</h2>
            <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 flex-grow">
@@ -133,6 +147,29 @@ export default function AdminDashboard() {
              <Users className="w-5 h-5" />
              {t('admin.openList')}
              <ArrowRight className="w-4 h-4 ml-2" />
+           </Link>
+        </div>
+
+        {/* ── Coach Applications Card ── */}
+        <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200 dark:border-zinc-800/50 p-6 flex flex-col">
+           <div className="flex items-start justify-between mb-4">
+             <h2 className="text-lg font-bold text-slate-900 dark:text-white">Coach Applications</h2>
+             {pendingApplications > 0 && (
+               <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1 rounded-full bg-amber-500 text-white text-xs font-black">
+                 {pendingApplications}
+               </span>
+             )}
+           </div>
+           <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6 flex-grow">
+             Review client applications to become a coach. Approve to promote their role instantly.
+           </p>
+           <Link
+             to="/app/admin/applications"
+             className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-500 border border-indigo-500/20 rounded-2xl font-bold transition-all"
+           >
+             <UserPlus className="w-4 h-4" />
+             {pendingApplications > 0 ? `Review (${pendingApplications} pending)` : 'Review Applications'}
+             <ArrowRight className="w-4 h-4 ml-auto" />
            </Link>
         </div>
 

@@ -93,7 +93,7 @@ const Workouts: React.FC = () => {
         <div className="mb-4 flex items-end justify-between">
           <div>
             <h2 className="text-xl font-extrabold text-[#10b981] dark:text-[#d6ff3e]">
-              {t('workouts.letsGo').replace('{{level}}', categories.find(c => c.id === activeCategory)?.label || activeCategory)}
+              {t('workouts.letsGo', { level: categories.find(c => c.id === activeCategory)?.label || activeCategory })}
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('workouts.exploreStyles')}</p>
           </div>

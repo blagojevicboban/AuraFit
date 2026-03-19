@@ -25,6 +25,7 @@ interface NutritionResult {
 
 export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { currentUser } = useAuth();
+  const recognitionRef = React.useRef<any>(null);
   const [description, setDescription] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [image, setImage] = useState<string | null>(null);
@@ -69,21 +70,29 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
     }
 
     if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
       setIsListening(false);
     } else {
       const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
       recognition.lang = language === 'sr' ? 'sr-RS' : 'en-US';
       recognition.continuous = false;
       recognition.interimResults = false;
 
       recognition.onstart = () => setIsListening(true);
-      recognition.onend = () => setIsListening(false);
+      recognition.onend = () => {
+        setIsListening(false);
+        recognitionRef.current = null;
+      };
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error', event.error);
         setIsListening(false);
+        recognitionRef.current = null;
         if (event.error === 'not-allowed') {
           setError(language === 'sr' ? 'Dozvola za mikrofon nije data.' : 'Microphone permission not granted.');
-        } else {
+        } else if (event.error !== 'aborted') {
           setError(language === 'sr' ? 'Greška pri prepoznavanju glasa.' : 'Voice recognition error.');
         }
       };
@@ -98,6 +107,7 @@ export const AILogModal: React.FC<AILogModalProps> = ({ isOpen, onClose, onSucce
       } catch (err) {
         console.error('Speech recognition start failed', err);
         setIsListening(false);
+        recognitionRef.current = null;
       }
     }
   };

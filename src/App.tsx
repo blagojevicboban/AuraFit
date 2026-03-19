@@ -19,6 +19,7 @@ import CoachDashboard from "./pages/CoachDashboard";
 import CoachClients from "./pages/CoachClients";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
+import CoachApplications from "./pages/CoachApplications";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -39,6 +40,14 @@ import Settings from "./pages/Settings";
 import NotificationSettings from "./pages/NotificationSettings";
 import Help from "./pages/Help";
 import WorkoutPlayer from "./pages/WorkoutPlayer";
+import PasswordSetting from "./pages/PasswordSetting";
+import DeleteAccount from "./pages/DeleteAccount";
+import Favorites from "./pages/Favorites";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import RecipeDetail from "./pages/RecipeDetail";
+import ArticlesList from "./pages/ArticlesList";
+import ArticleDetail from "./pages/ArticleDetail";
+import FoodCategories from "./pages/FoodCategories";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -68,6 +77,14 @@ function AppContent() {
           <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
           <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
           <Route path="/settings/notifications" element={<PageTransition><NotificationSettings /></PageTransition>} />
+          <Route path="/settings/password" element={<PageTransition><PasswordSetting /></PageTransition>} />
+          <Route path="/settings/delete-account" element={<PageTransition><DeleteAccount /></PageTransition>} />
+          <Route path="/favorites" element={<PageTransition><Favorites /></PageTransition>} />
+          <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+          <Route path="/recipe" element={<PageTransition><RecipeDetail /></PageTransition>} />
+          <Route path="/articles" element={<PageTransition><ArticlesList /></PageTransition>} />
+          <Route path="/article" element={<PageTransition><ArticleDetail /></PageTransition>} />
+          <Route path="/food-categories" element={<PageTransition><FoodCategories /></PageTransition>} />
           <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
           <Route path="/workout-player/:id" element={<PageTransition><WorkoutPlayer /></PageTransition>} />
 
@@ -80,6 +97,7 @@ function AppContent() {
             <Route path="coach/clients" element={<CoachClients />} />
             <Route path="admin" element={<AdminDashboard />} />
             <Route path="admin/users" element={<AdminUsers />} />
+            <Route path="admin/applications" element={<CoachApplications />} />
           </Route>
         </Routes>
       </AnimatePresence>

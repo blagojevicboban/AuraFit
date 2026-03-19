@@ -105,7 +105,7 @@ const HomeDashboard: React.FC = () => {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-extrabold" style={{ color: '#afa3ff' }}>
-                {t('home.welcome').replace('{{name}}', userData?.displayName || t('common.champ'))}
+                {t('home.welcome', { name: userData?.displayName || t('common.champ') })}
               </h1>
               {userData?.role === 'admin' && (
                 <button 
@@ -273,7 +273,7 @@ const HomeDashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white">{t('home.articlesTips')}</h2>
             <button 
-              onClick={() => navigate('/community')}
+              onClick={() => navigate('/articles')}
               className="text-[#afa3ff] text-sm font-bold flex items-center gap-1 hover:text-[#d6ff3e] transition-colors"
             >
               {t('common.seeAll')} <ChevronRight size={16} />
@@ -285,6 +285,7 @@ const HomeDashboard: React.FC = () => {
                 key={item.id}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
+              onClick={() => navigate('/article', { state: { articleId: item.id } })}
                 className={`relative rounded-3xl overflow-hidden cursor-pointer bg-gradient-to-br ${item.bg} h-44`}
               >
                 <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-20">{item.icon}</div>

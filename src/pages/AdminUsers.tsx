@@ -138,91 +138,144 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div>
           {loading ? (
             <div className="p-8 text-center text-slate-500 dark:text-zinc-400">
               <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4" />
               {t('admin.loadingUsers')}
             </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="px-6 py-12 text-center text-slate-500 dark:text-zinc-400">
+              {t('admin.noUsers')}
+            </div>
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-zinc-900/50 border-b border-slate-200 dark:border-zinc-800/50 transition-colors duration-200">
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{t('admin.user')}</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{t('admin.role')}</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider hidden md:table-cell">Email</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider text-right">{t('admin.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-zinc-800/50">
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user, index) => (
-                    <motion.tr 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      key={user.id} 
-                      className="hover:bg-slate-50 dark:hover:bg-zinc-900/50 transition-colors duration-200 group"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                            {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-slate-900 dark:text-white transition-colors duration-200">{user.displayName || t('common.unknown')}</p>
-                            <p className="text-xs text-slate-500 dark:text-zinc-500 md:hidden">{user.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                          user.role === 'admin' 
-                            ? 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' 
+            <>
+              {/* ── Mobile: Card List ── */}
+              <div className="divide-y divide-slate-200 dark:divide-zinc-800/50 md:hidden">
+                {filteredUsers.map((user, index) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.04 }}
+                    className="flex items-center justify-between gap-3 px-4 py-3"
+                  >
+                    {/* Avatar + Info */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                        {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{user.displayName || t('common.unknown')}</p>
+                        <p className="text-xs text-slate-500 dark:text-zinc-400 truncate">{user.email}</p>
+                        <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize ${
+                          user.role === 'admin'
+                            ? 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
                             : user.role === 'coach'
-                            ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20'
-                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
-                        } transition-colors duration-200`}>
+                            ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400'
+                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                        }`}>
                           {user.role}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 hidden md:table-cell">
-                        <span className="text-sm text-slate-600 dark:text-zinc-400 transition-colors duration-200">{user.email}</span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
-                            onClick={() => handleImpersonate(user.id, user.role)}
-                            className="p-2 text-slate-400 hover:text-emerald-600 dark:text-zinc-500 dark:hover:text-emerald-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
-                            title={t('admin.impersonate')}
-                          >
-                            <LogIn className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => setEditingUser(user)}
-                            className="p-2 text-slate-400 hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-indigo-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => setDeletingUser(user)}
-                            className="p-2 text-slate-400 hover:text-rose-600 dark:text-zinc-500 dark:hover:text-rose-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500 dark:text-zinc-400">
-                      {t('admin.noUsers')}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    {/* Actions – always visible */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => handleImpersonate(user.id, user.role)}
+                        className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-colors"
+                        title={t('admin.impersonate')}
+                      >
+                        <LogIn className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditingUser(user)}
+                        className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingUser(user)}
+                        className="p-2 text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* ── Desktop: Table ── */}
+              <div className="hidden md:block">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-zinc-900/50 border-b border-slate-200 dark:border-zinc-800/50">
+                      <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{t('admin.user')}</th>
+                      <th className="px-4 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{t('admin.role')}</th>
+                      <th className="px-4 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Email</th>
+                      <th className="px-4 py-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider text-right">{t('admin.actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-zinc-800/50">
+                    {filteredUsers.map((user, index) => (
+                      <motion.tr
+                        key={user.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="hover:bg-slate-50 dark:hover:bg-zinc-900/50 transition-colors duration-200"
+                      >
+                        <td className="px-6 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
+                              {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">{user.displayName || t('common.unknown')}</p>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                            user.role === 'admin'
+                              ? 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20'
+                              : user.role === 'coach'
+                              ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20'
+                              : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20'
+                          }`}>
+                            {user.role}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-sm text-slate-600 dark:text-zinc-400">{user.email}</span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleImpersonate(user.id, user.role)}
+                              className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-colors"
+                              title={t('admin.impersonate')}
+                            >
+                              <LogIn className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setEditingUser(user)}
+                              className="p-2 text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setDeletingUser(user)}
+                              className="p-2 text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -318,7 +371,7 @@ export default function AdminUsers() {
               </div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('admin.deleteUser')}</h2>
               <p className="text-slate-600 dark:text-zinc-400 mb-6">
-                {t('admin.confirmDelete').replace('{{name}}', deletingUser.displayName)}
+                {t('admin.confirmDelete', { name: deletingUser.displayName })}
               </p>
               <div className="flex justify-end gap-3">
                 <button

@@ -78,6 +78,54 @@ async function startServer() {
     }
   });
 
+  // ── Barcode lookup ──
+  app.get("/api/fatsecret/barcode", async (req, res) => {
+    try {
+      const barcode = req.query.barcode as string;
+      if (!barcode) return res.status(400).json({ error: "Barcode required" });
+
+      const token = await getFatSecretToken();
+
+      // Step 1: resolve barcode → food_id
+      const barcodeParams = new URLSearchParams();
+      barcodeParams.append('method', 'food.find_id_for_barcode');
+      barcodeParams.append('barcode', barcode);
+      barcodeParams.append('format', 'json');
+
+      const barcodeRes = await fetch('https://platform.fatsecret.com/rest/server.api', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: barcodeParams.toString()
+      });
+      const barcodeData = await barcodeRes.json();
+      const foodId = barcodeData?.food_id?.value;
+      if (!foodId) return res.status(404).json({ error: "Food not found for this barcode" });
+
+      // Step 2: get food details
+      const foodParams = new URLSearchParams();
+      foodParams.append('method', 'food.get.v3');
+      foodParams.append('food_id', foodId);
+      foodParams.append('format', 'json');
+
+      const foodRes = await fetch('https://platform.fatsecret.com/rest/server.api', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: foodParams.toString()
+      });
+      const foodData = await foodRes.json();
+      res.json(foodData);
+    } catch (error: any) {
+      console.error("FatSecret Barcode Error:", error);
+      res.status(500).json({ error: error.message || "Internal Server Error" });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

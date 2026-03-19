@@ -1,18 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ChevronLeft, Bell, Key, Trash2, ChevronDown,
-  Home, BookOpen, Apple, User, Headphones
+  ChevronLeft, Bell, Key, Trash2, ChevronDown, UserPlus,
+  Home, BookOpen, Apple, User
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { CoachApplicationModal } from '../components/auth/CoachApplicationModal';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
+  const { userData } = useAuth();
+  const [showCoachModal, setShowCoachModal] = useState(false);
+  const isClient = userData?.role === 'client';
 
   const settingsItems = [
     { icon: Bell, label: 'Notification Setting', onClick: () => navigate('/settings/notifications') },
-    { icon: Key, label: 'Password Setting', onClick: () => {} },
-    { icon: User, label: 'Delete Account', onClick: () => {}, danger: true },
+    { icon: Key, label: 'Password Setting', onClick: () => navigate('/settings/password') },
+    ...(isClient ? [{ icon: UserPlus, label: 'Become a Coach', onClick: () => setShowCoachModal(true), highlight: true }] : []),
+    { icon: User, label: 'Delete Account', onClick: () => navigate('/settings/delete-account'), danger: true },
   ];
 
   return (
@@ -40,14 +46,16 @@ const Settings: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
             onClick={item.onClick}
-            className="flex items-center justify-between group cursor-pointer"
+            className={`flex items-center justify-between group cursor-pointer ${
+                item.highlight ? 'opacity-100' : ''
+              }`}
           >
             <div className="flex items-center gap-6">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                    item.danger ? 'bg-zinc-800' : 'bg-[#afa3ff]/10 group-hover:bg-[#afa3ff]'
+                    item.danger ? 'bg-zinc-800' : item.highlight ? 'bg-[#d6ff3e]/10 group-hover:bg-[#d6ff3e]' : 'bg-[#afa3ff]/10 group-hover:bg-[#afa3ff]'
                 }`}>
                     <item.icon size={20} className={`${
-                        item.danger ? 'text-zinc-200' : 'text-[#afa3ff] group-hover:text-[#1c1c1c]'
+                        item.danger ? 'text-zinc-200' : item.highlight ? 'text-[#d6ff3e] group-hover:text-[#1c1c1c]' : 'text-[#afa3ff] group-hover:text-[#1c1c1c]'
                     }`} />
                 </div>
                 <span className="text-lg font-bold group-hover:text-[#d6ff3e] transition-colors text-zinc-200">
@@ -77,6 +85,12 @@ const Settings: React.FC = () => {
           </button>
         ))}
       </div>
+
+      <AnimatePresence>
+        {showCoachModal && (
+          <CoachApplicationModal onClose={() => setShowCoachModal(false)} />
+        )}
+      </AnimatePresence>
 
     </div>
   );
