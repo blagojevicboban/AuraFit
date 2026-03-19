@@ -28,8 +28,10 @@ Used for **Curated Content** and **User Data**:
 
 ### 2. FatSecret REST API
 Used for **Discovery Content** and **Global Database**:
-- **Food Search**: Access to millions of food items with full macro data.
+- **Food Search**: Access to millions of food items with full macro data. Proxied through server-side logic in `server.ts`.
 - **Barcode Scanning**: Real-time product lookup via EAN-13/UPC-A.
+- **Localized Results**: Automatically switches to the `RS` (Serbia) region and `sr` language when the app is set to Serbian, ensuring local products and descriptions are prioritized.
+- **Recipe Details**: Fetches complete preparation instructions, ingredient lists, and cooking times using the `recipe.get.v2` method via the `/api/fatsecret/recipe-details` endpoint.
 - **Recipe Fallback**: If no custom meal plans are found in Firebase, the app pulls fresh ideas from FatSecret.
 
 ---

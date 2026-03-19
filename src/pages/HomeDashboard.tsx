@@ -7,6 +7,7 @@ import {
 import BottomNav from '../components/BottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import GlobalSearch from '../components/GlobalSearch';
 
 // ─────────────────────────────────────────────
 // Data
@@ -42,6 +43,7 @@ const HomeDashboard: React.FC = () => {
     setFavArticles(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     // Show prompt if notifications are not enabled and it hasn't been shown this session
@@ -121,7 +123,7 @@ const HomeDashboard: React.FC = () => {
           </div>
           <div className="flex gap-4 pt-1">
             <button 
-              onClick={() => alert("Search coming soon!")}
+              onClick={() => setIsSearchOpen(true)}
               className="text-zinc-700 dark:text-white hover:text-[#d6ff3e] transition-colors"
             >
               <Search size={22} />
@@ -340,6 +342,10 @@ const HomeDashboard: React.FC = () => {
       </div>
 
       <BottomNav />
+      <GlobalSearch 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+      />
       {/* ── Temporary Seed Button (Admin Only) ── */}
       {userData?.role === 'admin' && (
         <div className="fixed top-4 left-4 z-[60]">
