@@ -262,5 +262,57 @@
       "error": "Failed to load foods. Check connection.",
       "logSuccess": "Logged!"
     }
+  },
+  "community": {
+    "title": "Community",
+    "forumTab": "Discussion Forum",
+    "challengesTab": "Challenges",
+    "forumsHeader": "Forums",
+    "activeChallenges": "Active Challenges",
+    "seeAll": "See All",
+    "noForums": "No forum categories yet.",
+    "noChallenges": "No active challenges.",
+    "strengthDesc": "Strength training methods",
+    "nutritionDesc": "Meal planning strategies",
+    "cardioDesc": "Cardio fitness guides",
+    "flexibilityDesc": "Flexibility and mobility"
+  },
+  "progress": {
+    "title": "Progress Tracking",
+    "workoutTab": "Workout",
+    "chartsTab": "Charts",
+    "myProgress": "My Progress",
+    "steps": "Steps",
+    "volume": "Volume",
+    "calories": "Calories",
+    "history": "History",
+    "muscleGroup": "Muscle Group Distribution",
+    "totalVolume": "Total Volume",
+    "trackingGains": "Tracking your gains!",
+    "noData": "No data recorded yet. Start training!",
+    "duration": "Duration",
+    "jan": "Jan", "feb": "Feb", "mar": "Mar", "apr": "Apr", "may": "May", "jun": "Jun",
+    "jul": "Jul", "aug": "Aug", "sep": "Sep", "oct": "Oct", "nov": "Nov", "dec": "Dec"
+  },
+  "mealPlans": {
+    "title": "Meal Plans",
+    "breakfastPlanForYou": "Breakfast Plan For You",
+    "planDescription": "Personalized meal strategies designed specifically for your goals and preferences.",
+    "seeRecipe": "See Recipe",
+    "noPlans": "No meal plans found for this category."
+  },
+  "settings": {
+    "title": "Settings",
+    "notifications": "Notification Setting",
+    "password": "Password Setting",
+    "becomeCoach": "Become a Coach",
+    "deleteAccount": "Delete Account",
+    "language": "Language",
+    "theme": "Theme",
+    "logout": "Logout",
+    "serbian": "Serbian",
+    "english": "English",
+    "dark": "Dark",
+    "light": "Light"
   }
 }

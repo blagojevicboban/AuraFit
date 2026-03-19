@@ -262,5 +262,57 @@
       "error": "Greška pri učitavanju. Proverite mrežu.",
       "logSuccess": "Logovano!"
     }
+  },
+  "community": {
+    "title": "Zajednica",
+    "forumTab": "Diskusije",
+    "challengesTab": "Izazovi",
+    "forumsHeader": "Forumi",
+    "activeChallenges": "Aktivni izazovi",
+    "seeAll": "Vidi sve",
+    "noForums": "Još uvek nema kategorija foruma.",
+    "noChallenges": "Nema aktivnih izazova.",
+    "strengthDesc": "Metodi treninga snage",
+    "nutritionDesc": "Strategije planiranja obroka",
+    "cardioDesc": "Kardio fitness vodiči",
+    "flexibilityDesc": "Fleksibilnost i mobilnost"
+  },
+  "progress": {
+    "title": "Praćenje napretka",
+    "workoutTab": "Trening",
+    "chartsTab": "Grafikoni",
+    "myProgress": "Moj napredak",
+    "steps": "Koraci",
+    "volume": "Volumen",
+    "calories": "Kalorije",
+    "history": "Istorija",
+    "muscleGroup": "Distribucija mišićnih grupa",
+    "totalVolume": "Ukupan volumen",
+    "trackingGains": "Pratim tvoje napretke!",
+    "noData": "Još uvek nema unetih podataka. Počni sa treningom!",
+    "duration": "Trajanje",
+    "jan": "Jan", "feb": "Feb", "mar": "Mar", "apr": "Apr", "may": "Maj", "jun": "Jun",
+    "jul": "Jul", "aug": "Avg", "sep": "Sep", "oct": "Okt", "nov": "Nov", "dec": "Dec"
+  },
+  "mealPlans": {
+    "title": "Planovi ishrane",
+    "breakfastPlanForYou": "Plan doručka za tebe",
+    "planDescription": "Personalizovane strategije ishrane dizajnirane specijalno za tvoje ciljeve i preferencije.",
+    "seeRecipe": "Vidi recept",
+    "noPlans": "Nema planova ishrane za ovu kategoriju."
+  },
+  "settings": {
+    "title": "Podešavanja",
+    "notifications": "Obaveštenja",
+    "password": "Lozinka",
+    "becomeCoach": "Postani trener",
+    "deleteAccount": "Obriši nalog",
+    "language": "Jezik",
+    "theme": "Tema",
+    "logout": "Odjavi se",
+    "serbian": "Srpski",
+    "english": "Engleski",
+    "dark": "Tamna",
+    "light": "Svetla"
   }
 }
