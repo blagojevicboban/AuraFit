@@ -215,23 +215,48 @@ export default function ClientDashboard() {
                   </div>
                 </div>
 
-                {/* Coach Message Card */}
+                {/* Coach Message Card / Selection */}
                 <div className="glass-card p-8 rounded-[2.5rem] flex flex-col">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/20">
-                      <Users className="w-7 h-7 text-indigo-400" />
+                  {!userData?.coachId ? (
+                    <div className="flex flex-col h-full">
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                          <Users className="w-7 h-7 text-amber-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-display font-bold text-white">Nemaš trenera?</h3>
+                          <p className="text-xs text-zinc-500">Pronađi stručnu pomoć</p>
+                        </div>
+                      </div>
+                      <p className="text-zinc-400 font-light leading-relaxed mb-8">
+                        Personalni trener ti može kreirati planove ishrane i treninga prilagođene tvojim potrebama.
+                      </p>
+                      <button 
+                        onClick={() => navigate('/coaches')}
+                        className="mt-auto w-full py-4 brand-gradient text-zinc-950 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      >
+                        PRONAĐI TRENERA
+                      </button>
                     </div>
-                    <div>
-                      <h3 className="font-display font-bold">Poruka trenera</h3>
-                      <p className="text-xs text-zinc-500">Pre 2 sata</p>
-                    </div>
-                  </div>
-                  <p className="text-zinc-300 font-light leading-relaxed mb-8 italic">
-                    "Odličan posao sa jučerašnjim treningom! Primetio sam da si povećao težinu na čučnju. Nastavi tako, danas fokus na hidrataciju."
-                  </p>
-                  <button className="mt-auto w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all">
-                    ODGOVORI TRENERU
-                  </button>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/20">
+                          <Users className="w-7 h-7 text-indigo-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-display font-bold">Poruka trenera</h3>
+                          <p className="text-xs text-zinc-500">Pre 2 sata</p>
+                        </div>
+                      </div>
+                      <p className="text-zinc-300 font-light leading-relaxed mb-8 italic">
+                        "Odličan posao sa jučerašnjim treningom! Primetio sam da si povećao težinu na čučnju. Nastavi tako, danas fokus na hidrataciju."
+                      </p>
+                      <button className="mt-auto w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all">
+                        ODGOVORI TRENERU
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}

@@ -306,23 +306,25 @@ const HomeDashboard: React.FC = () => {
       </div>
 
       <BottomNav />
-      {/* ── Temporary Seed Button ── */}
-      <div className="fixed top-4 left-4 z-[60]">
-        <button 
-          onClick={async () => {
-            const { seedDatabase } = await import('../lib/dbSeeder');
-            const result = await seedDatabase();
-            if (result.success) {
-              alert(`Successfully seeded ${result.count} documents!`);
-            } else {
-              alert(`Seed failed: ${result.error}`);
-            }
-          }}
-          className="bg-red-500/20 hover:bg-red-500/40 text-red-500 text-[8px] font-bold px-2 py-1 rounded-full border border-red-500/50 backdrop-blur-md"
-        >
-          DEBUG: SEED DB
-        </button>
-      </div>
+      {/* ── Temporary Seed Button (Admin Only) ── */}
+      {userData?.role === 'admin' && (
+        <div className="fixed top-4 left-4 z-[60]">
+          <button 
+            onClick={async () => {
+              const { seedDatabase } = await import('../lib/dbSeeder');
+              const result = await seedDatabase();
+              if (result.success) {
+                alert(`Successfully seeded ${result.count} documents!`);
+              } else {
+                alert(`Seed failed: ${result.error}`);
+              }
+            }}
+            className="bg-red-500/20 hover:bg-red-500/40 text-red-500 text-[8px] font-bold px-2 py-1 rounded-full border border-red-500/50 backdrop-blur-md"
+          >
+            DEBUG: SEED DB
+          </button>
+        </div>
+      )}
     </div>
   );
 };

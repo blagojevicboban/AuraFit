@@ -1,6 +1,10 @@
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.join(process.cwd(), ".env") });
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import path from "path";
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
 
 let fatSecretToken: string | null = null;
 let tokenExpiry: number = 0;
@@ -13,6 +17,8 @@ async function getFatSecretToken() {
   const clientId = process.env.FATSECRET_CLIENT_ID;
   const clientSecret = process.env.FATSECRET_CLIENT_SECRET;
   
+  console.log(`DEBUG: FatSecret ID found? ${!!clientId}, Secret found? ${!!clientSecret}`);
+
   if (!clientId || !clientSecret) {
     console.error("DEBUG: FatSecret Credentials MISSING in process.env");
     throw new Error("FatSecret credentials missing. Please set FATSECRET_CLIENT_ID and FATSECRET_CLIENT_SECRET.");
@@ -88,6 +94,13 @@ async function startServer() {
       });
       
       const data = await response.json();
+      if (data.error) {
+        console.error(`DEBUG: FatSecret Search API Error: ${data.error.code} - ${data.error.message}`);
+        return res.status(data.error.code === 21 ? 403 : 400).json({ 
+          error: data.error.message, 
+          code: data.error.code 
+        });
+      }
       res.json(data);
     } catch (error: any) {
       console.error("FatSecret API Error:", error);
@@ -118,6 +131,10 @@ async function startServer() {
       });
       
       const data = await response.json();
+      if (data.error) {
+        console.error(`DEBUG: FatSecret Autocomplete Error: ${data.error.code} - ${data.error.message}`);
+        return res.status(data.error.code === 21 ? 403 : 400).json({ error: data.error.message, code: data.error.code });
+      }
       res.json(data);
     } catch (error: any) {
       console.error("FatSecret Autocomplete Error:", error);
@@ -147,6 +164,10 @@ async function startServer() {
       });
       
       const data = await response.json();
+      if (data.error) {
+         console.error(`DEBUG: FatSecret Recipes Error: ${data.error.code} - ${data.error.message}`);
+         return res.status(data.error.code === 21 ? 403 : 400).json({ error: data.error.message, code: data.error.code });
+      }
       res.json(data);
     } catch (error: any) {
       console.error("FatSecret Recipes Error:", error);
@@ -195,6 +216,10 @@ async function startServer() {
         body: foodParams.toString()
       });
       const foodData = await foodRes.json();
+      if (foodData.error) {
+         console.error(`DEBUG: FatSecret Food Details API Error: ${JSON.stringify(foodData.error)}`);
+         return res.status(foodData.error.code === 21 ? 403 : 400).json({ error: foodData.error.message, code: foodData.error.code });
+      }
       res.json(foodData);
     } catch (error: any) {
       console.error("FatSecret Barcode Error:", error);

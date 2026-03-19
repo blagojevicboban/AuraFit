@@ -84,16 +84,27 @@ const FoodCategories: React.FC = () => {
     setFoods([]);
     try {
       const res = await fetch(`/api/fatsecret/search?q=${encodeURIComponent(query)}`);
+      
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
+        if (res.status === 403 || errData.code === 21) {
+          throw new Error('IP_RESTRICTED');
+        }
         throw new Error(errData.error || 'API error');
       }
+      
       const data = await res.json();
       const items: FoodItem[] = data?.foods?.food ?? [];
       setFoods(Array.isArray(items) ? items : [items]);
     } catch (e: any) {
       console.error("Search error:", e);
-      setError(e.message.includes('credentials missing') ? 'FatSecret API keys missing in .env' : t('nutrition.categories.error'));
+      if (e.message === 'IP_RESTRICTED') {
+        setError('Pristup odbijen. Proverite IP Whitelist u FatSecret konzoli.');
+      } else if (e.message.includes('credentials missing')) {
+        setError('FatSecret API keys missing in .env');
+      } else {
+        setError(t('nutrition.categories.error'));
+      }
     } finally {
       setIsLoading(false);
       setSuggestions([]);
@@ -241,8 +252,8 @@ const FoodCategories: React.FC = () => {
         </form>
       </div>
 
-      {/* ── Category Grid (always visible) ── */}
-      {!activeCategory && foods.length === 0 && (
+      {/* ── Category Grid (visible when not searching/loading) ── */}
+      {!activeCategory && foods.length === 0 && !isLoading && !error && (
         <div className="px-6 pt-2">
           <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">{t('nutrition.categories.browse')}</p>
           <div className="grid grid-cols-3 gap-3">

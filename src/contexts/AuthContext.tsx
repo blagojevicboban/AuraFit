@@ -30,6 +30,7 @@ interface AuthContextType {
   stopImpersonating: () => void;
   isImpersonating: boolean;
   initNotifications: () => Promise<void>;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -315,6 +316,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUserData = async () => {
+    if (!currentUser) return;
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const data = userDoc.data() as UserData;
+        setUserData(data);
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       currentUser, 
@@ -328,7 +343,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       impersonateUser,
       stopImpersonating,
       isImpersonating: !!originalUserData,
-      initNotifications
+      initNotifications,
+      refreshUserData
     }}>
       {!loading && children}
     </AuthContext.Provider>
