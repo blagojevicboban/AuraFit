@@ -13,7 +13,7 @@ import { cn } from '../lib/utils';
 
 export default function CoachSelection() {
   const navigate = useNavigate();
-  const { user, userData, refreshUserData } = useAuth();
+  const { currentUser, userData, refreshUserData } = useAuth();
   const { t } = useLanguage();
   
   const [coaches, setCoaches] = useState<any[]>([]);
@@ -21,18 +21,24 @@ export default function CoachSelection() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectingId, setSelectingId] = useState<string | null>(null);
-
+ 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
+      if (!currentUser) {
+        // If auth is initialized but no user, stop loading
+        setLoading(false);
+        return;
+      }
+      
       try {
+        setLoading(true);
         // Fetch Coaches
         const qC = query(collection(db, 'users'), where('role', '==', 'coach'));
         const coachSnap = await getDocs(qC);
         setCoaches(coachSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
         // Fetch user's requests
-        const qR = query(collection(db, 'coachRequests'), where('clientId', '==', user.uid));
+        const qR = query(collection(db, 'coachRequests'), where('clientId', '==', currentUser.uid));
         const requestSnap = await getDocs(qR);
         setRequests(requestSnap.docs.map(doc => doc.data()));
       } catch (error) {
@@ -42,10 +48,10 @@ export default function CoachSelection() {
       }
     };
     fetchData();
-  }, [user]);
+  }, [currentUser]);
 
   const handleSelectCoach = async (coachId: string) => {
-    if (!user || !userData) return;
+    if (!currentUser || !userData) return;
     
     // Check if there is already a pending request for this specific coach
     if (requests.some(r => r.coachId === coachId && r.status === 'pending')) return;
@@ -53,7 +59,7 @@ export default function CoachSelection() {
     setSelectingId(coachId);
     try {
       await addDoc(collection(db, 'coachRequests'), {
-        clientId: user.uid,
+        clientId: currentUser.uid,
         clientName: userData.displayName || 'Korisnik',
         clientPhoto: userData.photoURL || '',
         coachId: coachId,
@@ -69,6 +75,7 @@ export default function CoachSelection() {
       setSelectingId(null);
     }
   };
+
 
   const filteredCoaches = coaches.filter(c => 
     (c.displayName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||

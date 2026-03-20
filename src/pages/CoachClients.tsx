@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Search, Filter, MoreVertical, Mail, Activity, ChevronRight, UserPlus, Loader2 } from "lucide-react";
+import { Users, Search, Filter, MoreVertical, Mail, Activity, ChevronRight, UserPlus, Loader2, Check, X, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import { collection, query, where, getDocs, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -15,7 +15,10 @@ export default function CoachClients() {
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       // Fetch current clients
@@ -36,6 +39,7 @@ export default function CoachClients() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchData();
