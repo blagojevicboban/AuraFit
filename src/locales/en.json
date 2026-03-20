@@ -39,8 +39,10 @@
     "nutrition": "Nutrition",
     "progress": "Progress",
     "community": "Community",
-    "home": "Home"
+    "home": "Home",
+    "messages": "Messages"
   },
+
   "admin": {
     "systemOverview": "System Overview & Activities",
     "manageUsers": "Manage Users",
@@ -147,12 +149,15 @@
     "pwaDesc": "To install AuraFit on your phone, open it in Chrome (Android) or Safari (iOS) and select 'Add to Home Screen'.",
     "notifyTitle": "Push Notifications",
     "notifyDesc": "Enable notifications in the Home Dashboard prompt to stay updated on your workout goals.",
+    "messagingTitle": "Direct Messaging & Chat",
+    "messagingDesc": "Communicate in real-time with your coach or clients. Receive new message notifications directly in the app.",
     "supportTitle": "Support",
     "supportDesc": "If you encounter any issues, please contact our support team at support@aurafit.com.",
     "fatsecretTitle": "Verified Food Database",
     "fatsecretDesc": "Access millions of food items and recipes with verified macro data. When set to Serbian, results are automatically localized for our region.",
     "versionTitle": "App Version",
-    "versionDesc": "AuraFit v1.2.0 - Premium Edition",
+    "versionDesc": "AuraFit v1.3.0 - Stable Release (Messaging)",
+
     "designedFor": "Designed for Excellence",
     "author": "Lead Developer: Boban Blagojević",
     "docsTitle": "Technical Documentation",

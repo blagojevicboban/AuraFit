@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Users, Search, Filter, MoreVertical, Mail, Activity, ChevronRight, UserPlus, Loader2, Check, X, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import { collection, query, where, getDocs, doc, updateDoc, writeBatch } from "firebase/firestore";
@@ -7,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 
 export default function CoachClients() {
+  const navigate = useNavigate();
   const { currentUser, refreshUserData } = useAuth();
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
@@ -217,12 +219,27 @@ export default function CoachClients() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-indigo-400 transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/app/messages', { state: { selectedUserId: client.id } });
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-indigo-400 transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
+                        >
                           <Mail className="w-4 h-4" />
                         </button>
-                        <button className="p-2 text-slate-400 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800">
+
+
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/app/coach', { state: { selectedClientId: client.id } });
+                          }}
+                          className="p-2 text-slate-400 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
+                        >
                           <ChevronRight className="w-4 h-4" />
                         </button>
+
                       </div>
                     </td>
                   </motion.tr>

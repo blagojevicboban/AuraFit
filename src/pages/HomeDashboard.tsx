@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Search, Bell, User, Star, Dumbbell, BarChart2, Apple, Users, Play, Clock, Flame, ChevronRight, X, Shield
+  Search, Bell, User, Star, Dumbbell, BarChart2, Apple, Users, Play, Clock, Flame, ChevronRight, X, Shield, MessageSquare
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import GlobalSearch from '../components/GlobalSearch';
+import { db } from '../lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+
 
 // ─────────────────────────────────────────────
 // Data
@@ -44,6 +47,22 @@ const HomeDashboard: React.FC = () => {
   };
   const [showPrompt, setShowPrompt] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [unreadFromCoach, setUnreadFromCoach] = useState(0);
+
+  useEffect(() => {
+    if (!userData?.uid || !userData?.coachId) return;
+    const q = query(
+      collection(db, "messages"),
+      where("receiverId", "==", userData.uid),
+      where("senderId", "==", userData.coachId),
+      where("read", "==", false)
+    );
+    const unsub = onSnapshot(q, (snapshot) => {
+      setUnreadFromCoach(snapshot.size);
+    });
+    return () => unsub();
+  }, [userData?.uid, userData?.coachId]);
+
 
   useEffect(() => {
     // Show prompt if notifications are not enabled and it hasn't been shown this session
@@ -206,6 +225,40 @@ const HomeDashboard: React.FC = () => {
             </motion.div>
           </section>
         )}
+        {/* ── My Coach Card (For clients with coach) ── */}
+
+        {userData?.role === 'client' && userData?.coachId && (
+          <section className="px-6 pt-4">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={() => navigate('/app/messages', { state: { selectedUserId: userData.coachId } })}
+              className="p-6 rounded-[2.5rem] bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between cursor-pointer group transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-2xl bg-[#afa3ff] flex items-center justify-center text-zinc-950 font-black">
+                    <MessageSquare className="w-6 h-6" />
+                  </div>
+                  {unreadFromCoach > 0 && (
+                    <span className="absolute -top-2 -right-2 min-w-[1.25rem] h-[1.25rem] px-1 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950 text-[10px] font-black text-white flex items-center justify-center animate-pulse shadow-sm">
+                      {unreadFromCoach}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-[#afa3ff] uppercase tracking-widest">Moj Trener</p>
+                  <h3 className="text-lg font-bold">Pošalji poruku</h3>
+                </div>
+              </div>
+
+              <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-[#afa3ff] transition-colors">
+                <ChevronRight size={20} />
+              </div>
+            </motion.div>
+          </section>
+        )}
+
 
         {/* ── Recommendations ── */}
         <section className="px-6 pt-4">

@@ -4,12 +4,17 @@ import { askAuraFitAI } from "../lib/gemini";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
 import { db } from "../lib/firebase";
-import { collection, query, where, onSnapshot, getDocs, limit, orderBy } from "firebase/firestore";
+import { collection, query, where, onSnapshot, getDocs, limit, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import { useAuth } from "../contexts/AuthContext";
 import { generateWeeklySummary } from "../services/aiService";
 
 export default function CoachDashboard() {
   const { userData } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
   const [isGenerating, setIsGenerating] = useState(false);
   const [workoutPlan, setWorkoutPlan] = useState<string | null>(null);
   const [clients, setClients] = useState<any[]>([]);
@@ -19,12 +24,27 @@ export default function CoachDashboard() {
   const [activeView, setActiveView] = useState<'clients' | 'templates' | 'feedback'>('clients');
   const [templates, setTemplates] = useState<any[]>([]);
   const [feedbackList, setFeedbackList] = useState<any[]>([]);
+  
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     if (!userData) return;
     const q = query(collection(db, "users"), where("coachId", "==", userData.uid));
     const unsubClients = onSnapshot(q, (snapshot) => {
-      setClients(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const clientsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setClients(clientsData);
+
+      // Handle selection from navigation state (coming from Clients list)
+      const passedClientId = (location.state as any)?.selectedClientId;
+      if (passedClientId && !selectedClient) {
+        const target = clientsData.find(c => c.id === passedClientId);
+        if (target) setSelectedClient(target);
+      }
     });
 
     const tQ = query(collection(db, "templates"), where("coachId", "==", userData.uid));
@@ -42,7 +62,7 @@ export default function CoachDashboard() {
       unsubTemplates();
       unsubFeedback();
     };
-  }, [userData]);
+  }, [userData, location.state]);
 
   const handleGenerateSummary = async (client: any) => {
     setIsGeneratingSummary(true);
@@ -60,22 +80,67 @@ export default function CoachDashboard() {
 
       const summary = await generateWeeklySummary(data);
       setWeeklySummary(summary);
+      showToast("Rezime uspešno generisan!");
     } catch (err) {
       console.error(err);
+      showToast("Greška pri generisanju rezimea", "error");
     }
     setIsGeneratingSummary(false);
   };
 
   const handleGenerateWorkout = async () => {
     setIsGenerating(true);
-    const prompt = "Daj mi JSON strukturu za novi trening snage za Marka, fokus na noge, 4 vežbe. Vrati samo JSON.";
-    const response = await askAuraFitAI(prompt, true, true);
-    setWorkoutPlan(response);
+    try {
+      const prompt = "Daj mi JSON strukturu za novi trening snage za Marka, fokus na noge, 4 vežbe. Vrati samo JSON.";
+      const response = await askAuraFitAI(prompt, true, true);
+      setWorkoutPlan(response);
+      showToast("Novi trening plan je generisan!");
+    } catch (err) {
+      showToast("AI ne može da napravi plan trenutno", "error");
+    }
     setIsGenerating(false);
+  };
+
+  const handleApplyPlan = async () => {
+    if (!selectedClient || !workoutPlan) return;
+    try {
+      await addDoc(collection(db, "workouts"), {
+        userId: selectedClient.id,
+        coachId: userData?.uid,
+        plan: workoutPlan,
+        title: "Novi Plan Snage",
+        createdAt: serverTimestamp(),
+        status: 'pending'
+      });
+      showToast("Plan uspešno primenjen!");
+      setWorkoutPlan(null);
+    } catch (err) {
+      console.error("Error applying plan:", err);
+      showToast("Greška pri čuvanju plana.", "error");
+    }
   };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 pb-24 lg:pb-8 transition-colors duration-200">
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className={cn(
+               "fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-4 rounded-[2rem] shadow-2xl z-[100] font-bold text-sm flex items-center gap-3 backdrop-blur-xl border transition-colors",
+               toast.type === 'success' 
+                ? "bg-emerald-500 text-white border-emerald-400/50 shadow-emerald-500/20" 
+                : "bg-rose-500 text-white border-rose-400/50 shadow-rose-500/20"
+            )}
+          >
+            {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors duration-200">Coach Dashboard</h1>
@@ -182,10 +247,20 @@ export default function CoachDashboard() {
                         <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1 transition-colors duration-200">Email: {selectedClient.email}</p>
                       </div>
                     </div>
-                    <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-white text-sm font-medium rounded-xl hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors border border-slate-200 dark:border-zinc-700">
+                    <button 
+                      onClick={() => {
+                        if (selectedClient?.id) {
+                          navigate('/app/messages', { state: { selectedUserId: selectedClient.id } });
+                        }
+                      }}
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-white text-sm font-medium rounded-xl hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors border border-slate-200 dark:border-zinc-700"
+                    >
                       <MessageSquare className="w-4 h-4" />
                       Pošalji poruku
                     </button>
+
+
+
                   </div>
 
                   <div className="mb-8">
@@ -255,10 +330,31 @@ export default function CoachDashboard() {
                             <FileJson className="w-3.5 h-3.5" />
                             workout_plan.json
                           </span>
-                          <button className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1.5 font-medium bg-indigo-100 dark:bg-indigo-500/10 px-2 py-1 rounded-md transition-colors">
+                          <button 
+                            onClick={async () => {
+                              if (!selectedClient || !workoutPlan) return;
+                              try {
+                                await addDoc(collection(db, "workouts"), {
+                                  userId: selectedClient.id,
+                                  coachId: userData?.uid,
+                                  plan: workoutPlan,
+                                  title: "Novi Plan Snage",
+                                  createdAt: serverTimestamp(),
+                                  status: 'pending'
+                                });
+                                alert("Plan uspešno primenjen i poslat klijentu!");
+                                setWorkoutPlan(null);
+                              } catch (err) {
+                                console.error("Error applying plan:", err);
+                                alert("Greška pri čuvanju plana.");
+                              }
+                            }}
+                            className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1.5 font-medium bg-indigo-100 dark:bg-indigo-500/10 px-2 py-1 rounded-md transition-colors"
+                          >
                             <CheckCircle2 className="w-3.5 h-3.5" /> Primeni plan
                           </button>
                         </div>
+
                         <pre className="p-4 text-sm font-mono text-slate-700 dark:text-zinc-300 overflow-x-auto custom-scrollbar transition-colors duration-200">
                           {workoutPlan}
                         </pre>

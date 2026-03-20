@@ -51,6 +51,8 @@ const ArticlesList = lazy(() => import("./pages/ArticlesList"));
 const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
 const FoodCategories = lazy(() => import("./pages/FoodCategories"));
 const CoachSelection = lazy(() => import("./pages/CoachSelection"));
+const Messages = lazy(() => import("./pages/Messages"));
+
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -104,7 +106,9 @@ function AppContent() {
               <Route path="admin" element={<AdminDashboard />} />
               <Route path="admin/users" element={<AdminUsers />} />
               <Route path="admin/applications" element={<CoachApplications />} />
+              <Route path="messages" element={<Messages />} />
             </Route>
+
           </Routes>
         </Suspense>
       </AnimatePresence>

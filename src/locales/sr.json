@@ -39,7 +39,8 @@
     "nutrition": "Ishrana",
     "progress": "Napredak",
     "community": "Zajednica",
-    "home": "Početna"
+    "home": "Početna",
+    "messages": "Poruke"
   },
   "admin": {
     "systemOverview": "Pregled sistema i aktivnosti",
@@ -147,12 +148,15 @@
     "pwaDesc": "Da biste instalirali AuraFit na svoj telefon, otvorite ga u Chrome (Android) ili Safari (iOS) pretraživaču i izaberite 'Add to Home Screen'.",
     "notifyTitle": "Obaveštenja",
     "notifyDesc": "Uključite obaveštenja na početnom ekranu kako biste dobijali informacije o svojim ciljevima.",
+    "messagingTitle": "Direktne Poruke i Chat",
+    "messagingDesc": "Komunicirajte u realnom vremenu sa trenerom ili klijentima. Primajte notifikacije o novim porukama direktno u aplikaciji.",
     "supportTitle": "Podrška",
     "supportDesc": "Ako naiđete na bilo kakve probleme, kontaktirajte naš tim za podršku na support@aurafit.com.",
     "fatsecretTitle": "Verifikovana baza hrane",
     "fatsecretDesc": "Pristupite milionima namirnica i recepata sa verifikovanim nutricionim podacima. Kada je aplikacija na srpskom, rezultati su automatski lokalizovani za naš region.",
     "versionTitle": "Verzija aplikacije",
-    "versionDesc": "AuraFit v1.2.0 - Premium Edition",
+    "versionDesc": "AuraFit v1.3.0 - Stable Release (Messaging)",
+
     "designedFor": "Dizajnirano za izvrsnost",
     "author": "Glavni programer: Boban Blagojević",
     "docsTitle": "Tehnička dokumentacija",

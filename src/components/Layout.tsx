@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Activity, LayoutDashboard, Users, LogOut, Menu, X, User, Sun, Moon, Shield, Home } from "lucide-react";
+import { Activity, LayoutDashboard, Users, LogOut, Menu, X, User, Sun, Moon, Shield, Home, MessageSquare } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -8,6 +8,9 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ThemeToggle } from "./ui/ThemeToggle";
 import { LanguageToggle } from "./ui/LanguageToggle";
+import { db } from "../lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+
 
 export default function Layout() {
   const location = useLocation();
@@ -20,6 +23,38 @@ export default function Layout() {
   const isCoach = location.pathname.includes("/coach");
   const isClient = location.pathname.includes("/client");
   const isAdmin = location.pathname.includes("/admin");
+
+  const [totalUnread, setTotalUnread] = useState(0);
+  const [totalClients, setTotalClients] = useState(0);
+
+
+  useEffect(() => {
+    if (!userData?.uid) return;
+    const q = query(
+      collection(db, "messages"),
+      where("receiverId", "==", userData.uid),
+      where("read", "==", false)
+    );
+    const unsub = onSnapshot(q, (snapshot) => {
+      setTotalUnread(snapshot.size);
+    });
+    return () => unsub();
+  }, [userData?.uid]);
+
+  useEffect(() => {
+    if (!userData?.uid || userData.role !== 'coach') return;
+    const q = query(
+      collection(db, "users"),
+      where("coachId", "==", userData.uid)
+    );
+    const unsub = onSnapshot(q, (snapshot) => {
+      setTotalClients(snapshot.size);
+    });
+    return () => unsub();
+  }, [userData?.uid, userData?.role]);
+
+
+
 
   useEffect(() => {
     if (!loading && !userData && (isCoach || isClient || isAdmin)) {
@@ -46,14 +81,20 @@ export default function Layout() {
   };
 
   const clientLinks = [
-    { to: "/client", icon: LayoutDashboard, label: t('nav.dashboard') },
-    { to: "/client/workouts", icon: Activity, label: t('nav.workouts') },
+    { to: "/app/client", icon: LayoutDashboard, label: t('nav.dashboard') },
+    { to: "/app/client/workouts", icon: Activity, label: t('nav.workouts') },
+    { to: "/app/messages", icon: MessageSquare, label: t('nav.messages') || 'Poruke' },
   ];
 
+
+
   const coachLinks = [
-    { to: "/coach", icon: LayoutDashboard, label: t('nav.overview') },
-    { to: "/coach/clients", icon: Users, label: t('nav.clients') },
+    { to: "/app/coach", icon: LayoutDashboard, label: t('nav.overview') },
+    { to: "/app/coach/clients", icon: Users, label: t('nav.clients') },
+    { to: "/app/messages", icon: MessageSquare, label: t('nav.messages') || 'Poruke' },
   ];
+
+
 
   const adminLinks = [
     { to: "/app/admin", icon: LayoutDashboard, label: t('nav.dashboard') },
@@ -169,7 +210,21 @@ export default function Layout() {
                   : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/5"
               )}
             >
+            <div className="relative">
               <link.icon className={cn("w-5 h-5", location.pathname === link.to ? "text-zinc-950" : "text-zinc-500")} />
+              {link.icon === MessageSquare && totalUnread > 0 && (
+                <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center animate-pulse">
+                  {totalUnread}
+                </span>
+              )}
+              {link.icon === Users && totalClients > 0 && (
+                <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center">
+                  {totalClients}
+                </span>
+              )}
+            </div>
+
+
               {link.label}
             </Link>
           ))}
@@ -226,7 +281,21 @@ export default function Layout() {
                   "flex items-center justify-center w-10 h-10 rounded-xl mb-1 transition-all duration-300",
                   isActive ? "bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.2)]" : "bg-transparent"
                 )}>
+                <div className="relative">
                   <link.icon className={cn("w-5 h-5 transition-transform duration-300", isActive ? "scale-110" : "scale-100")} />
+                  {link.icon === MessageSquare && totalUnread > 0 && (
+                     <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center animate-pulse">
+                      {totalUnread}
+                    </span>
+                  )}
+                  {link.icon === Users && totalClients > 0 && (
+                    <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center">
+                      {totalClients}
+                    </span>
+                  )}
+                </div>
+
+
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest">{link.label}</span>
               </Link>
