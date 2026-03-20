@@ -305,7 +305,18 @@
     "strengthDesc": "Metodi treninga snage",
     "nutritionDesc": "Strategije planiranja obroka",
     "cardioDesc": "Kardio fitness vodiči",
-    "flexibilityDesc": "Fleksibilnost i mobilnost"
+    "flexibilityDesc": "Fleksibilnost i mobilnost",
+    "joinChallenge": "Pridruži se",
+    "leaveChallenge": "Napusti izazov",
+    "challengeJoined": "Uspešno ste se pridružili!",
+    "challengeLeft": "Napustili ste izazov.",
+    "participants": "Učesnika",
+    "intensity": "Intenzitet",
+    "duration": "Trajanje",
+    "calories": "Kalorije",
+    "difficulty": "Težina",
+    "details": "Detalji Izazova",
+    "noDescription": "Nema opisa za ovaj izazov."
   },
   "progress": {
     "title": "Praćenje napretka",

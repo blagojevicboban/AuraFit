@@ -334,7 +334,7 @@ const HomeDashboard: React.FC = () => {
           <motion.div
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/routine')}
+            onClick={() => navigate('/challenge/30-day-plank')}
             className="rounded-[2.5rem] overflow-hidden bg-[#afa3ff] relative cursor-pointer shadow-xl border border-white/20 group"
             style={{ minHeight: 180 }}
           >
@@ -347,7 +347,7 @@ const HomeDashboard: React.FC = () => {
             <div className="relative z-20 p-8">
               <p className="text-[#d6ff3e] text-[10px] font-black uppercase tracking-[0.2em] mb-2">{t('home.weeklyChallenge')}</p>
               <h3 className="text-3xl font-black text-white leading-tight mb-2">
-                Plank With<br/>Hip Twist
+                30 Day<br/>Plank
               </h3>
               <div className="flex items-center gap-3">
                  <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">5 Min</span>

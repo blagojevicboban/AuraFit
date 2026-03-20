@@ -150,7 +150,8 @@ const Community: React.FC = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white dark:bg-zinc-800 rounded-3xl p-1 relative overflow-hidden group cursor-pointer shadow-lg aspect-video border border-zinc-100 dark:border-none"
+                        onClick={() => navigate(`/challenge/${challenge.id}`)}
+                        className="bg-white dark:bg-zinc-800 rounded-[2.5rem] p-1 relative overflow-hidden group cursor-pointer shadow-lg aspect-video border border-zinc-100 dark:border-none"
                       >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
                         <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center overflow-hidden">

@@ -306,7 +306,18 @@
     "strengthDesc": "Strength training methods",
     "nutritionDesc": "Meal planning strategies",
     "cardioDesc": "Cardio fitness guides",
-    "flexibilityDesc": "Flexibility and mobility"
+    "flexibilityDesc": "Flexibility and mobility",
+    "joinChallenge": "Join Challenge",
+    "leaveChallenge": "Leave Challenge",
+    "challengeJoined": "Successfully joined!",
+    "challengeLeft": "You've left the challenge.",
+    "participants": "Participants",
+    "intensity": "Intensity",
+    "duration": "Duration",
+    "calories": "Calories",
+    "difficulty": "Difficulty",
+    "details": "Challenge Details",
+    "noDescription": "No description available for this challenge."
   },
   "progress": {
     "title": "Progress Tracking",

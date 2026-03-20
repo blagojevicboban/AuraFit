@@ -54,6 +54,7 @@ const ForumPostDetail = lazy(() => import("./pages/ForumPostDetail"));
 const ArticlesList = lazy(() => import("./pages/ArticlesList"));
 const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
 const FoodCategories = lazy(() => import("./pages/FoodCategories"));
+const ChallengeDetail = lazy(() => import("./pages/ChallengeDetail"));
 
 
 
@@ -97,6 +98,7 @@ function AppContent() {
             <Route path="/article" element={<PageTransition><ArticleDetail /></PageTransition>} />
             <Route path="/food-categories" element={<PageTransition><FoodCategories /></PageTransition>} />
             <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
+            <Route path="/challenge/:id" element={<PageTransition><ChallengeDetail /></PageTransition>} />
             <Route path="/coaches" element={<PageTransition><CoachSelection /></PageTransition>} />
             <Route path="/forum/:id" element={<PageTransition><ForumTopicList /></PageTransition>} />
             <Route path="/forum-topic/:id" element={<PageTransition><ForumPostDetail /></PageTransition>} />

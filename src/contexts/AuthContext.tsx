@@ -16,6 +16,7 @@ interface UserData {
   gender?: 'Male' | 'Female';
   goal?: string;
   setupCompleted?: boolean;
+  joinedChallenges?: string[];
 }
 
 interface AuthContextType {
