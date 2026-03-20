@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Activity, LayoutDashboard, Users, LogOut, Menu, X, User, Sun, Moon, Shield, Home, MessageSquare } from "lucide-react";
+import { Activity, LayoutDashboard, Users, LogOut, Menu, X, User, Sun, Moon, Shield, Home, MessageSquare, Globe } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -92,7 +92,9 @@ export default function Layout() {
     { to: "/app/coach", icon: LayoutDashboard, label: t('nav.overview') },
     { to: "/app/coach/clients", icon: Users, label: t('nav.clients') },
     { to: "/app/messages", icon: MessageSquare, label: t('nav.messages') || 'Poruke' },
+    { to: "/community", icon: Globe, label: t('community.title') || 'Zajednica' },
   ];
+
 
 
 

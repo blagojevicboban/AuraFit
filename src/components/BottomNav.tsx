@@ -1,19 +1,29 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Apple, User } from 'lucide-react';
+import { Home, BookOpen, Apple, User, MessageSquare, Users } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const BottomNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
+  const { userData } = useAuth();
 
-  const navItems = [
+  const isCoach = userData?.role === 'coach';
+
+  const navItems = isCoach ? [
+    { icon: Home, label: t('nav.overview'), path: '/app/coach' },
+    { icon: Users, label: t('nav.clients'), path: '/app/coach/clients' },
+    { icon: MessageSquare, label: t('nav.messages'), path: '/app/messages' },
+    { icon: User, label: t('common.profile'), path: '/profile' },
+  ] : [
     { icon: Home, label: t('nav.overview'), path: '/home' },
     { icon: BookOpen, label: t('nav.workouts'), path: '/workouts' },
     { icon: Apple, label: t('nav.nutrition'), path: '/nutrition' },
     { icon: User, label: t('common.profile'), path: '/profile' },
   ];
+
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#afa3ff] px-6 py-4 flex items-center justify-around z-50 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]">

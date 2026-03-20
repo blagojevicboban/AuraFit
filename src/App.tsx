@@ -47,11 +47,15 @@ const DeleteAccount = lazy(() => import("./pages/DeleteAccount"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const RecipeDetail = lazy(() => import("./pages/RecipeDetail"));
+const CoachSelection = lazy(() => import("./pages/CoachSelection"));
+const Messages = lazy(() => import("./pages/Messages"));
+const ForumTopicList = lazy(() => import("./pages/ForumTopicList"));
+const ForumPostDetail = lazy(() => import("./pages/ForumPostDetail"));
 const ArticlesList = lazy(() => import("./pages/ArticlesList"));
 const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
 const FoodCategories = lazy(() => import("./pages/FoodCategories"));
-const CoachSelection = lazy(() => import("./pages/CoachSelection"));
-const Messages = lazy(() => import("./pages/Messages"));
+
+
 
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -94,7 +98,10 @@ function AppContent() {
             <Route path="/food-categories" element={<PageTransition><FoodCategories /></PageTransition>} />
             <Route path="/help" element={<PageTransition><Help /></PageTransition>} />
             <Route path="/coaches" element={<PageTransition><CoachSelection /></PageTransition>} />
+            <Route path="/forum/:id" element={<PageTransition><ForumTopicList /></PageTransition>} />
+            <Route path="/forum-topic/:id" element={<PageTransition><ForumPostDetail /></PageTransition>} />
             <Route path="/workout-player/:id" element={<PageTransition><WorkoutPlayer /></PageTransition>} />
+
 
             {/* App routes with Layout wrapper */}
             <Route path="/app" element={<Layout />}>

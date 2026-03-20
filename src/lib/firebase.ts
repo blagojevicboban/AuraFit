@@ -126,8 +126,16 @@ export const logOut = async () => {
 export const requestForToken = async () => {
   if (!messaging) return null;
   try {
+    // Edge/Chrome compatibility: Request permission explicitly first if needed
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+       console.log('Notification permission not granted.');
+       return null;
+    }
+    
     const currentToken = await getToken(messaging, {
-      vapidKey: 'BPEv0m-p-V6q-q-q-q-q-q-q-q-q-q-q-q-q-q-q' // Placeholder
+      // NAPOMENA: Ovde treba uneti pravi VAPID ključ iz Firebase konzole ako ovaj ne radi
+      vapidKey: 'BPEv-Z_Q6UvNu7S3z6...VAŠ_PRAVI_KLJUČ' 
     });
     if (currentToken) {
       return currentToken;
@@ -138,6 +146,7 @@ export const requestForToken = async () => {
     return null;
   }
 };
+
 
 export const onMessageListener = () =>
   new Promise((resolve) => {
