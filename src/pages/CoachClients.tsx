@@ -1,39 +1,72 @@
 import { useState, useEffect } from "react";
 import { Users, Search, Filter, MoreVertical, Mail, Activity, ChevronRight, UserPlus, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 
 export default function CoachClients() {
-  const { currentUser } = useAuth();
+  const { currentUser, refreshUserData } = useAuth();
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [clients, setClients] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      if (!currentUser) return;
-      setLoading(true);
-      try {
-        const q = query(collection(db, 'users'), where('coachId', '==', currentUser.uid));
-        const snap = await getDocs(q);
-        const clientsData = snap.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setClients(clientsData);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    if (!currentUser) return;
+    setLoading(true);
+    try {
+      // Fetch current clients
+      const qC = query(collection(db, 'users'), where('coachId', '==', currentUser.uid));
+      const clientSnap = await getDocs(qC);
+      setClients(clientSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
-    fetchClients();
+      // Fetch pending requests
+      const qR = query(collection(db, 'coachRequests'), 
+        where('coachId', '==', currentUser.uid),
+        where('status', '==', 'pending')
+      );
+      const requestSnap = await getDocs(qR);
+      setRequests(requestSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    } catch (error) {
+      console.error("Error fetching coach data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [currentUser]);
+
+  const handleAccept = async (requestId: string, clientId: string) => {
+    if (!currentUser) return;
+    try {
+      const batch = writeBatch(db);
+      
+      // 1. Accept request
+      batch.update(doc(db, 'coachRequests', requestId), { status: 'accepted' });
+      
+      // 2. Assign coach to client
+      batch.update(doc(db, 'users', clientId), { coachId: currentUser.uid });
+      
+      await batch.commit();
+      await fetchData(); // Refresh UI
+    } catch (error) {
+      console.error("Error accepting request:", error);
+    }
+  };
+
+  const handleDecline = async (requestId: string) => {
+    try {
+      await updateDoc(doc(db, 'coachRequests', requestId), { status: 'declined' });
+      await fetchData(); // Refresh UI
+    } catch (error) {
+      console.error("Error declining request:", error);
+    }
+  };
 
   const filteredClients = clients.filter(client => 
     (client.displayName || client.name || "").toLowerCase().includes(searchQuery.toLowerCase())
@@ -51,6 +84,56 @@ export default function CoachClients() {
           Dodaj klijenta
         </button>
       </header>
+
+      {/* Pending Requests Section */}
+      {requests.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 text-[#afa3ff]">
+            <Clock className="w-5 h-5" />
+            <h2 className="text-lg font-bold uppercase tracking-widest">Zahtevi na čekanju ({requests.length})</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {requests.map((request) => (
+              <motion.div
+                key={request.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white dark:bg-zinc-900 border border-indigo-500/20 rounded-3xl p-5 flex items-center justify-between shadow-xl shadow-indigo-500/5"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center overflow-hidden border border-indigo-500/20">
+                    {request.clientPhoto ? (
+                      <img src={request.clientPhoto} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-indigo-400 font-bold">{request.clientName?.[0]}</span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-white">{request.clientName}</h3>
+                    <p className="text-xs text-slate-500 dark:text-zinc-500">Želi te za trenera</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleAccept(request.id, request.clientId)}
+                    className="p-3 bg-emerald-500/10 text-emerald-500 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-500/10"
+                    title="Prihvati"
+                  >
+                    <Check className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={() => handleDecline(request.id)}
+                    className="p-3 bg-rose-500/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/10"
+                    title="Odbij"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="bg-white dark:bg-zinc-900/40 rounded-3xl border border-slate-200 dark:border-zinc-800/50 backdrop-blur-sm shadow-sm dark:shadow-none overflow-hidden transition-colors duration-200">
         <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-zinc-800/50 flex flex-col sm:flex-row gap-4 justify-between transition-colors duration-200">

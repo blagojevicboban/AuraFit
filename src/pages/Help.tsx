@@ -7,16 +7,28 @@ import { useTheme } from '../contexts/ThemeContext';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { LanguageToggle } from '../components/ui/LanguageToggle';
 
+import { usePWA } from '../contexts/PWAContext';
+import { RefreshCw } from 'lucide-react';
+import { cn } from '../lib/utils';
+
 const Help: React.FC = () => {
+
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { theme } = useTheme();
+  const { forceUpdate } = usePWA();
 
   const helpTopics = [
     {
       icon: Smartphone,
       title: t('help.pwaTitle'),
       desc: t('help.pwaDesc')
+    },
+    {
+      icon: RefreshCw,
+      title: "Sistem Fix / Reset UI",
+      desc: "Ukoliko PWA ne prikazuje najnoviji dizajn, kliknite ovde da očistite keš i forsirate ažuriranje aplikacije.",
+      action: forceUpdate
     },
     {
       icon: Bell,
@@ -75,8 +87,13 @@ const Help: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/5 rounded-3xl p-6 backdrop-blur-md shadow-sm dark:shadow-none"
+            onClick={() => topic.action && topic.action()}
+            className={cn(
+              "bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/5 rounded-3xl p-6 backdrop-blur-md shadow-sm dark:shadow-none transition-all",
+              topic.action && "cursor-pointer hover:border-emerald-500/30 dark:hover:border-[#d6ff3e]/30 active:scale-[0.98]"
+            )}
           >
+
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-[#d6ff3e]/10 flex items-center justify-center flex-shrink-0 border border-emerald-500/20 dark:border-[#d6ff3e]/20">
                 <topic.icon className="text-emerald-500 dark:text-[#d6ff3e]" />

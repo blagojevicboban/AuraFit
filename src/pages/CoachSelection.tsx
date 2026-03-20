@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Users, Search, Star, MessageSquare, ChevronRight, 
-  Loader2, CheckCircle2, Trophy, ShieldCheck, ArrowLeft
+  Loader2, CheckCircle2, Trophy, ShieldCheck, ArrowLeft, Clock
 } from 'lucide-react';
 import { db } from '../lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from '../lib/utils';
@@ -17,38 +17,54 @@ export default function CoachSelection() {
   const { t } = useLanguage();
   
   const [coaches, setCoaches] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectingId, setSelectingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCoaches = async () => {
+    const fetchData = async () => {
+      if (!user) return;
       try {
-        const q = query(collection(db, 'users'), where('role', '==', 'coach'));
-        const snap = await getDocs(q);
-        const coachList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setCoaches(coachList);
+        // Fetch Coaches
+        const qC = query(collection(db, 'users'), where('role', '==', 'coach'));
+        const coachSnap = await getDocs(qC);
+        setCoaches(coachSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+        // Fetch user's requests
+        const qR = query(collection(db, 'coachRequests'), where('clientId', '==', user.uid));
+        const requestSnap = await getDocs(qR);
+        setRequests(requestSnap.docs.map(doc => doc.data()));
       } catch (error) {
-        console.error("Error fetching coaches:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchCoaches();
-  }, []);
+    fetchData();
+  }, [user]);
 
   const handleSelectCoach = async (coachId: string) => {
-    if (!user) return;
+    if (!user || !userData) return;
+    
+    // Check if there is already a pending request for this specific coach
+    if (requests.some(r => r.coachId === coachId && r.status === 'pending')) return;
+
     setSelectingId(coachId);
     try {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        coachId: coachId
+      await addDoc(collection(db, 'coachRequests'), {
+        clientId: user.uid,
+        clientName: userData.displayName || 'Korisnik',
+        clientPhoto: userData.photoURL || '',
+        coachId: coachId,
+        status: 'pending',
+        createdAt: serverTimestamp()
       });
-      await refreshUserData();
-      navigate('/home'); // or /client/dashboard
+      
+      // Update local state to reflect the sent request
+      setRequests(prev => [...prev, { coachId, status: 'pending' }]);
     } catch (error) {
-      console.error("Error selecting coach:", error);
+      console.error("Error sending coach request:", error);
     } finally {
       setSelectingId(null);
     }
@@ -162,12 +178,14 @@ export default function CoachSelection() {
                 <div className="mt-auto p-4 bg-zinc-950/50 border-t border-zinc-800">
                   <button 
                     onClick={() => handleSelectCoach(coach.id)}
-                    disabled={selectingId === coach.id}
+                    disabled={selectingId === coach.id || requests.some(r => r.coachId === coach.id && r.status === 'pending')}
                     className={cn(
                       "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2",
                       userData?.coachId === coach.id
                         ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        : "bg-[#d6ff3e] text-zinc-950 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#d6ff3e]/10"
+                        : requests.some(r => r.coachId === coach.id && r.status === 'pending')
+                          ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                          : "bg-[#d6ff3e] text-zinc-950 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#d6ff3e]/10"
                     )}
                   >
                     {selectingId === coach.id ? (
@@ -177,14 +195,20 @@ export default function CoachSelection() {
                           <CheckCircle2 size={16} />
                           Tvoj Trener
                         </>
+                    ) : requests.some(r => r.coachId === coach.id && r.status === 'pending') ? (
+                        <>
+                          <Clock className="w-4 h-4" />
+                          Zahtev poslat
+                        </>
                     ) : (
                       <>
-                        IZABERI TRENERA
+                        POŠALJI ZAHTEV
                         <ChevronRight size={14} />
                       </>
                     )}
                   </button>
                 </div>
+
               </motion.div>
             ))}
           </div>

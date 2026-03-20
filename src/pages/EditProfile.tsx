@@ -45,19 +45,51 @@ const EditProfile: React.FC = () => {
   }, [userData]);
 
 
+  const calculateAge = (dob: string) => {
+    if (!dob || !dob.includes('/')) return '';
+    try {
+      const parts = dob.split('/');
+      if (parts.length !== 3) return '';
+      const birthDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age.toString();
+    } catch {
+      return '';
+    }
+  };
+
   const handleSave = async () => {
     if (!currentUser) return;
     setIsSaving(true);
     try {
       const userRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userRef, {
+      
+      // Construct update object safely
+      const updateData: any = {
         displayName: formData.displayName,
-        weight: Number(formData.weight) || userData?.weight,
-        height: Number(formData.height) || userData?.height,
-        age: Number(formData.age) || userData?.age,
         mobile: formData.mobile,
         dob: formData.dob
-      });
+      };
+
+      if (formData.weight) updateData.weight = Number(formData.weight);
+      if (formData.height) updateData.height = Number(formData.height);
+      
+      // Calculate age from DOB if it was changed
+      const calculatedAge = calculateAge(formData.dob);
+      if (formData.age) {
+        updateData.age = Number(formData.age);
+      } else if (calculatedAge) {
+        updateData.age = Number(calculatedAge);
+      } else if (userData?.age) {
+        updateData.age = userData.age;
+      }
+
+      await updateDoc(userRef, updateData);
       await refreshUserData();
       navigate('/profile');
     } catch (error) {
@@ -66,6 +98,7 @@ const EditProfile: React.FC = () => {
       setIsSaving(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans flex flex-col pb-24 transition-colors duration-300">

@@ -5,6 +5,7 @@ interface PWAContextType {
   installApp: () => Promise<void>;
   showInstallPrompt: boolean;
   setShowInstallPrompt: (show: boolean) => void;
+  forceUpdate: () => Promise<void>;
 }
 
 const PWAContext = createContext<PWAContextType | undefined>(undefined);
@@ -66,11 +67,42 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
     setDeferredPrompt(null);
   };
 
+  const forceUpdate = async () => {
+    console.log('[PWA] Forcing update and cache clear...');
+    try {
+      // 1. Unregister all service workers
+      if (window.navigator.serviceWorker) {
+        const registrations = await window.navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          await reg.unregister();
+        }
+      }
+      // 2. Clear all PWA caches
+      if (window.caches) {
+        const keys = await window.caches.keys();
+        for (const key of keys) {
+          await window.caches.delete(key);
+        }
+      }
+      // 3. Clear storage (optional but good for a hard reset)
+      // localStorage.clear(); // Uncomment if you want a complete nuclear reset
+      
+      console.log('[PWA] Reset complete. Reloading...');
+      // 4. Force reload from server
+      window.location.replace('/home'); 
+      window.location.reload();
+    } catch (error) {
+      console.error('[PWA] Error during force update:', error);
+      window.location.reload();
+    }
+  };
+
   return (
-    <PWAContext.Provider value={{ isInstallable, installApp, showInstallPrompt, setShowInstallPrompt }}>
+    <PWAContext.Provider value={{ isInstallable, installApp, showInstallPrompt, setShowInstallPrompt, forceUpdate }}>
       {children}
     </PWAContext.Provider>
   );
+
 }
 
 export function usePWA() {
