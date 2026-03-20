@@ -19,7 +19,7 @@ export default defineConfig(({mode}) => {
           maximumFileSizeToCacheInBytes: 4194304
         },
         manifest: {
-          name: 'AuraFit Premium',
+          name: 'AuraFit',
           short_name: 'AuraFit',
           description: 'High-tech premium fitness tracker',
           theme_color: '#1c1c1c',
