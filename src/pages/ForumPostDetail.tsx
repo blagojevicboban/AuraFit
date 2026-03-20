@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ChevronLeft, MessageSquare, User, Clock, Send, Heart } from 'lucide-react';
+import { ChevronLeft, MessageSquare, User, Clock, Send, Heart, Trash2 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, addDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,6 +17,8 @@ export default function ForumPostDetail() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { userData } = useAuth();
+  const isAdmin = userData?.role === 'admin';
+
   
   const [newReply, setNewReply] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,7 +88,29 @@ export default function ForumPostDetail() {
 
   };
 
+  const handleDeletePost = async (postId: string) => {
+    if (!window.confirm('Da li ste sigurni da želite da obrišete ovu poruku?')) return;
+
+    try {
+      const { deleteDoc, updateDoc, increment, doc } = await import('firebase/firestore');
+      
+      await deleteDoc(doc(db, 'forumPosts', postId));
+      
+      // Decrement reply count if there is a topic ID
+      if (id) {
+        await updateDoc(doc(db, 'forumTopics', id), {
+          replyCount: increment(-1)
+        });
+      }
+
+      await fetchFullTopic();
+    } catch (err) {
+      console.error("Error deleting post:", err);
+    }
+  };
+
   const handleLikePost = async (postId: string) => {
+
     // Placeholder for like logic
     console.log("Liked post:", postId);
   };
@@ -114,17 +138,28 @@ export default function ForumPostDetail() {
                 animate={{ opacity: 1, x: 0 }}
                 className="bg-white dark:bg-zinc-900 rounded-[2rem] p-6 border border-zinc-100 dark:border-white/5 shadow-sm"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-[#afa3ff]">
-                    <User size={14} />
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-[#afa3ff]">
+                        <User size={14} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-widest">{post.authorName || 'Korisnik'}</p>
+                        <p className="text-[10px] text-zinc-500 font-bold">
+                           {post.createdAt?.toDate ? post.createdAt.toDate().toLocaleString() : 'Slanje...'}
+                        </p>
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <button 
+                        onClick={() => handleDeletePost(post.id)}
+                        className="p-1.5 text-zinc-300 hover:text-rose-500 transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-widest">{post.authorName || 'Korisnik'}</p>
-                    <p className="text-[10px] text-zinc-500 font-bold">
-                       {post.createdAt?.toDate ? post.createdAt.toDate().toLocaleString() : 'Slanje...'}
-                    </p>
-                  </div>
-                </div>
+
                 <p className="text-sm leading-relaxed text-zinc-800 dark:text-zinc-200">{post.content}</p>
                 <div className="mt-4 pt-4 border-t border-zinc-50 dark:border-white/5 flex gap-4">
                   <button 

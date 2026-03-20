@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, MessageCircle, User, Clock, Plus, Search } from 'lucide-react';
+import { ChevronLeft, MessageCircle, User, Clock, Plus, Search, Trash2 } from 'lucide-react';
 import { db } from '../lib/firebase';
-import { collection, query, where, getDocs, orderBy, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, doc, getDoc, addDoc, serverTimestamp, deleteDoc, writeBatch } from 'firebase/firestore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -17,6 +17,8 @@ export default function ForumTopicList() {
   const [topics, setTopics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { userData } = useAuth();
+  const isAdmin = userData?.role === 'admin';
+
 
 
   // Create Topic State
@@ -58,6 +60,28 @@ export default function ForumTopicList() {
   useEffect(() => {
     fetchTopics();
   }, [id]);
+
+  const handleDeleteTopic = async (topicId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm('Da li ste sigurni da želite da obrišete ovu temu i sve poruke unutar nje?')) return;
+
+    try {
+      const postsQ = query(collection(db, 'forumPosts'), where('topicId', '==', topicId));
+      const postsSnap = await getDocs(postsQ);
+      const batch = writeBatch(db);
+      
+      postsSnap.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      batch.delete(doc(db, 'forumTopics', topicId));
+      
+      await batch.commit();
+      await fetchTopics();
+    } catch (err) {
+      console.error("Error deleting topic:", err);
+    }
+  };
+
 
   const handleCreateTopic = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,10 +182,22 @@ export default function ForumTopicList() {
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h3 className="font-bold text-lg leading-tight mb-2 group-hover:text-emerald-500 transition-colors">
-                  {topic.title}
-                </h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="font-bold text-lg leading-tight group-hover:text-emerald-500 transition-colors">
+                    {topic.title}
+                  </h3>
+                  {isAdmin && (
+                    <button 
+                      onClick={(e) => handleDeleteTopic(topic.id, e)}
+                      className="p-1.5 text-zinc-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
                 <div className="flex items-center gap-4 text-[10px] text-zinc-500 font-black uppercase tracking-widest">
+
+
                   <span className="flex items-center gap-1.5"><User size={12} className="text-[#afa3ff]" /> {topic.authorName || 'Korisnik'}</span>
                   <span className="flex items-center gap-1.5"><Clock size={12} className="text-[#afa3ff]" /> {topic.createdAt?.toDate()?.toLocaleDateString() || 'Danas'}</span>
                 </div>

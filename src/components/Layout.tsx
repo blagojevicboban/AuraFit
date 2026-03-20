@@ -26,6 +26,8 @@ export default function Layout() {
 
   const [totalUnread, setTotalUnread] = useState(0);
   const [totalClients, setTotalClients] = useState(0);
+  const [forumUnread, setForumUnread] = useState(0);
+
 
 
   useEffect(() => {
@@ -51,16 +53,36 @@ export default function Layout() {
       setTotalClients(snapshot.size);
     });
     return () => unsub();
-  }, [userData?.uid, userData?.role]);
+  }, [userData?.uid, userData?.role]);  useEffect(() => {
+    if (!userData?.uid) return;
+    
+    // Get last visit from localStorage for now (can be moved to userData later)
+    const lastVisitKey = `lastForumVisit_${userData.uid}`;
+    const lastVisit = parseInt(localStorage.getItem(lastVisitKey) || "0");
 
+    // Listen for new posts/topics
+    const q = query(
+      collection(db, "forumTopics"),
+      where("lastPostAt", ">", new Date(lastVisit))
+    );
 
+    const unsub = onSnapshot(q, (snapshot) => {
+      // Filter out posts by the current user themselves
+      const newPostsCount = snapshot.docs.filter(doc => doc.data().lastPostAuthorId !== userData.uid).length;
+      setForumUnread(newPostsCount);
+    });
 
+    return () => unsub();
+  }, [userData?.uid, location.pathname]);
 
   useEffect(() => {
-    if (!loading && !userData && (isCoach || isClient || isAdmin)) {
-      navigate('/');
+    if (location.pathname === '/community' && userData?.uid) {
+      const lastVisitKey = `lastForumVisit_${userData.uid}`;
+      localStorage.setItem(lastVisitKey, Date.now().toString());
+      setForumUnread(0);
     }
-  }, [userData, loading, isCoach, isClient, isAdmin, navigate]);
+  }, [location.pathname, userData?.uid]);
+
 
   if (!isCoach && !isClient && !isAdmin) {
     return <Outlet />;
@@ -84,7 +106,9 @@ export default function Layout() {
     { to: "/app/client", icon: LayoutDashboard, label: t('nav.dashboard') },
     { to: "/app/client/workouts", icon: Activity, label: t('nav.workouts') },
     { to: "/app/messages", icon: MessageSquare, label: t('nav.messages') || 'Poruke' },
+    { to: "/community", icon: Globe, label: t('community.title') || 'Zajednica' },
   ];
+
 
 
 
@@ -224,7 +248,14 @@ export default function Layout() {
                   {totalClients}
                 </span>
               )}
+              {link.icon === Globe && forumUnread > 0 && (
+                <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center animate-pulse">
+                  {forumUnread}
+                </span>
+              )}
             </div>
+
+
 
 
               {link.label}
@@ -285,17 +316,23 @@ export default function Layout() {
                 )}>
                 <div className="relative">
                   <link.icon className={cn("w-5 h-5 transition-transform duration-300", isActive ? "scale-110" : "scale-100")} />
-                  {link.icon === MessageSquare && totalUnread > 0 && (
-                     <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center animate-pulse">
-                      {totalUnread}
+                   {link.icon === MessageSquare && totalUnread > 0 && (
+                      <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center animate-pulse">
+                       {totalUnread}
+                     </span>
+                   )}
+                   {link.icon === Users && totalClients > 0 && (
+                     <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center">
+                       {totalClients}
+                     </span>
+                   )}
+                   {link.icon === Globe && forumUnread > 0 && (
+                     <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center animate-pulse">
+                      {forumUnread}
                     </span>
-                  )}
-                  {link.icon === Users && totalClients > 0 && (
-                    <span className="absolute -top-2 -right-2 min-w-[1.125rem] h-[1.125rem] px-1 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950 text-[9px] font-black text-white flex items-center justify-center">
-                      {totalClients}
-                    </span>
-                  )}
-                </div>
+                   )}
+                 </div>
+
 
 
                 </div>
