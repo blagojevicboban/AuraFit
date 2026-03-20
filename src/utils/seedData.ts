@@ -4,26 +4,62 @@ import { db } from '../lib/firebase';
 export const seedDatabase = async () => {
   const batch = writeBatch(db);
 
-  // 1. Create a Coach
+  // 1. Create a System Admin
+  const adminId = 'seed-admin-1';
+  const adminRef = doc(collection(db, 'users'), adminId);
+  batch.set(adminRef, {
+    uid: adminId,
+    email: 'admin@system.local',
+    displayName: 'Sistemski Admin',
+    role: 'admin',
+    createdAt: Timestamp.now(),
+    photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin',
+    dob: '01/01/2000',
+    weight: 80,
+    height: 180,
+    setupCompleted: true
+  });
+
+  // 2. Create a Coach
   const coachId = 'seed-coach-1';
   const coachRef = doc(collection(db, 'users'), coachId);
   batch.set(coachRef, {
     uid: coachId,
-    email: 'trener@test.local',
+    email: 'coach@aura.fit',
     displayName: 'Trener Marko',
     role: 'coach',
     createdAt: Timestamp.now(),
-    photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marko'
+    photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marko',
+    dob: '01/01/2000',
+    weight: 80,
+    height: 180,
+    setupCompleted: true
   });
 
-  // 2. Create Clients assigned to the Coach
-  const clients = [
-    { id: 'seed-client-1', name: 'Ana Klijent', email: 'ana@test.local' },
+  // 3. Create a Main Client
+  const mainClientId = 'seed-client-1';
+  const mainClientRef = doc(collection(db, 'users'), mainClientId);
+  batch.set(mainClientRef, {
+    uid: mainClientId,
+    email: 'client@aura.fit',
+    displayName: 'Glavni Klijent',
+    role: 'client',
+    coachId: coachId,
+    createdAt: Timestamp.now(),
+    photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Client',
+    dob: '01/01/2000',
+    weight: 80,
+    height: 180,
+    setupCompleted: true
+  });
+
+  // 4. Create additional Clients assigned to the Coach
+  const extraClients = [
     { id: 'seed-client-2', name: 'Petar Klijent', email: 'petar@test.local' },
     { id: 'seed-client-3', name: 'Jovan Klijent', email: 'jovan@test.local' }
   ];
 
-  clients.forEach((client, index) => {
+  extraClients.forEach((client) => {
     const clientRef = doc(collection(db, 'users'), client.id);
     batch.set(clientRef, {
       uid: client.id,
@@ -32,10 +68,14 @@ export const seedDatabase = async () => {
       role: 'client',
       coachId: coachId,
       createdAt: Timestamp.now(),
-      photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${client.name.replace(' ', '')}`
+      photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${client.name.replace(' ', '')}`,
+      dob: '01/01/2000',
+      weight: 80,
+      height: 180,
+      setupCompleted: true
     });
 
-    // 3. Create Workouts for each client
+    // 5. Create Workouts for each client
     const workoutRef1 = doc(collection(db, 'workouts'));
     batch.set(workoutRef1, {
       userId: client.id,
@@ -49,18 +89,7 @@ export const seedDatabase = async () => {
       createdAt: Timestamp.now()
     });
 
-    const workoutRef2 = doc(collection(db, 'workouts'));
-    batch.set(workoutRef2, {
-      userId: client.id,
-      title: 'Kardio Trening',
-      duration: 30,
-      exercises: [
-        { name: 'Trčanje na traci', sets: 1, reps: 30 }
-      ],
-      createdAt: Timestamp.now()
-    });
-
-    // 4. Create Meals for each client
+    // 6. Create Meals for each client
     const mealRef1 = doc(collection(db, 'meals'));
     batch.set(mealRef1, {
       userId: client.id,
@@ -71,19 +100,9 @@ export const seedDatabase = async () => {
       fat: 12,
       createdAt: Timestamp.now()
     });
-
-    const mealRef2 = doc(collection(db, 'meals'));
-    batch.set(mealRef2, {
-      userId: client.id,
-      description: 'Ručak: Piletina na žaru sa pirinčem i brokolijem.',
-      calories: 600,
-      protein: 50,
-      carbs: 70,
-      fat: 15,
-      createdAt: Timestamp.now()
-    });
   });
 
   // Commit the batch
   await batch.commit();
 };
+

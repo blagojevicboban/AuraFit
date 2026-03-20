@@ -16,19 +16,34 @@ import { Loader2 } from 'lucide-react';
 
 const EditProfile: React.FC = () => {
   const navigate = useNavigate();
-  const { userData, currentUser } = useAuth();
+  const { userData, currentUser, refreshUserData } = useAuth();
+
   const { t, language } = useLanguage();
   const [isSaving, setIsSaving] = React.useState(false);
   
   // Form state
   const [formData, setFormData] = React.useState({
-    displayName: userData?.displayName || '',
-    weight: userData?.weight || '',
-    height: userData?.height || '',
-    age: userData?.age || '',
-    mobile: (userData as any)?.mobile || '',
-    dob: (userData as any)?.dob || (userData as any)?.birthday || ''
+    displayName: '',
+    weight: '',
+    height: '',
+    age: '',
+    mobile: '',
+    dob: ''
   });
+
+  React.useEffect(() => {
+    if (userData) {
+      setFormData({
+        displayName: userData.displayName || '',
+        weight: userData.weight?.toString() || '',
+        height: userData.height?.toString() || '',
+        age: userData.age?.toString() || '',
+        mobile: (userData as any).mobile || '',
+        dob: (userData as any).dob || (userData as any).birthday || ''
+      });
+    }
+  }, [userData]);
+
 
   const handleSave = async () => {
     if (!currentUser) return;
@@ -43,6 +58,7 @@ const EditProfile: React.FC = () => {
         mobile: formData.mobile,
         dob: formData.dob
       });
+      await refreshUserData();
       navigate('/profile');
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -50,6 +66,7 @@ const EditProfile: React.FC = () => {
       setIsSaving(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans flex flex-col pb-24 transition-colors duration-300">
       
