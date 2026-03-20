@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, Search, Filter, MoreVertical, Mail, Activity, ChevronRight, UserPlus, Loader2, Check, X, Clock } from "lucide-react";
+import { Users, Search, Filter, MoreVertical, Mail, Activity, ChevronRight, UserPlus, Loader2, Check, X, Clock, User } from "lucide-react";
 import { motion } from "motion/react";
 import { collection, query, where, getDocs, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -121,15 +121,22 @@ export default function CoachClients() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
+                    onClick={() => navigate(`/profile/${request.clientId}`)}
+                    className="p-3 bg-indigo-500/10 text-[#afa3ff] rounded-2xl hover:bg-[#afa3ff] hover:text-white transition-all shadow-lg shadow-indigo-500/10 border border-[#afa3ff]/20"
+                    title="Pogledaj profil"
+                  >
+                    <User className="w-5 h-5" />
+                  </button>
+                  <button 
                     onClick={() => handleAccept(request.id, request.clientId)}
-                    className="p-3 bg-emerald-500/10 text-emerald-500 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-500/10"
+                    className="p-3 bg-emerald-500/10 text-emerald-500 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-500/10 border border-emerald-500/20"
                     title="Prihvati"
                   >
                     <Check className="w-5 h-5" />
                   </button>
                   <button 
                     onClick={() => handleDecline(request.id)}
-                    className="p-3 bg-rose-500/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/10"
+                    className="p-3 bg-rose-500/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/10 border border-rose-500/20"
                     title="Odbij"
                   >
                     <X className="w-5 h-5" />
@@ -229,6 +236,17 @@ export default function CoachClients() {
                           <Mail className="w-4 h-4" />
                         </button>
 
+
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/profile/${client.id}`);
+                          }}
+                          className="p-2 text-slate-400 hover:text-[#afa3ff] dark:text-zinc-500 dark:hover:text-[#afa3ff] transition-colors rounded-lg hover:bg-indigo-50 dark:hover:bg-[#afa3ff]/10"
+                          title="Profil"
+                        >
+                          <User className="w-4 h-4" />
+                        </button>
 
                         <button 
                           onClick={(e) => {

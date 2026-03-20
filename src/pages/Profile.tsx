@@ -1,32 +1,74 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { 
   ChevronLeft, User, Heart, Lock, Settings, HelpCircle, LogOut, ChevronRight,
-  Home, BookOpen, Apple, Headphones
+  Home, BookOpen, Apple, Headphones, Mail, MessageSquare
 } from 'lucide-react';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import BottomNav from '../components/BottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Profile: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { userData, signOut } = useAuth();
+  const { userData, currentUser, signOut } = useAuth();
   const { t } = useLanguage();
+  const [targetUser, setTargetUser] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(!!id);
+
+  const isOwnProfile = !id || id === currentUser?.uid;
+
+  React.useEffect(() => {
+    const fetchTargetUser = async () => {
+      if (id && id !== currentUser?.uid) {
+        setLoading(true);
+        try {
+          const userDoc = await getDoc(doc(db, "users", id));
+          if (userDoc.exists()) {
+            setTargetUser({ id: userDoc.id, ...userDoc.data() });
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setTargetUser(userData);
+        setLoading(false);
+      }
+    };
+
+    fetchTargetUser();
+  }, [id, currentUser, userData]);
 
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
   };
 
-  const menuItems = [
+  const displayUser = targetUser;
+
+  const menuItems = isOwnProfile ? [
     { icon: User, label: t('profile.editProfile'), onClick: () => navigate('/profile/edit') },
     { icon: Heart, label: t('profile.favorite'), onClick: () => navigate('/favorites') },
     { icon: Lock, label: t('profile.privacy'), onClick: () => navigate('/privacy') },
     { icon: Settings, label: t('profile.settings'), onClick: () => navigate('/settings') },
     { icon: HelpCircle, label: t('common.help'), onClick: () => navigate('/help') },
     { icon: LogOut, label: t('profile.logout'), onClick: handleLogout, danger: true },
+  ] : [
+    { icon: MessageSquare, label: "Pošalji poruku", onClick: () => navigate('/app/messages', { state: { selectedUserId: id } }) },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[#afa3ff] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans flex flex-col pb-24 transition-colors duration-300 overflow-x-hidden">
@@ -45,13 +87,17 @@ const Profile: React.FC = () => {
             >
               <ChevronLeft size={24} />
             </button>
-            <h1 className="text-xl font-black text-[#1c1c1c] uppercase tracking-widest">{t('common.profile')}</h1>
-            <button 
-              onClick={() => navigate('/settings')}
-              className="text-[#1c1c1c] bg-white/30 backdrop-blur-md p-2.5 rounded-2xl hover:bg-white/40 transition-all"
-            >
-              <Settings size={22} />
-            </button>
+            <h1 className="text-xl font-black text-[#1c1c1c] uppercase tracking-widest">{isOwnProfile ? t('common.profile') : "Profil Korisnika"}</h1>
+            {isOwnProfile ? (
+              <button 
+                onClick={() => navigate('/settings')}
+                className="text-[#1c1c1c] bg-white/30 backdrop-blur-md p-2.5 rounded-2xl hover:bg-white/40 transition-all"
+              >
+                <Settings size={22} />
+              </button>
+            ) : (
+              <div className="w-10" />
+            )}
           </div>
   
           <div className="flex flex-col items-center relative z-10">
@@ -63,10 +109,10 @@ const Profile: React.FC = () => {
             >
               <div className="w-36 h-36 rounded-full p-1.5 bg-gradient-to-tr from-[#d6ff3e] to-white/50 shadow-2xl">
                 <div className="w-full h-full rounded-full border-4 border-[#1c1c1c]/10 overflow-hidden bg-zinc-900 flex items-center justify-center relative shadow-inner">
-                  {userData?.photoURL ? (
-                    <img src={userData.photoURL} alt="Avatar" className="w-full h-full object-cover" />
+                  {displayUser?.photoURL ? (
+                    <img src={displayUser.photoURL} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-6xl font-black text-[#afa3ff]">{userData?.displayName?.charAt(0).toUpperCase() || 'A'}</span>
+                    <span className="text-6xl font-black text-[#afa3ff]">{displayUser?.displayName?.charAt(0).toUpperCase() || 'A'}</span>
                   )}
                   {/* Status Indicator */}
                   <div className="absolute bottom-2 right-2 w-6 h-6 bg-[#d6ff3e] rounded-full border-4 border-[#1c1c1c]/20" />
@@ -75,12 +121,12 @@ const Profile: React.FC = () => {
             </motion.div>
   
             <h2 className="text-3xl font-black text-[#1c1c1c] tracking-tight text-center mb-1">
-              {userData?.displayName || 'User'}
+              {displayUser?.displayName || 'User'}
             </h2>
-            <p className="text-[#1c1c1c]/60 text-base font-medium mb-3">{userData?.email || 'email@example.com'}</p>
+            <p className="text-[#1c1c1c]/60 text-base font-medium mb-3">{displayUser?.email || 'email@example.com'}</p>
             
             <div className="px-5 py-1.5 bg-[#1c1c1c] text-[#d6ff3e] text-[10px] font-black uppercase tracking-[0.3em] rounded-full shadow-lg border border-white/10">
-              {userData?.role || 'CLIENT'}
+              {displayUser?.role || 'CLIENT'}
             </div>
           </div>
         </div>
@@ -95,7 +141,7 @@ const Profile: React.FC = () => {
           >
             <div className="text-center group flex-1">
               <div className="text-zinc-900 dark:text-white font-black text-2xl mb-1 tabular-nums">
-                {userData?.weight || '--'} <span className="text-xs text-zinc-400">kg</span>
+                {displayUser?.weight || '--'} <span className="text-xs text-zinc-400">kg</span>
               </div>
               <div className="text-zinc-500 dark:text-zinc-500 text-[10px] font-black uppercase tracking-widest">{t('profile.weight')}</div>
             </div>
@@ -104,7 +150,7 @@ const Profile: React.FC = () => {
             
             <div className="text-center group flex-1">
               <div className="text-zinc-900 dark:text-white font-black text-2xl mb-1 tabular-nums">
-                {userData?.age || '--'}
+                {displayUser?.age || '--'}
               </div>
               <div className="text-zinc-500 dark:text-zinc-500 text-[10px] font-black uppercase tracking-widest">{t('profile.age')}</div>
             </div>
@@ -113,7 +159,7 @@ const Profile: React.FC = () => {
             
             <div className="text-center group flex-1">
               <div className="text-zinc-900 dark:text-white font-black text-2xl mb-1 tabular-nums">
-                {userData?.height || '--'} <span className="text-xs text-zinc-400">cm</span>
+                {displayUser?.height || '--'} <span className="text-xs text-zinc-400">cm</span>
               </div>
               <div className="text-zinc-500 dark:text-zinc-500 text-[10px] font-black uppercase tracking-widest">{t('profile.height')}</div>
             </div>

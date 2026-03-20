@@ -85,6 +85,7 @@ function AppContent() {
             <Route path="/nutrition" element={<PageTransition><Nutrition /></PageTransition>} />
             <Route path="/meal-plan" element={<PageTransition><MealPlanList /></PageTransition>} />
             <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+            <Route path="/profile/:id" element={<PageTransition><Profile /></PageTransition>} />
             <Route path="/profile/edit" element={<PageTransition><EditProfile /></PageTransition>} />
             <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
             <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
